@@ -248,12 +248,13 @@ function closeReplay(showResult=true){
 }
 
 function modeledFallback(){
-  neural.r=smooth(neural.r,clamp(sensory.motion*.58+sensory.light*.35),.18);
-  neural.lc4=smooth(neural.lc4,clamp(sensory.loom*.9+sensory.motion*.22),.24);
-  neural.lplc2=smooth(neural.lplc2,clamp(sensory.loom*.5+sensory.motion*.2),.2);
-  neural.dnp=smooth(neural.dnp,clamp(neural.lc4*.5-.12),.23);
-  neural.motor=smooth(neural.motor,clamp(neural.dnp*.85),.22);
-  return clamp(neural.lc4*.52+neural.dnp*.28+neural.motor*.2);
+  neural.r=smooth(neural.r,clamp(sensory.motion*.62+sensory.light*.25),.2);
+  neural.lc4=smooth(neural.lc4,clamp(sensory.loom*1.15+sensory.motion*.18),.32);
+  neural.lplc2=smooth(neural.lplc2,clamp(neural.lc4*.72+sensory.loom*.24),.26);
+  neural.dnp=smooth(neural.dnp,clamp(neural.lc4*.64-.06),.26);
+  neural.motor=smooth(neural.motor,clamp(Math.max(neural.lplc2,neural.dnp)*.72),.24);
+  const raw=neural.lc4*.52+Math.max(neural.lplc2,neural.dnp)*.34+neural.motor*.14;
+  return clamp((raw-.06)/.52);
 }
 
 function connectomeAdapter(now){
@@ -264,12 +265,12 @@ function connectomeAdapter(now){
     }
     const threat=connectome.escape;
     maxThreat=Math.max(maxThreat,threat);
-    if(!escaped&&sensory.loom>.12&&threat>.20)triggerEscape(threat);
+    if(!escaped&&sensory.loom>.10&&threat>.48)triggerEscape(threat);
     return threat;
   }
   const threat=modeledFallback();
   maxThreat=Math.max(maxThreat,threat);
-  if(!escaped&&threat>.76)triggerEscape(threat);
+  if(!escaped&&sensory.loom>.14&&threat>.52)triggerEscape(threat);
   return threat;
 }
 
@@ -313,7 +314,7 @@ function setBar(id,v){$('#'+id+'Bar').style.width=Math.round(v*100)+'%';$('#'+id
 function updateUI(threat){
   $('#threatBar').style.width=Math.round(threat*100)+'%';$('#threatValue').textContent=Math.round(threat*100)+'%';
   setBar('motion',sensory.motion);setBar('light',sensory.light);setBar('loom',sensory.loom);setBar('r',neural.r);setBar('lc4',neural.lc4);setBar('lplc2',neural.lplc2);setBar('dnp',neural.dnp);setBar('motor',neural.motor);
-  const state=connectome.status==='ready'?(threat>.18?'ESCAPE READY':threat>.08?'ALERT':'CALM'):(threat>.72?'ESCAPE READY':threat>.4?'ALERT':'CALM'); $('#brainState').textContent=lang==='zh'?(state==='CALM'?'平静':state==='ALERT'?'警觉':'即将逃逸'):state; $('#statusPill').textContent=$('#brainState').textContent;
+  const state=threat>.46?'ESCAPE READY':threat>.16?'ALERT':'CALM'; $('#brainState').textContent=lang==='zh'?(state==='CALM'?'平静':state==='ALERT'?'警觉':'即将逃逸'):state; $('#statusPill').textContent=$('#brainState').textContent;
 }
 
 function drawMosaic(){
@@ -360,6 +361,6 @@ if(DEBUG_MODE){
   diag.id='debugStatus';
   diag.style.cssText='position:absolute;z-index:99;left:10px;top:56px;padding:8px 10px;background:#000;color:#dfff55;font:11px monospace;border:1px solid #dfff55;border-radius:8px';
   document.body.appendChild(diag);
-  setInterval(()=>{diag.textContent=`graph=${connectome.status} n=${connectome.neurons} e=${connectome.edges} loom=${sensory.loom.toFixed(2)} lc4=${neural.lc4.toFixed(2)} dnL=${neural.lplc2.toFixed(2)} dnR=${neural.dnp.toFixed(2)} flight=${neural.motor.toFixed(2)} spikes=${connectome.spikes}`},120);
+  setInterval(()=>{diag.textContent=`graph=${connectome.status} n=${connectome.neurons} e=${connectome.edges} loom=${sensory.loom.toFixed(2)} lc4=${neural.lc4.toFixed(2)} dnL=${neural.lplc2.toFixed(2)} dnR=${neural.dnp.toFixed(2)} escapeDN=${connectome.escapeDn.toFixed(2)} flight=${neural.motor.toFixed(2)} threat=${connectome.escape.toFixed(2)} spikes=${connectome.spikes}`},120);
   startDebugMode();
 }
