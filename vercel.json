@@ -1,6 +1,22 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    {"source":"/vendor/mediapipe/vision_bundle.mjs","destination":"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/vision_bundle.mjs"},
+    {"source":"/vendor/mediapipe/wasm/:path*","destination":"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/wasm/:path*"},
+    {"source":"/vendor/mediapipe/hand_landmarker.task","destination":"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"},
+    {"source":"/data/brain/manifest.json","destination":"https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/manifest.json"},
+    {"source":"/data/brain/graph.bin","destination":"https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/graph.bin"}
+  ],
   "headers": [
-    {"source":"/(.*)","headers":[{"key":"Permissions-Policy","value":"camera=(self)"},{"key":"X-Content-Type-Options","value":"nosniff"}]}
+    {"source":"/(.*)","headers":[
+      {"key":"Permissions-Policy","value":"camera=(self)"},
+      {"key":"X-Content-Type-Options","value":"nosniff"}
+    ]},
+    {"source":"/vendor/mediapipe/(.*)","headers":[
+      {"key":"Cache-Control","value":"public, max-age=31536000, immutable"}
+    ]},
+    {"source":"/data/brain/(.*)","headers":[
+      {"key":"Cache-Control","value":"public, max-age=31536000, immutable"}
+    ]}
   ]
 }
