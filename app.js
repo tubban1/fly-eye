@@ -39,7 +39,7 @@ const replay={frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
 
-const connectome={status:'loading',phase:'manifest',profile:'auto',loaded:0,total:9864604,worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
+const connectome={status:'loading',phase:'manifest',profile:'auto',loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
   try{
     connectome.worker=new Worker('/connectome-worker.js');
@@ -48,7 +48,7 @@ function initConnectome(){
       if(msg.type==='ready'){
         connectome.status='ready';connectome.phase='ready';connectome.profile=msg.profile||connectome.profile;connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();
       }else if(msg.type==='status'){
-        connectome.status='loading';connectome.phase=msg.status||'loading';connectome.profile=msg.profile||connectome.profile;connectome.loaded=msg.loaded||0;connectome.total=msg.total||connectome.total;updateConnectomeStatus();
+        connectome.status='loading';connectome.phase=msg.status||'loading';connectome.profile=msg.profile||connectome.profile;connectome.loaded=msg.loaded||0;connectome.total=msg.total||connectome.total;connectome.reason=msg.reason||connectome.reason;updateConnectomeStatus();updatePerceptionUI(perceptionState);
       }else if(msg.type==='state'){
         connectome.pending=false;
         connectome.escape=smooth(connectome.escape,clamp(msg.escape||0),.5);
@@ -364,6 +364,18 @@ function updatePerceptionUI(p){
     }else if(connectome.phase==='metadata'){
       status.textContent=lang==='zh'?'正在建立 LC4 / DN 读出…':'BUILDING LC4 / DN READOUTS…';
       status.dataset.state=state;
+    }else if(connectome.phase==='profile-check'){
+      const secs=((performance.now()-connectome.startedAt)/1000).toFixed(1);
+      status.textContent=lang==='zh'?'正在查找快速 Escape Graph… '+secs+'s':'CHECKING FAST ESCAPE GRAPH… '+secs+'s';
+      status.dataset.state=state;
+    }else if(connectome.phase==='profile-fallback'){
+      const why=connectome.reason?(' · '+connectome.reason):'';
+      status.textContent=lang==='zh'?'快速图不可用，正在切换 70K 图'+why:'FAST GRAPH UNAVAILABLE · FALLING BACK TO 70K'+why;
+      status.dataset.state='moving';
+    }else if(connectome.phase==='manifest'){
+      const profile=connectome.profile==='escape-v1'?'Escape v1':'70K';
+      status.textContent=lang==='zh'?'正在读取 '+profile+' 清单…':'READING '+profile+' MANIFEST…';
+      status.dataset.state=state;
     }else{
       key='waitingGraph';
     }
@@ -372,7 +384,7 @@ function updatePerceptionUI(p){
   else if(p.phase==='hand-detected'){key='handSeen';state='ready'}
   else if(p.phase==='approaching'){key='approaching';state='ready'}
   else if(p.phase==='alert'){key='perceptionAlert';state='ready'}
-  if(!(connectome.status!=='ready' && ['graph-download','graph-parse','metadata'].includes(connectome.phase))){
+  if(!(connectome.status!=='ready' && ['graph-download','graph-parse','metadata','profile-check','profile-fallback','manifest'].includes(connectome.phase))){
     status.textContent=t(key); status.dataset.state=state;
   }
   $('#handStatus').textContent=p.handDetected?(lang==='zh'?'检测到':'YES'):(lang==='zh'?'未检测':'NO');
