@@ -1,7 +1,6 @@
 const UPSTREAM_COMMIT = 'bff49a376f0844c918eb7f2be83e95f2699b0d14';
-const BASE = `https://raw.githubusercontent.com/dzhng/fly-escape/${UPSTREAM_COMMIT}/data/processed/brain`;
-const MANIFEST_URL = `${BASE}/manifest.json`;
-const GRAPH_URL = `${BASE}/graph.bin`;
+const MANIFEST_URL = '/data/brain/manifest.json';
+const GRAPH_URL = '/data/brain/graph.bin';
 
 const PARAMS = Object.freeze({
   tau: 20,
@@ -55,16 +54,22 @@ self.onmessage = async (event) => {
 
 async function init() {
   loading = true;
-  self.postMessage({ type: 'status', status: 'loading' });
+  self.postMessage({ type: 'status', status: 'manifest' });
   try {
-    const [manifestRes, graphRes] = await Promise.all([fetch(MANIFEST_URL), fetch(GRAPH_URL)]);
+    const manifestRes = await fetch(MANIFEST_URL, { cache: 'force-cache' });
     if (!manifestRes.ok) throw new Error(`Manifest download failed (${manifestRes.status})`);
-    if (!graphRes.ok) throw new Error(`Graph download failed (${graphRes.status})`);
     manifest = await manifestRes.json();
-    const buffer = await graphRes.arrayBuffer();
+
+    self.postMessage({ type: 'status', status: 'graph-download', loaded: 0, total: expectedGraphBytes(manifest) });
+    const buffer = await fetchArrayBufferWithProgress(GRAPH_URL, expectedGraphBytes(manifest));
+
+    self.postMessage({ type: 'status', status: 'graph-parse', loaded: buffer.byteLength, total: buffer.byteLength });
     parseGraph(buffer);
+
+    self.postMessage({ type: 'status', status: 'metadata' });
     buildMetadata();
     resetState();
+
     ready = true;
     loading = false;
     self.postMessage({
@@ -74,6 +79,7 @@ async function init() {
       loomCount: groups.loom?.length || 0,
       visionCount: (groups.visionL?.length || 0) + (groups.visionR?.length || 0),
       escapeTargetCount: escapeTargets.length,
+      graphBytes: buffer.byteLength,
       upstreamCommit: UPSTREAM_COMMIT,
       attribution: manifest.attribution || 'Janelia FlyEM MaleCNS',
     });
@@ -81,6 +87,43 @@ async function init() {
     loading = false;
     self.postMessage({ type: 'error', message: error?.message || String(error) });
   }
+}
+
+function expectedGraphBytes(m) {
+  const neurons = Number(m?.neuronCount) || 0;
+  const edges = Number(m?.edgeCount) || 0;
+  return 20 + (neurons + 1) * 4 + edges * 12;
+}
+
+async function fetchArrayBufferWithProgress(url, expectedTotal = 0) {
+  const response = await fetch(url, { cache: 'force-cache' });
+  if (!response.ok) throw new Error(`Graph download failed (${response.status})`);
+  const total = Number(response.headers.get('content-length')) || expectedTotal || 0;
+  if (!response.body?.getReader) return response.arrayBuffer();
+
+  const reader = response.body.getReader();
+  const chunks = [];
+  let loaded = 0;
+  let lastReport = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.byteLength;
+    const now = performance.now();
+    if (now - lastReport > 120) {
+      lastReport = now;
+      self.postMessage({ type: 'status', status: 'graph-download', loaded, total });
+    }
+  }
+  self.postMessage({ type: 'status', status: 'graph-download', loaded, total });
+  const merged = new Uint8Array(loaded);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return merged.buffer;
 }
 
 function parseGraph(buffer) {
