@@ -4,19 +4,19 @@
 
 Fly Eye is a camera-first browser experiment. Your real environment becomes sensory input for a virtual fruit fly: local motion, brightness and looming signals are converted into neural input, then the fly reacts inside the camera view.
 
-## v0.2
+## v0.3 — Neural Replay
 
-- Mobile-first rear-camera mode and desktop webcam support
-- Camera frames stay local in the browser
-- Fly-centered motion / looming analysis rather than whole-frame motion triggers
-- Simplified compound-eye viewer
-- `Sneak up on the fly` challenge
-- EN / 中文 interface
-- Real MaleCNS-derived signed connectome subgraph loaded in a Web Worker
-- Camera looming injected into the real LC4 group
-- Local spike propagation through the graph
-- Live readouts for LC4, descending-neuron populations, flight descending neurons and network activity
-- Transparent fallback controller if the graph cannot be downloaded
+- Camera-first mobile experience
+- Local motion / looming / brightness sensory encoder
+- Real signed MaleCNS-derived connectome subgraph in a Web Worker
+- LC4 injection with downstream DN / flight readouts
+- Rolling ~2.2 s local replay buffer
+- Automatic slow-motion **What just happened?** replay after escape
+- Scrubbable neural timeline: Looming → LC4 → DN Left/Right → Flight DN → Escape
+- Replay frames and neural samples remain in browser memory only
+- `?debug=1` synthetic looming mode for camera-free graph/replay verification
+- EN / 中文 UI
+
 
 ## Connectome runtime
 
