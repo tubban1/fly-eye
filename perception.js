@@ -21,14 +21,23 @@ export class PerceptionEngine {
     try{
       const {FilesetResolver,HandLandmarker}=await import(MP_MODULE);
       const vision=await FilesetResolver.forVisionTasks(MP_WASM);
-      this.handLandmarker=await HandLandmarker.createFromOptions(vision,{
-        baseOptions:{modelAssetPath:HAND_MODEL,delegate:'GPU'},
+      const options={
         runningMode:'VIDEO',
         numHands:1,
         minHandDetectionConfidence:.48,
         minHandPresenceConfidence:.45,
         minTrackingConfidence:.45
-      });
+      };
+      try{
+        this.handLandmarker=await HandLandmarker.createFromOptions(vision,{
+          ...options,baseOptions:{modelAssetPath:HAND_MODEL,delegate:'GPU'}
+        });
+      }catch(gpuError){
+        console.warn('MediaPipe GPU delegate unavailable, retrying on CPU',gpuError);
+        this.handLandmarker=await HandLandmarker.createFromOptions(vision,{
+          ...options,baseOptions:{modelAssetPath:HAND_MODEL}
+        });
+      }
       this.handStatus='ready'; return true;
     }catch(err){
       console.warn('MediaPipe Hand Landmarker unavailable',err);
