@@ -1,7 +1,23 @@
 const UPSTREAM_COMMIT = 'bff49a376f0844c918eb7f2be83e95f2699b0d14';
 const FAST_PROFILE = { name:'escape-v1', manifest:'/data/escape-v1/manifest.json', graph:'/data/escape-v1/graph.bin' };
 const FULL_PROFILE = { name:'70k', manifest:'/data/brain/manifest.json', graph:'/data/brain/graph.bin' };
-let activeProfile = FULL_PROFILE;
+const AGGREGATE_PROFILE = {
+  name:'escape-fast-v1',
+  representedNeurons:192,
+  groups:['loom','turnL','turnR','flightL','flightR'],
+  links:[
+    ['turnL','turnL',34,705,63],['turnL','turnR',24,395,67],['turnL','flightL',5,46,6],['turnL','flightR',6,171,5],
+    ['turnR','turnL',26,387,6],['turnR','turnR',21,536,47],['turnR','flightL',6,89,0],['turnR','flightR',4,48,0],
+    ['flightL','turnL',3,9,33],['flightL','turnR',4,118,21],['flightL','flightL',9,151,24],['flightL','flightR',4,112,45],
+    ['flightR','turnL',3,12,25],['flightR','turnR',3,107,19],['flightR','flightL',7,60,40],['flightR','flightR',7,57,26],
+    ['loom','turnL',84,1910,0],['loom','turnR',52,678,0],['loom','flightL',71,1827,0],['loom','flightR',50,665,0],
+    ['loom','loom',1387,9814,0]
+  ],
+  attribution:'Janelia FlyEM MaleCNS aggregate group links'
+};
+let activeProfile = AGGREGATE_PROFILE;
+let runtimeMode = 'aggregate';
+let aggregateState = {loom:0,turnL:0,turnR:0,flightL:0,flightR:0};
 
 const PARAMS = Object.freeze({
   tau: 20,
@@ -48,55 +64,36 @@ self.onmessage = async (event) => {
     const motion = clamp(Number(msg.motion) || 0);
     const light = clamp(Number(msg.light) || 0);
     const loom = clamp(Number(msg.loom) || 0);
-    const out = advanceSensory({ motion, light, loom });
+    const out = runtimeMode==='aggregate' ? advanceAggregate({ motion, light, loom }) : advanceSensory({ motion, light, loom });
     self.postMessage({ type: 'state', ...out });
   }
 };
 
 async function init() {
   loading = true;
-  self.postMessage({ type: 'status', status: 'profile-check', profile: FAST_PROFILE.name });
-  try {
-    let loaded;
-    try {
-      loaded = await loadProfile(FAST_PROFILE);
-      activeProfile = FAST_PROFILE;
-    } catch (fastError) {
-      self.postMessage({ type: 'status', status: 'profile-fallback', profile: FULL_PROFILE.name, reason: fastError?.message || String(fastError) });
-      loaded = await loadProfile(FULL_PROFILE);
-      activeProfile = FULL_PROFILE;
-    }
-
-    manifest = loaded.manifest;
-    const buffer = loaded.buffer;
-
-    self.postMessage({ type: 'status', status: 'graph-parse', profile: activeProfile.name, loaded: buffer.byteLength, total: buffer.byteLength });
-    parseGraph(buffer);
-
-    self.postMessage({ type: 'status', status: 'metadata', profile: activeProfile.name });
-    buildMetadata();
-    resetState();
-
-    ready = true;
-    loading = false;
-    self.postMessage({
-      type: 'ready',
-      profile: activeProfile.name,
-      neurons: n,
-      edges: edgeCount,
-      loomCount: groups.loom?.length || 0,
-      visionCount: (groups.visionL?.length || 0) + (groups.visionR?.length || 0),
-      escapeTargetCount: escapeTargets.length,
-      graphBytes: buffer.byteLength,
-      upstreamCommit: UPSTREAM_COMMIT,
-      attribution: manifest.attribution || 'Janelia FlyEM MaleCNS',
-    });
-  } catch (error) {
-    loading = false;
-    self.postMessage({ type: 'error', message: error?.message || String(error) });
-  }
+  self.postMessage({ type:'status', status:'embedded', profile:AGGREGATE_PROFILE.name });
+  activeProfile = AGGREGATE_PROFILE;
+  runtimeMode = 'aggregate';
+  resetAggregateState();
+  ready = true;
+  loading = false;
+  self.postMessage({
+    type:'ready',
+    profile:AGGREGATE_PROFILE.name,
+    aggregate:true,
+    groups:AGGREGATE_PROFILE.groups.length,
+    aggregateLinks:AGGREGATE_PROFILE.links.length,
+    representedNeurons:AGGREGATE_PROFILE.representedNeurons,
+    neurons:AGGREGATE_PROFILE.representedNeurons,
+    edges:AGGREGATE_PROFILE.links.length,
+    loomCount:126,
+    visionCount:0,
+    escapeTargetCount:4,
+    graphBytes:0,
+    upstreamCommit:UPSTREAM_COMMIT,
+    attribution:AGGREGATE_PROFILE.attribution
+  });
 }
-
 async function loadProfile(profile) {
   self.postMessage({ type: 'status', status: 'manifest', profile: profile.name });
   const manifestRes = await fetch(profile.manifest, { cache: 'force-cache' });
@@ -211,6 +208,7 @@ function buildMetadata() {
 }
 
 function resetState() {
+  if(runtimeMode==='aggregate'){ resetAggregateState(); self.postMessage({type:'reset-done'}); return; }
   voltage = new Float32Array(n);
   refractory = new Uint8Array(n);
   spikes = new Uint8Array(n);
@@ -219,6 +217,62 @@ function resetState() {
   spikeCount = 0;
   synaptic = new Float32Array(n);
   self.postMessage({ type: 'reset-done' });
+}
+
+function resetAggregateState(){
+  aggregateState={loom:0,turnL:0,turnR:0,flightL:0,flightR:0};
+}
+
+function aggregateCoefficient(edge){
+  const [, , count, positive, negative]=edge;
+  const meanNet=(positive-negative)/Math.max(1,count);
+  return Math.tanh(meanNet/18);
+}
+
+function advanceAggregate(input){
+  const names=AGGREGATE_PROFILE.groups;
+  const looming=Math.pow(clamp(input.loom),.82);
+  let st={...aggregateState};
+
+  // Group-level dynamics are modeled. Coupling coefficients preserve the sign
+  // and relative mean strength of real MaleCNS aggregate group connections.
+  for(let tickIndex=0;tickIndex<5;tickIndex++){
+    const drive={loom:0,turnL:0,turnR:0,flightL:0,flightR:0};
+    for(const edge of AGGREGATE_PROFILE.links){
+      const [source,target]=edge;
+      drive[target]+=st[source]*aggregateCoefficient(edge);
+    }
+    const next={};
+    for(const name of names){
+      const external=name==='loom'?looming*.60:0;
+      next[name]=clamp(st[name]*.52+drive[name]*.11+external);
+    }
+    st=next;
+  }
+  aggregateState=st;
+
+  const dnLeft=clamp(st.turnL);
+  const dnRight=clamp(st.turnR);
+  const flightLeft=clamp(st.flightL);
+  const flightRight=clamp(st.flightR);
+  const flight=clamp((flightLeft+flightRight)*.5);
+  const escapeDn=clamp((dnLeft+dnRight)*.5);
+  const network=clamp((st.loom+dnLeft+dnRight+flightLeft+flightRight)/5);
+  const rawEscape=st.loom*.45+escapeDn*.25+flight*.30;
+  const escape=clamp((rawEscape-.08)/.50);
+
+  return {
+    lc4:clamp(st.loom),
+    dnLeft,
+    dnRight,
+    escapeDn,
+    flight,
+    network,
+    escape,
+    spikeCount:Math.round(network*AGGREGATE_PROFILE.representedNeurons),
+    motorTurn:clampSigned((flightRight-flightLeft)*1.4),
+    aggregate:true
+  };
 }
 
 function advanceSensory(input) {
