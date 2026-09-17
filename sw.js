@@ -1,5 +1,5 @@
-const CACHE='fly-eye-runtime-v0.4.1';
-const ASSET_PREFIXES=['/vendor/mediapipe/','/data/brain/'];
+const CACHE='fly-eye-runtime-v0.4.2';
+const ASSET_PREFIXES=['/vendor/mediapipe/','/data/brain/','/data/escape-v1/'];
 
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
