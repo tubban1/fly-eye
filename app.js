@@ -67,8 +67,39 @@ function initConnectome(){
     connectome.worker.postMessage({type:'init'});
   }catch(err){connectome.status='error';connectome.error=String(err);updateConnectomeStatus();}
 }
+function updateConnectomeLoadProgress(){
+  const wrap=$('#connectomeLoad'),stage=$('#connectomeLoadStage'),pct=$('#connectomeLoadPct'),bar=$('#connectomeLoadBar'),detail=$('#connectomeLoadDetail');
+  if(!wrap||!stage||!pct||!bar||!detail)return;
+  let p=0,label=lang==='zh'?'连接图':'CONNECTOME',d='';
+  if(connectome.status==='ready'){
+    p=100;
+    label=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
+    d=lang==='zh'
+      ? connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接 · 已就绪'
+      : connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges · READY';
+  }else if(connectome.status==='error'){
+    p=100;label=lang==='zh'?'加载失败':'LOAD FAILED';d=connectome.error||connectome.reason||'';
+  }else if(connectome.phase==='profile-check'){
+    p=5;label=lang==='zh'?'快速图检查':'FAST GRAPH CHECK';d=lang==='zh'?'检查 escape-v1 是否可用':'Looking for reusable escape-v1 asset';
+  }else if(connectome.phase==='profile-fallback'){
+    p=8;label=lang==='zh'?'切换 70K':'FALLBACK → 70K';d=connectome.reason||'escape-v1 unavailable';
+  }else if(connectome.phase==='manifest'){
+    p=12;label=(connectome.profile==='escape-v1'?'ESCAPE v1':'70K')+' MANIFEST';d=lang==='zh'?'读取节点和分组清单':'Reading graph manifest';
+  }else if(connectome.phase==='graph-download'){
+    const ratio=connectome.total?connectome.loaded/connectome.total:0;
+    p=15+Math.round(clamp(ratio)*70);
+    label=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
+    d=(connectome.loaded/1e6).toFixed(2)+' / '+(connectome.total/1e6).toFixed(2)+' MB';
+  }else if(connectome.phase==='graph-parse'){
+    p=90;label=lang==='zh'?'解析图':'PARSING GRAPH';d=(connectome.total/1e6).toFixed(2)+' MB';
+  }else if(connectome.phase==='metadata'){
+    p=96;label=lang==='zh'?'建立神经读出':'BUILDING READOUTS';d='LC4 → DN / flight';
+  }
+  stage.textContent=label;pct.textContent=Math.round(p)+'%';bar.style.width=Math.round(p)+'%';detail.textContent=d;
+}
 function updateConnectomeStatus(){
   const el=$('#connectomeStatus'),badge=$('#graphBadge');
+  updateConnectomeLoadProgress();
   if(connectome.status==='ready'){
     if(el) el.textContent=lang==='zh'
       ? '真实连接图在线 · '+connectome.profile+' · '+connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接'
