@@ -122,12 +122,15 @@ async function openCamera(){
 
 function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
 
-function interactionReady(){
+function experienceArmed(){
   return DEBUG_MODE || (
     perceptionEngine.handStatus==='ready' &&
     perceptionState.phase!=='calibrating' &&
     connectome.status==='ready'
   );
+}
+function interactionReady(){
+  return experienceArmed() && (DEBUG_MODE || perceptionState.cameraStable);
 }
 
 function analyzeFrame(now){
@@ -296,7 +299,7 @@ function updateFly(dt,now,threat){
 
 function drawFly(now){
   fctx.clearRect(0,0,W,H);
-  if(!DEBUG_MODE&&!interactionReady()) return;
+  if(!DEBUG_MODE&&!experienceArmed()) return;
   const px=fly.x*W,py=fly.y*H; const s=clamp(Math.min(W,H)/430,.78,1.35)*(fly.state==='escape'?.88:1);
   fctx.save(); fctx.translate(px,py); fctx.rotate(Math.sin(now*.002)*.08 + fly.vx*20);
   const flap=Math.sin(fly.wing)*.85;
