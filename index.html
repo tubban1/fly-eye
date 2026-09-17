@@ -80,8 +80,49 @@
         <p id="resultExplain">Camera looming drove LC4 and propagated through the connectome.</p>
         <div class="result-actions">
           <button class="cta" id="againBtn" data-i18n="again">TRY AGAIN</button>
+          <button class="ghost big" id="viewReplayBtn" data-i18n="viewReplay">VIEW REPLAY</button>
           <button class="ghost big" id="shareBtn" data-i18n="share">SHARE</button>
         </div>
+      </div>
+    </section>
+
+    <section class="replay hidden" id="replayPanel">
+      <div class="replay-shell glass">
+        <div class="replay-head">
+          <div>
+            <div class="eyebrow" data-i18n="replayEyebrow">NEURAL REPLAY</div>
+            <h2 data-i18n="replayTitle">What just happened?</h2>
+          </div>
+          <button class="tiny-btn" id="closeReplay">×</button>
+        </div>
+
+        <div class="replay-grid">
+          <div class="replay-vision">
+            <canvas id="replayCanvas" width="384" height="216"></canvas>
+            <div class="replay-caption" id="replayCaption">Visual motion begins.</div>
+          </div>
+
+          <div class="replay-neural">
+            <div class="replay-time"><b id="replayTime">0 ms</b><span data-i18n="replayBefore">before escape</span></div>
+            <div class="replay-row"><label>LOOMING</label><div><i id="replayLoom"></i></div><b id="replayLoomVal">0</b></div>
+            <div class="replay-row"><label>LC4</label><div><i id="replayLc4"></i></div><b id="replayLc4Val">0</b></div>
+            <div class="replay-row"><label>DN LEFT</label><div><i id="replayDnL"></i></div><b id="replayDnLVal">0</b></div>
+            <div class="replay-row"><label>DN RIGHT</label><div><i id="replayDnR"></i></div><b id="replayDnRVal">0</b></div>
+            <div class="replay-row"><label>FLIGHT DN</label><div><i id="replayFlight"></i></div><b id="replayFlightVal">0</b></div>
+            <div class="replay-row escape-row"><label>ESCAPE</label><div><i id="replayEscape"></i></div><b id="replayEscapeVal">0</b></div>
+          </div>
+        </div>
+
+        <div class="replay-scrub">
+          <input id="replayScrubber" type="range" min="0" max="1000" value="0" step="1" aria-label="Replay timeline" />
+          <div class="replay-axis"><span>-2.0 s</span><span>LC4</span><span>DN</span><span data-i18n="replayEscapeMark">ESCAPE</span></div>
+        </div>
+
+        <div class="replay-actions">
+          <button class="ghost big" id="replayPlay" data-i18n="pauseReplay">PAUSE</button>
+          <button class="cta" id="replayContinue" data-i18n="continueBtn">CONTINUE</button>
+        </div>
+        <p class="replay-note" data-i18n="replayPrivacy">Replay frames and neural samples stay only in this browser tab.</p>
       </div>
     </section>
 
@@ -97,7 +138,7 @@
       <button class="drawer-close" id="closeScience">×</button>
       <div class="eyebrow" data-i18n="science">SCIENCE</div>
       <h2 data-i18n="scienceTitle">Camera → sensory signals → fly behavior</h2>
-      <p data-i18n="scienceBody">Fly Eye v0.2 loads a signed MaleCNS-derived connectome subgraph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.</p>
+      <p data-i18n="scienceBody">Fly Eye v0.3 loads a signed MaleCNS-derived connectome subgraph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.</p>
       <div class="pipeline">
         <div>CAMERA</div><span>↓</span><div>MOTION / LIGHT / LOOMING</div><span>↓</span><div>LC4 + REAL SIGNED GRAPH</div><span>↓</span><div>DN / FLIGHT READOUT</div>
       </div>
