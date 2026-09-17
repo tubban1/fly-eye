@@ -1,4 +1,5 @@
 import { PerceptionEngine } from './perception.js';
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(err=>console.warn('service worker unavailable',err));}
 const $ = (s) => document.querySelector(s);
 const video = $('#camera');
 const visionCanvas = $('#visionCanvas');
