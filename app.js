@@ -26,24 +26,25 @@ mobileOverride.textContent='@media(max-width:760px){.brain .channel{display:grid
 document.head.appendChild(mobileOverride);
 
 let W=innerWidth,H=innerHeight,D=Math.min(devicePixelRatio||1,2);
-let stream=null, running=false, rear=false, lastFrame=null, lastEnergy=0, lastNearMotion=0, lastTs=performance.now();
+let stream=null, running=false, rear=false, lastFrame=null, referenceFrame=null, referenceTs=0, lastEnergy=0, lastNearMotion=0, lastTs=performance.now();
 let maxThreat=0, escaped=false, frameCounter=0;
 const fly={x:.56,y:.55,vx:0,vy:0,state:'idle',escapeUntil:0,wing:0,blink:0};
 const sensory={motion:0,light:0,loom:0};
 const neural={r:0,lc4:0,lplc2:0,dnp:0,motor:0};
 const replay={frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0,progress:0,wallStart:0,startProgress:0};
 
-const connectome={status:'loading',worker:null,pending:false,lastSent:0,escape:0,network:0,spikes:0,neurons:0,edges:0,error:''};
+const connectome={status:'loading',worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
   try{
     connectome.worker=new Worker('/connectome-worker.js');
     connectome.worker.onmessage=(event)=>{
       const msg=event.data||{};
       if(msg.type==='ready'){
-        connectome.status='ready';connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.pending=false;updateConnectomeStatus();
+        connectome.status='ready';connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.pending=false;updateConnectomeStatus();
       }else if(msg.type==='state'){
         connectome.pending=false;
-        connectome.escape=smooth(connectome.escape,clamp(msg.escape||0),.42);
+        connectome.escape=smooth(connectome.escape,clamp(msg.escape||0),.5);
+        connectome.escapeDn=smooth(connectome.escapeDn,clamp(msg.escapeDn||0),.42);
         connectome.network=smooth(connectome.network,clamp(msg.network||0),.3);
         connectome.spikes=msg.spikeCount||0;
         neural.r=connectome.network;
@@ -101,12 +102,12 @@ async function openCamera(){
     const track=stream.getVideoTracks()[0]; rear=(track.getSettings().facingMode==='environment');
     document.body.classList.toggle('rear-camera',rear);
     $('#landing').classList.add('hidden'); $('#hud').classList.remove('hidden'); $('#result').classList.add('hidden');
-    visionCanvas.width=96; visionCanvas.height=54; lastFrame=null; maxThreat=0; escaped=false; resetFly(); running=true;
+    visionCanvas.width=96; visionCanvas.height=54; lastFrame=null; referenceFrame=null; referenceTs=0; maxThreat=0; escaped=false; resetFly(); running=true;
     requestAnimationFrame(loop);
   }catch(err){ console.error(err); $('#permission').classList.remove('hidden'); }
 }
 
-function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
+function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
 
 function analyzeFrame(){
   if(video.readyState<2) return;
