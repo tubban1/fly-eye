@@ -60,13 +60,18 @@ function initConnectome(){
   }catch(err){connectome.status='error';connectome.error=String(err);updateConnectomeStatus();}
 }
 function updateConnectomeStatus(){
-  const el=$('#connectomeStatus'); if(!el)return;
+  const el=$('#connectomeStatus'),badge=$('#graphBadge');
   if(connectome.status==='ready'){
-    el.textContent=lang==='zh'?`真实连接图在线 · ${connectome.neurons.toLocaleString()} 神经元 · ${connectome.edges.toLocaleString()} 条连接 · 本地 Worker`:`REAL GRAPH ONLINE · ${connectome.neurons.toLocaleString()} neurons · ${connectome.edges.toLocaleString()} edges · local Worker`;
+    if(el) el.textContent=lang==='zh'
+      ? '真实连接图在线 · '+connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接 · '+connectome.escapeTargets+' 个 LC4 下游逃逸 DN'
+      : 'REAL GRAPH ONLINE · '+connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges · '+connectome.escapeTargets+' LC4 downstream escape DNs';
+    if(badge){badge.textContent=lang==='zh'?'真实图在线':'REAL GRAPH';badge.dataset.state='ready'}
   }else if(connectome.status==='error'){
-    el.textContent=lang==='zh'?'连接图加载失败 · 已切换透明后备模型':'GRAPH LOAD FAILED · transparent fallback active';
+    if(el) el.textContent=lang==='zh'?'连接图加载失败 · 已切换透明后备模型':'GRAPH LOAD FAILED · transparent fallback active';
+    if(badge){badge.textContent=lang==='zh'?'后备模型':'FALLBACK';badge.dataset.state='error'}
   }else{
-    el.textContent=lang==='zh'?'正在本地加载真实 MaleCNS 衍生连接图…':'Loading the real MaleCNS-derived graph locally…';
+    if(el) el.textContent=lang==='zh'?'正在本地加载真实 MaleCNS 衍生连接图…':'Loading the real MaleCNS-derived graph locally…';
+    if(badge){badge.textContent=lang==='zh'?'图加载中':'GRAPH LOADING';badge.dataset.state='loading'}
   }
 }
 initConnectome();
@@ -111,33 +116,36 @@ function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.esc
 
 function analyzeFrame(){
   if(video.readyState<2) return;
-  const fw=96,fh=54;
+  const fw=96,fh=54,now=performance.now();
   vctx.drawImage(video,0,0,fw,fh);
   const img=vctx.getImageData(0,0,fw,fh).data;
   const gray=new Uint8Array(fw*fh);
   const flyFrameX=(rear?fly.x:1-fly.x)*fw, flyFrameY=fly.y*fh;
-  let sum=0,diff=0,nearDiff=0,nearWeight=0,nearLight=0;
+  let diff=0,nearDiff=0,slowNearDiff=0,nearWeight=0,nearLight=0;
   for(let i=0,p=0;i<img.length;i+=4,p++){
     const g=(img[i]*.2126+img[i+1]*.7152+img[i+2]*.0722)|0;
-    gray[p]=g; sum+=g;
-    const px=p%fw, py=(p/fw)|0;
-    const dx=(px-flyFrameX)/(fw*.28),dy=(py-flyFrameY)/(fh*.38);
-    const weight=Math.exp(-(dx*dx+dy*dy)*1.5);
-    nearWeight+=weight; nearLight+=g*weight;
+    gray[p]=g;
+    const px=p%fw,py=(p/fw)|0;
+    const dx=(px-flyFrameX)/(fw*.27),dy=(py-flyFrameY)/(fh*.36);
+    const weight=Math.exp(-(dx*dx+dy*dy)*1.55);
+    nearWeight+=weight;nearLight+=g*weight;
     if(lastFrame){const d=Math.abs(g-lastFrame[p]);diff+=d;nearDiff+=d*weight;}
+    if(referenceFrame) slowNearDiff+=Math.abs(g-referenceFrame[p])*weight;
   }
   const localBrightness=nearLight/(Math.max(1,nearWeight)*255);
-  const motion=lastFrame ? diff/(gray.length*255) : 0;
-  const nearMotion=lastFrame ? nearDiff/(Math.max(1,nearWeight)*255) : 0;
+  const motion=lastFrame?diff/(gray.length*255):0;
+  const nearMotion=lastFrame?nearDiff/(Math.max(1,nearWeight)*255):0;
+  const slowNearMotion=referenceFrame?slowNearDiff/(Math.max(1,nearWeight)*255):0;
   const energy=nearMotion*(0.58+localBrightness*.42);
   const expansion=Math.max(0,nearMotion-lastNearMotion);
-  const loom=clamp(expansion*14 + nearMotion*3.3 + Math.max(0,energy-lastEnergy)*8 - .055);
+  const loomTarget=clamp(expansion*18+nearMotion*5.8+slowNearMotion*2.9+Math.max(0,energy-lastEnergy)*10-.03);
   lastEnergy=smooth(lastEnergy,energy,.34);
   lastNearMotion=smooth(lastNearMotion,nearMotion,.34);
   lastFrame=gray;
-  sensory.motion=smooth(sensory.motion,clamp((nearMotion*.82+motion*.18)*7),.22);
+  if(!referenceFrame||now-referenceTs>420){referenceFrame=gray.slice();referenceTs=now;}
+  sensory.motion=smooth(sensory.motion,clamp((nearMotion*.78+slowNearMotion*.14+motion*.08)*8),.26);
   sensory.light=smooth(sensory.light,localBrightness,.12);
-  sensory.loom=smooth(sensory.loom,loom,.28);
+  sensory.loom=loomTarget>sensory.loom?smooth(sensory.loom,loomTarget,.48):Math.max(loomTarget,sensory.loom*.915);
 }
 
 function resetReplay(){
