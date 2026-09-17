@@ -153,6 +153,7 @@ def main():
         "groups":new_groups,
         "motor":new_motor,
         "sourceIndexByLocalIndex":old,
+        "sourceBodyIdByLocalIndex":[manifest.get("bodyIds",[])[i] if i < len(manifest.get("bodyIds",[])) else None for i in old],
         "attribution":manifest.get("attribution","Janelia FlyEM MaleCNS"),
         "license":"CC BY 4.0 for underlying MaleCNS data; retain source attribution"
     }
