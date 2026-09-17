@@ -4,6 +4,15 @@
 
 Fly Eye is a camera-first browser experiment. Your real environment becomes sensory input for a virtual fruit fly: local motion, brightness and looming signals are converted into neural input, then the fly reacts inside the camera view.
 
+## v0.4.2 — Reusable fast escape graph
+
+- visible graph progress in the mobile challenge card
+- deterministic `escape-v1` graph builder for LC4 → escape pathways
+- reusable FLYGRAPH v1 binary + manifest format for external developers
+- preserves source graph index and MaleCNS body ID mapping
+- runtime prefers `escape-v1` and falls back to the 70k graph only when necessary
+- CI builds and publishes `data/escape-v1/graph.bin` and `manifest.json`
+
 ## v0.4.1 — Faster cold start and local cache
 
 - MediaPipe version pinned instead of `@latest`
