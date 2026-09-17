@@ -1,0 +1,136 @@
+const $ = (s) => document.querySelector(s);
+const video = $('#camera');
+const visionCanvas = $('#visionCanvas');
+const vctx = visionCanvas.getContext('2d', { willReadFrequently: true });
+const fxCanvas = $('#fxCanvas');
+const fctx = fxCanvas.getContext('2d');
+const mosaicCanvas = $('#mosaicCanvas');
+const mctx = mosaicCanvas.getContext('2d');
+
+const dict = {
+  en:{eyebrow:'A REAL-WORLD FLY BRAIN EXPERIMENT',hero:'Let a fly brain<br><em>see your world.</em>',desc:"Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.",openCamera:'OPEN CAMERA',privacy:'Camera frames stay on your device.',needCamera:'Fly Eye needs camera access',needCameraBody:'We use the live image only inside your browser to estimate motion, looming and brightness. Raw camera frames are not uploaded.',tryAgain:'TRY AGAIN',challenge:'CHALLENGE',sneak:'Sneak up on the fly',challengeBody:'Move your hand slowly toward the fly. Get close without triggering escape.',threat:'THREAT',liveBrain:'LIVE BRAIN',flyVision:'FLY VISION',scienceNote:'v0.1 uses a transparent modeled controller. Full MaleCNS graph runtime is the next milestone.',calm:'CALM',reset:'RESET FLY',escaped:'ESCAPE TRIGGERED',resultTitle:'You woke up<br><em>the escape circuit.</em>',maxThreat:'MAX THREAT',again:'TRY AGAIN',share:'SHARE',whatFlySees:'WHAT THE FLY SEES',visionExplain:'A deliberately simplified compound-eye view used to explain the sensory pipeline.',science:'SCIENCE',scienceTitle:'Camera → sensory signals → fly behavior',scienceBody:'Fly Eye currently extracts motion, looming and brightness locally from camera frames. Those signals feed a replaceable connectome adapter. v0.1 intentionally does not claim full MaleCNS simulation.'},
+  zh:{eyebrow:'现实世界果蝇大脑实验',hero:'让果蝇的大脑<br><em>看见你的世界。</em>',desc:'你的摄像头会成为果蝇的视觉世界。运动、逼近和亮度都在你的设备本地处理。',openCamera:'打开摄像头',privacy:'摄像头画面不会上传。',needCamera:'Fly Eye 需要摄像头权限',needCameraBody:'浏览器只在本地分析运动、逼近和亮度，不上传原始摄像头画面。',tryAgain:'重试',challenge:'挑战',sneak:'慢慢靠近果蝇',challengeBody:'把手慢慢靠近它，尽量接近，但不要触发逃逸。',threat:'威胁',liveBrain:'实时神经活动',flyVision:'果蝇视角',scienceNote:'v0.1 使用透明的建模控制器；完整 MaleCNS 图运行时是下一阶段。',calm:'平静',reset:'重置果蝇',escaped:'触发逃逸',resultTitle:'你唤醒了<br><em>逃逸回路。</em>',maxThreat:'最高威胁',again:'再试一次',share:'分享',whatFlySees:'果蝇看到的世界',visionExplain:'这是为了解释感觉输入流程而做的简化复眼视图。',science:'科学说明',scienceTitle:'摄像头 → 感觉信号 → 果蝇行为',scienceBody:'Fly Eye 当前会在本地从摄像头提取运动、逼近和亮度，再送入可替换的 connectome adapter。v0.1 不声称已经运行完整 MaleCNS。'}
+};
+let lang = localStorage.getItem('flyEye_lang') || 'en';
+function t(k){ return dict[lang][k] || dict.en[k] || k }
+function applyLang(){document.documentElement.lang=lang==='zh'?'zh-CN':'en';document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));$('#langBtn').textContent=lang==='en'?'中文':'EN';localStorage.setItem('flyEye_lang',lang)}
+applyLang();
+
+let W=innerWidth,H=innerHeight,D=Math.min(devicePixelRatio||1,2);
+let stream=null, running=false, rear=false, lastFrame=null, lastEnergy=0, lastTs=performance.now();
+let maxThreat=0, escaped=false, frameCounter=0;
+const fly={x:.56,y:.55,vx:0,vy:0,state:'idle',escapeUntil:0,wing:0,blink:0};
+const sensory={motion:0,light:0,loom:0};
+const neural={r:0,lc4:0,lplc2:0,dnp:0,motor:0};
+
+function resize(){W=innerWidth;H=innerHeight;D=Math.min(devicePixelRatio||1,2);fxCanvas.width=W*D;fxCanvas.height=H*D;fctx.setTransform(D,0,0,D,0,0)}
+addEventListener('resize',resize);resize();
+
+function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}
+function smooth(prev,next,k=.16){return prev+(next-prev)*k}
+
+async function openCamera(){
+  $('#permission').classList.add('hidden');
+  try{
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    const constraints={audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}};
+    stream=await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject=stream; await video.play();
+    const track=stream.getVideoTracks()[0]; rear=(track.getSettings().facingMode==='environment');
+    document.body.classList.toggle('rear-camera',rear);
+    $('#landing').classList.add('hidden'); $('#hud').classList.remove('hidden'); $('#result').classList.add('hidden');
+    visionCanvas.width=96; visionCanvas.height=54; lastFrame=null; maxThreat=0; escaped=false; resetFly(); running=true;
+    requestAnimationFrame(loop);
+  }catch(err){ console.error(err); $('#permission').classList.remove('hidden'); }
+}
+
+function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;$('#result').classList.add('hidden')}
+
+function analyzeFrame(){
+  if(video.readyState<2) return;
+  vctx.drawImage(video,0,0,96,54);
+  const img=vctx.getImageData(0,0,96,54).data;
+  const gray=new Uint8Array(96*54); let sum=0, diff=0;
+  for(let i=0,p=0;i<img.length;i+=4,p++){
+    const g=(img[i]*.2126+img[i+1]*.7152+img[i+2]*.0722)|0; gray[p]=g; sum+=g;
+    if(lastFrame) diff+=Math.abs(g-lastFrame[p]);
+  }
+  const brightness=sum/(gray.length*255);
+  const motion=lastFrame ? diff/(gray.length*255) : 0;
+  const energy=motion * (0.55 + brightness*0.45);
+  const loom=clamp((energy-lastEnergy)*9 + motion*2.25 - .05);
+  lastEnergy=smooth(lastEnergy,energy,.35); lastFrame=gray;
+  sensory.motion=smooth(sensory.motion,clamp(motion*6),.22);
+  sensory.light=smooth(sensory.light,brightness,.12);
+  sensory.loom=smooth(sensory.loom,loom,.28);
+}
+
+function connectomeAdapter(){
+  neural.r=smooth(neural.r,clamp(sensory.motion*.58+sensory.light*.35),.18);
+  neural.lc4=smooth(neural.lc4,clamp(sensory.loom*.9+sensory.motion*.22),.24);
+  neural.lplc2=smooth(neural.lplc2,clamp(sensory.loom*.72+sensory.motion*.34),.2);
+  neural.dnp=smooth(neural.dnp,clamp((neural.lc4*.62+neural.lplc2*.55)-.22),.23);
+  neural.motor=smooth(neural.motor,clamp(neural.dnp*.9+sensory.motion*.12),.22);
+  const threat=clamp(neural.lc4*.52+neural.lplc2*.34+neural.dnp*.28);
+  maxThreat=Math.max(maxThreat,threat);
+  if(!escaped && threat>.76){triggerEscape(threat)}
+  return threat;
+}
+
+function triggerEscape(){
+  escaped=true; fly.state='escape'; fly.escapeUntil=performance.now()+1050;
+  const a=Math.random()*Math.PI*2; fly.vx=Math.cos(a)*(rear?.008:.007); fly.vy=Math.sin(a)*.006-.003;
+  setTimeout(()=>{if(!running)return; $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';$('#resultExplain').textContent=lang==='zh'?'快速增强的逼近刺激把 LC4 / LPLC2 活动推入了逃逸通路。':'Looming rose quickly, pushing LC4/LPLC2 activity into the escape pathway.';$('#result').classList.remove('hidden')},420)
+}
+
+function updateFly(dt,now,threat){
+  fly.wing+=dt*(fly.state==='escape'?.06:.018);
+  if(fly.state==='escape'){
+    fly.x+=fly.vx*dt; fly.y+=fly.vy*dt; fly.vx*=.994; fly.vy*=.994;
+    if(now>fly.escapeUntil) fly.state='alert';
+  }else{
+    fly.state=threat>.4?'alert':'idle';
+    fly.x+=Math.sin(now*.0011)*.000012*dt; fly.y+=Math.cos(now*.0014)*.00001*dt;
+  }
+  fly.x=clamp(fly.x,.08,.92); fly.y=clamp(fly.y,.18,.84);
+}
+
+function drawFly(now){
+  fctx.clearRect(0,0,W,H);
+  const px=fly.x*W,py=fly.y*H; const s=clamp(Math.min(W,H)/430,.78,1.35)*(fly.state==='escape'?.88:1);
+  fctx.save(); fctx.translate(px,py); fctx.rotate(Math.sin(now*.002)*.08 + fly.vx*20);
+  const flap=Math.sin(fly.wing)*.85;
+  fctx.globalAlpha=.42; fctx.fillStyle='#dffcff';
+  fctx.beginPath(); fctx.ellipse(-16*s,-10*s,24*s,(7+Math.abs(flap)*8)*s,-.42,0,Math.PI*2);fctx.fill();
+  fctx.beginPath(); fctx.ellipse(16*s,-10*s,24*s,(7+Math.abs(flap)*8)*s,.42,0,Math.PI*2);fctx.fill();
+  fctx.globalAlpha=1; fctx.fillStyle='#6f4b2d';fctx.beginPath();fctx.ellipse(0,9*s,11*s,19*s,0,0,Math.PI*2);fctx.fill();
+  fctx.fillStyle='#8c5d32';fctx.beginPath();fctx.ellipse(0,-7*s,15*s,14*s,0,0,Math.PI*2);fctx.fill();
+  fctx.fillStyle='#d4302c';fctx.beginPath();fctx.arc(-8*s,-10*s,7*s,0,Math.PI*2);fctx.arc(8*s,-10*s,7*s,0,Math.PI*2);fctx.fill();
+  fctx.fillStyle='#fff';fctx.beginPath();fctx.arc(-10*s,-12*s,2*s,0,Math.PI*2);fctx.arc(6*s,-12*s,2*s,0,Math.PI*2);fctx.fill();
+  fctx.strokeStyle='rgba(255,255,255,.46)';fctx.lineWidth=1.2*s;for(let i=-1;i<=1;i++){fctx.beginPath();fctx.moveTo(-5*s,11*s);fctx.lineTo((-19-i*4)*s,(18+i*8)*s);fctx.stroke();fctx.beginPath();fctx.moveTo(5*s,11*s);fctx.lineTo((19+i*4)*s,(18+i*8)*s);fctx.stroke()}
+  if(fly.state==='alert'||fly.state==='escape'){fctx.strokeStyle=fly.state==='escape'?'#ff5a3b':'#dfff55';fctx.lineWidth=2*s;fctx.beginPath();fctx.arc(0,0,31*s,0,Math.PI*2);fctx.stroke()}
+  fctx.restore();
+}
+
+function setBar(id,v){$('#'+id+'Bar').style.width=Math.round(v*100)+'%';$('#'+id+'Val').textContent=Math.round(v*100)}
+function updateUI(threat){
+  $('#threatBar').style.width=Math.round(threat*100)+'%';$('#threatValue').textContent=Math.round(threat*100)+'%';
+  setBar('motion',sensory.motion);setBar('light',sensory.light);setBar('loom',sensory.loom);setBar('r',neural.r);setBar('lc4',neural.lc4);setBar('lplc2',neural.lplc2);setBar('dnp',neural.dnp);setBar('motor',neural.motor);
+  const state=threat>.72?'ESCAPE READY':threat>.4?'ALERT':'CALM'; $('#brainState').textContent=lang==='zh'?(state==='CALM'?'平静':state==='ALERT'?'警觉':'即将逃逸'):state; $('#statusPill').textContent=$('#brainState').textContent;
+}
+
+function drawMosaic(){
+  if(!lastFrame)return; const w=96,h=54,cols=20,rows=11,cw=mosaicCanvas.width/cols,ch=mosaicCanvas.height/rows; mctx.fillStyle='#090909';mctx.fillRect(0,0,mosaicCanvas.width,mosaicCanvas.height);
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const sx=Math.floor(x/cols*w),sy=Math.floor(y/rows*h),g=lastFrame[sy*w+sx]||0;const r=Math.min(cw,ch)*.43;mctx.fillStyle=`rgb(${g},${Math.min(255,g*1.08)},${Math.min(255,g*.78)})`;mctx.beginPath();mctx.arc(x*cw+cw/2,y*ch+ch/2,r,0,Math.PI*2);mctx.fill()}
+}
+
+function loop(now){if(!running)return;const dt=Math.min(32,now-lastTs);lastTs=now;frameCounter++;if(frameCounter%2===0)analyzeFrame();const threat=connectomeAdapter();updateFly(dt,now,threat);drawFly(now);updateUI(threat);if(!$('#flyVisionPanel').classList.contains('hidden')&&frameCounter%4===0)drawMosaic();requestAnimationFrame(loop)}
+
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
+
+$('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#resetBtn').onclick=resetFly;$('#againBtn').onclick=()=>{resetFly();$('#result').classList.add('hidden')};
+$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang()};
+$('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#closeScience').onclick=()=>$('#scienceDrawer').classList.remove('open');
+$('#flyVisionBtn').onclick=()=>{$('#flyVisionPanel').classList.remove('hidden');drawMosaic()};$('#closeVision').onclick=()=>$('#flyVisionPanel').classList.add('hidden');
+$('#shareBtn').onclick=async()=>{const data={title:'Fly Eye',text:lang==='zh'?'让一只果蝇的大脑看看你的世界。':'Let a fly brain see your world.',url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);toast(lang==='zh'?'链接已复制':'Link copied')}}catch{}};
+addEventListener('visibilitychange',()=>{if(document.hidden){sensory.motion=sensory.loom=0}});
