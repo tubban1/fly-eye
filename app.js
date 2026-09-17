@@ -39,16 +39,16 @@ const replay={frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
 
-const connectome={status:'loading',phase:'manifest',loaded:0,total:9864604,worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
+const connectome={status:'loading',phase:'manifest',profile:'auto',loaded:0,total:9864604,worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
   try{
     connectome.worker=new Worker('/connectome-worker.js');
     connectome.worker.onmessage=(event)=>{
       const msg=event.data||{};
       if(msg.type==='ready'){
-        connectome.status='ready';connectome.phase='ready';connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();
+        connectome.status='ready';connectome.phase='ready';connectome.profile=msg.profile||connectome.profile;connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();
       }else if(msg.type==='status'){
-        connectome.status='loading';connectome.phase=msg.status||'loading';connectome.loaded=msg.loaded||0;connectome.total=msg.total||connectome.total;updateConnectomeStatus();
+        connectome.status='loading';connectome.phase=msg.status||'loading';connectome.profile=msg.profile||connectome.profile;connectome.loaded=msg.loaded||0;connectome.total=msg.total||connectome.total;updateConnectomeStatus();
       }else if(msg.type==='state'){
         connectome.pending=false;
         connectome.escape=smooth(connectome.escape,clamp(msg.escape||0),.5);
@@ -71,8 +71,8 @@ function updateConnectomeStatus(){
   const el=$('#connectomeStatus'),badge=$('#graphBadge');
   if(connectome.status==='ready'){
     if(el) el.textContent=lang==='zh'
-      ? '真实连接图在线 · '+connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接 · '+connectome.escapeTargets+' 个 LC4 下游逃逸 DN'
-      : 'REAL GRAPH ONLINE · '+connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges · '+connectome.escapeTargets+' LC4 downstream escape DNs';
+      ? '真实连接图在线 · '+connectome.profile+' · '+connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接'
+      : 'REAL GRAPH ONLINE · '+connectome.profile+' · '+connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges';
     if(badge){badge.textContent=lang==='zh'?'真实图在线':'REAL GRAPH';badge.dataset.state='ready'}
   }else if(connectome.status==='error'){
     if(el) el.textContent=lang==='zh'?'连接图加载失败 · 挑战已暂停':'GRAPH LOAD FAILED · challenge paused';
@@ -82,7 +82,8 @@ function updateConnectomeStatus(){
     let badgeLabel=lang==='zh'?'图加载中':'GRAPH LOADING';
     if(connectome.phase==='graph-download'){
       const loaded=(connectome.loaded/1e6).toFixed(1),total=(connectome.total/1e6).toFixed(1);
-      label=lang==='zh'?'连接图下载 '+loaded+' / '+total+' MB':'GRAPH '+loaded+' / '+total+' MB';
+      const profile=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
+      label=lang==='zh'?profile+' 下载 '+loaded+' / '+total+' MB:profile+' · '+loaded+' / '+total+' MB';
       badgeLabel=Math.round((connectome.loaded/Math.max(1,connectome.total))*100)+'%';
     }else if(connectome.phase==='graph-parse'){
       label=lang==='zh'?'连接图已下载，正在解析约 9.9 MB 数据…':'GRAPH DOWNLOADED · PARSING ~9.9 MB…';
@@ -90,8 +91,12 @@ function updateConnectomeStatus(){
     }else if(connectome.phase==='metadata'){
       label=lang==='zh'?'正在建立 LC4 / DN 读出…':'BUILDING LC4 / DN READOUTS…';
       badgeLabel=lang==='zh'?'准备中':'PREPARING';
+    }else if(connectome.phase==='profile-check'){
+      label=lang==='zh'?'正在查找快速 Escape Graph…':'CHECKING FAST ESCAPE GRAPH…';
+    }else if(connectome.phase==='profile-fallback'){
+      label=lang==='zh'?'快速图暂不可用，切换 70K 图…':'FAST GRAPH UNAVAILABLE · FALLING BACK TO 70K…';
     }else if(connectome.phase==='manifest'){
-      label=lang==='zh'?'正在读取连接图清单…':'READING GRAPH MANIFEST…';
+      label=lang==='zh'?'正在读取 '+(connectome.profile==='escape-v1'?'Escape v1':'70K')+' 清单…':'READING '+(connectome.profile==='escape-v1'?'ESCAPE v1':'70K')+' MANIFEST…';
     }
     if(el) el.textContent=label;
     if(badge){badge.textContent=badgeLabel;badge.dataset.state='loading'}
@@ -349,10 +354,11 @@ function updatePerceptionUI(p){
     state='loading';
     if(connectome.phase==='graph-download'){
       const loaded=(connectome.loaded/1e6).toFixed(1),total=(connectome.total/1e6).toFixed(1);
-      status.textContent=lang==='zh'?'连接图下载 '+loaded+' / '+total+' MB':'GRAPH '+loaded+' / '+total+' MB';
+      const profile=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
+      status.textContent=lang==='zh'?profile+' 下载 '+loaded+' / '+total+' MB:profile+' · '+loaded+' / '+total+' MB';
       status.dataset.state=state;
     }else if(connectome.phase==='graph-parse'){
-      status.textContent=lang==='zh'?'连接图已下载，正在解析…':'GRAPH DOWNLOADED · PARSING…';
+      status.textContent=lang==='zh'?(connectome.profile==='escape-v1'?'Escape v1':'70K')+' 已下载，正在解析…':(connectome.profile==='escape-v1'?'ESCAPE v1':'70K')+' DOWNLOADED · PARSING…';
       status.dataset.state=state;
     }else if(connectome.phase==='metadata'){
       status.textContent=lang==='zh'?'正在建立 LC4 / DN 读出…':'BUILDING LC4 / DN READOUTS…';
