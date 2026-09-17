@@ -17,7 +17,7 @@ function applyLang(){document.documentElement.lang=lang==='zh'?'zh-CN':'en';docu
 applyLang();
 
 let W=innerWidth,H=innerHeight,D=Math.min(devicePixelRatio||1,2);
-let stream=null, running=false, rear=false, lastFrame=null, lastEnergy=0, lastTs=performance.now();
+let stream=null, running=false, rear=false, lastFrame=null, lastEnergy=0, lastNearMotion=0, lastTs=performance.now();
 let maxThreat=0, escaped=false, frameCounter=0;
 const fly={x:.56,y:.55,vx:0,vy:0,state:'idle',escapeUntil:0,wing:0,blink:0};
 const sensory={motion:0,light:0,loom:0};
@@ -48,20 +48,32 @@ function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.esc
 
 function analyzeFrame(){
   if(video.readyState<2) return;
-  vctx.drawImage(video,0,0,96,54);
-  const img=vctx.getImageData(0,0,96,54).data;
-  const gray=new Uint8Array(96*54); let sum=0, diff=0;
+  const fw=96,fh=54;
+  vctx.drawImage(video,0,0,fw,fh);
+  const img=vctx.getImageData(0,0,fw,fh).data;
+  const gray=new Uint8Array(fw*fh);
+  const flyFrameX=(rear?fly.x:1-fly.x)*fw, flyFrameY=fly.y*fh;
+  let sum=0,diff=0,nearDiff=0,nearWeight=0,nearLight=0;
   for(let i=0,p=0;i<img.length;i+=4,p++){
-    const g=(img[i]*.2126+img[i+1]*.7152+img[i+2]*.0722)|0; gray[p]=g; sum+=g;
-    if(lastFrame) diff+=Math.abs(g-lastFrame[p]);
+    const g=(img[i]*.2126+img[i+1]*.7152+img[i+2]*.0722)|0;
+    gray[p]=g; sum+=g;
+    const px=p%fw, py=(p/fw)|0;
+    const dx=(px-flyFrameX)/(fw*.28),dy=(py-flyFrameY)/(fh*.38);
+    const weight=Math.exp(-(dx*dx+dy*dy)*1.5);
+    nearWeight+=weight; nearLight+=g*weight;
+    if(lastFrame){const d=Math.abs(g-lastFrame[p]);diff+=d;nearDiff+=d*weight;}
   }
-  const brightness=sum/(gray.length*255);
+  const localBrightness=nearLight/(Math.max(1,nearWeight)*255);
   const motion=lastFrame ? diff/(gray.length*255) : 0;
-  const energy=motion * (0.55 + brightness*0.45);
-  const loom=clamp((energy-lastEnergy)*9 + motion*2.25 - .05);
-  lastEnergy=smooth(lastEnergy,energy,.35); lastFrame=gray;
-  sensory.motion=smooth(sensory.motion,clamp(motion*6),.22);
-  sensory.light=smooth(sensory.light,brightness,.12);
+  const nearMotion=lastFrame ? nearDiff/(Math.max(1,nearWeight)*255) : 0;
+  const energy=nearMotion*(0.58+localBrightness*.42);
+  const expansion=Math.max(0,nearMotion-lastNearMotion);
+  const loom=clamp(expansion*14 + nearMotion*3.3 + Math.max(0,energy-lastEnergy)*8 - .055);
+  lastEnergy=smooth(lastEnergy,energy,.34);
+  lastNearMotion=smooth(lastNearMotion,nearMotion,.34);
+  lastFrame=gray;
+  sensory.motion=smooth(sensory.motion,clamp((nearMotion*.82+motion*.18)*7),.22);
+  sensory.light=smooth(sensory.light,localBrightness,.12);
   sensory.loom=smooth(sensory.loom,loom,.28);
 }
 
@@ -73,7 +85,7 @@ function connectomeAdapter(){
   neural.motor=smooth(neural.motor,clamp(neural.dnp*.9+sensory.motion*.12),.22);
   const threat=clamp(neural.lc4*.52+neural.lplc2*.34+neural.dnp*.28);
   maxThreat=Math.max(maxThreat,threat);
-  if(!escaped && threat>.76){triggerEscape(threat)}
+  if(!escaped && threat>.76){triggerEscape()}
   return threat;
 }
 
