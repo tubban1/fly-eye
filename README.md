@@ -4,6 +4,15 @@
 
 Fly Eye is a camera-first browser experiment. Your real environment becomes sensory input for a virtual fruit fly: local motion, brightness and looming signals are converted into neural input, then the fly reacts inside the camera view.
 
+## v0.4.1 — Faster cold start and local cache
+
+- MediaPipe version pinned instead of `@latest`
+- MediaPipe module/WASM/model and connectome graph exposed through same-origin Fly Eye paths
+- heavy runtime assets cached in browser Cache Storage after first successful load
+- MediaPipe hand tracker prewarmed in the background before camera interaction
+- connectome loader now reports download progress and parsing phases
+- current selected graph: 70,000 neurons, 798,715 edges, 9,864,604-byte graph binary
+
 ## v0.4 — Perception Layer
 
 The camera no longer sends raw motion directly into the fly brain. Real-world input is filtered first:
