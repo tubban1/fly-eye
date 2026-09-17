@@ -83,10 +83,11 @@ function updateConnectomeStatus(){
     if(connectome.phase==='graph-download'){
       const loaded=(connectome.loaded/1e6).toFixed(1),total=(connectome.total/1e6).toFixed(1);
       const profile=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
-      label=lang==='zh'?profile+' 下载 '+loaded+' / '+total+' MB:profile+' · '+loaded+' / '+total+' MB';
+      label=lang==='zh'?profile+' 下载 '+loaded+' / '+total+' MB':profile+' · '+loaded+' / '+total+' MB';
       badgeLabel=Math.round((connectome.loaded/Math.max(1,connectome.total))*100)+'%';
     }else if(connectome.phase==='graph-parse'){
-      label=lang==='zh'?'连接图已下载，正在解析约 9.9 MB 数据…':'GRAPH DOWNLOADED · PARSING ~9.9 MB…';
+      const total=(connectome.total/1e6).toFixed(1);
+      label=lang==='zh'?'连接图已下载，正在解析 '+total+' MB…':'GRAPH DOWNLOADED · PARSING '+total+' MB…';
       badgeLabel=lang==='zh'?'解析中':'PARSING';
     }else if(connectome.phase==='metadata'){
       label=lang==='zh'?'正在建立 LC4 / DN 读出…':'BUILDING LC4 / DN READOUTS…';
@@ -355,7 +356,7 @@ function updatePerceptionUI(p){
     if(connectome.phase==='graph-download'){
       const loaded=(connectome.loaded/1e6).toFixed(1),total=(connectome.total/1e6).toFixed(1);
       const profile=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
-      status.textContent=lang==='zh'?profile+' 下载 '+loaded+' / '+total+' MB:profile+' · '+loaded+' / '+total+' MB';
+      status.textContent=lang==='zh'?profile+' 下载 '+loaded+' / '+total+' MB':profile+' · '+loaded+' / '+total+' MB';
       status.dataset.state=state;
     }else if(connectome.phase==='graph-parse'){
       status.textContent=lang==='zh'?(connectome.profile==='escape-v1'?'Escape v1':'70K')+' 已下载，正在解析…':(connectome.profile==='escape-v1'?'ESCAPE v1':'70K')+' DOWNLOADED · PARSING…';
