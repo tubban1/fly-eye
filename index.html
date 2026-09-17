@@ -42,8 +42,15 @@
     <section class="hud hidden" id="hud">
       <div class="challenge-card glass">
         <span data-i18n="challenge">CHALLENGE</span>
-        <strong data-i18n="sneak">Sneak up on the fly</strong>
-        <p data-i18n="challengeBody">Move your hand slowly toward the fly. Get close without triggering escape.</p>
+        <strong id="challengeTitle" data-i18n="sneak">Sneak up on the fly</strong>
+        <p id="challengeBody" data-i18n="challengeBody">Move your hand slowly toward the fly. Get close without triggering escape.</p>
+        <div class="perception-status" id="perceptionStatus">CALIBRATING VISION…</div>
+        <div class="perception-grid">
+          <div><span>HAND</span><b id="handStatus">—</b></div>
+          <div><span>CAMERA</span><b id="cameraStatus">—</b></div>
+          <div><span>APPROACH</span><b id="approachValue">0%</b></div>
+          <div><span>VALID LOOM</span><b id="validLoomValue">0%</b></div>
+        </div>
         <div class="threat-row"><span data-i18n="threat">THREAT</span><b id="threatValue">0%</b></div>
         <div class="threat-track"><i id="threatBar"></i></div>
       </div>
@@ -139,9 +146,9 @@
       <button class="drawer-close" id="closeScience">×</button>
       <div class="eyebrow" data-i18n="science">SCIENCE</div>
       <h2 data-i18n="scienceTitle">Camera → sensory signals → fly behavior</h2>
-      <p data-i18n="scienceBody">Fly Eye v0.3 loads a signed MaleCNS-derived connectome subgraph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.</p>
+      <p data-i18n="scienceBody">Fly Eye v0.4 loads a signed MaleCNS-derived connectome subgraph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.</p>
       <div class="pipeline">
-        <div>CAMERA</div><span>↓</span><div>MOTION / LIGHT / LOOMING</div><span>↓</span><div>LC4 + REAL SIGNED GRAPH</div><span>↓</span><div>DN / FLIGHT READOUT</div>
+        <div>CAMERA</div><span>↓</span><div>GLOBAL MOTION COMPENSATION + HAND LANDMARKS</div><span>↓</span><div>VALIDATED APPROACH / LOOMING</div><span>↓</span><div>LC4 + REAL SIGNED GRAPH</div><span>↓</span><div>DN / FLIGHT READOUT</div>
       </div>
     </section>
 
