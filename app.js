@@ -345,12 +345,29 @@ function updatePerceptionUI(p){
   else if(perceptionEngine.handStatus==='error'){key='trackerError';state='error'}
   else if(perceptionEngine.handStatus!=='ready'){key='loadingHands';state='loading'}
   else if(p.phase==='calibrating'){key='calibrating';state='loading'}
-  else if(connectome.status!=='ready'){key='waitingGraph';state='loading'}
+  else if(connectome.status!=='ready'){
+    state='loading';
+    if(connectome.phase==='graph-download'){
+      const loaded=(connectome.loaded/1e6).toFixed(1),total=(connectome.total/1e6).toFixed(1);
+      status.textContent=lang==='zh'?'连接图下载 '+loaded+' / '+total+' MB':'GRAPH '+loaded+' / '+total+' MB';
+      status.dataset.state=state;
+    }else if(connectome.phase==='graph-parse'){
+      status.textContent=lang==='zh'?'连接图已下载，正在解析…':'GRAPH DOWNLOADED · PARSING…';
+      status.dataset.state=state;
+    }else if(connectome.phase==='metadata'){
+      status.textContent=lang==='zh'?'正在建立 LC4 / DN 读出…':'BUILDING LC4 / DN READOUTS…';
+      status.dataset.state=state;
+    }else{
+      key='waitingGraph';
+    }
+  }
   else if(p.phase==='camera-moving'){key='holdSteady';state='moving'}
   else if(p.phase==='hand-detected'){key='handSeen';state='ready'}
   else if(p.phase==='approaching'){key='approaching';state='ready'}
   else if(p.phase==='alert'){key='perceptionAlert';state='ready'}
-  status.textContent=t(key); status.dataset.state=state;
+  if(!(connectome.status!=='ready' && ['graph-download','graph-parse','metadata'].includes(connectome.phase))){
+    status.textContent=t(key); status.dataset.state=state;
+  }
   $('#handStatus').textContent=p.handDetected?(lang==='zh'?'检测到':'YES'):(lang==='zh'?'未检测':'NO');
   $('#cameraStatus').textContent=p.cameraStable?(lang==='zh'?'稳定':'STABLE'):(p.phase==='calibrating'?'—':(lang==='zh'?'移动':'MOVING'));
   $('#approachValue').textContent=Math.round((p.approach||0)*100)+'%';
