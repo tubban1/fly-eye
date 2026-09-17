@@ -8,8 +8,8 @@ const mosaicCanvas = $('#mosaicCanvas');
 const mctx = mosaicCanvas.getContext('2d');
 
 const dict = {
-  en:{eyebrow:'A REAL-WORLD FLY BRAIN EXPERIMENT',hero:'Let a fly brain<br><em>see your world.</em>',desc:"Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.",openCamera:'OPEN CAMERA',privacy:'Camera frames stay on your device.',needCamera:'Fly Eye needs camera access',needCameraBody:'We use the live image only inside your browser to estimate motion, looming and brightness. Raw camera frames are not uploaded.',tryAgain:'TRY AGAIN',challenge:'CHALLENGE',sneak:'Sneak up on the fly',challengeBody:'Move your hand slowly toward the fly. Get close without triggering escape.',threat:'THREAT',liveBrain:'LIVE BRAIN',flyVision:'FLY VISION',scienceNote:'v0.1 uses a transparent modeled controller. Full MaleCNS graph runtime is the next milestone.',calm:'CALM',reset:'RESET FLY',escaped:'ESCAPE TRIGGERED',resultTitle:'You woke up<br><em>the escape circuit.</em>',maxThreat:'MAX THREAT',again:'TRY AGAIN',share:'SHARE',whatFlySees:'WHAT THE FLY SEES',visionExplain:'A deliberately simplified compound-eye view used to explain the sensory pipeline.',science:'SCIENCE',scienceTitle:'Camera → sensory signals → fly behavior',scienceBody:'Fly Eye currently extracts motion, looming and brightness locally from camera frames. Those signals feed a replaceable connectome adapter. v0.1 intentionally does not claim full MaleCNS simulation.'},
-  zh:{eyebrow:'现实世界果蝇大脑实验',hero:'让果蝇的大脑<br><em>看见你的世界。</em>',desc:'你的摄像头会成为果蝇的视觉世界。运动、逼近和亮度都在你的设备本地处理。',openCamera:'打开摄像头',privacy:'摄像头画面不会上传。',needCamera:'Fly Eye 需要摄像头权限',needCameraBody:'浏览器只在本地分析运动、逼近和亮度，不上传原始摄像头画面。',tryAgain:'重试',challenge:'挑战',sneak:'慢慢靠近果蝇',challengeBody:'把手慢慢靠近它，尽量接近，但不要触发逃逸。',threat:'威胁',liveBrain:'实时神经活动',flyVision:'果蝇视角',scienceNote:'v0.1 使用透明的建模控制器；完整 MaleCNS 图运行时是下一阶段。',calm:'平静',reset:'重置果蝇',escaped:'触发逃逸',resultTitle:'你唤醒了<br><em>逃逸回路。</em>',maxThreat:'最高威胁',again:'再试一次',share:'分享',whatFlySees:'果蝇看到的世界',visionExplain:'这是为了解释感觉输入流程而做的简化复眼视图。',science:'科学说明',scienceTitle:'摄像头 → 感觉信号 → 果蝇行为',scienceBody:'Fly Eye 当前会在本地从摄像头提取运动、逼近和亮度，再送入可替换的 connectome adapter。v0.1 不声称已经运行完整 MaleCNS。'}
+  en:{eyebrow:'A REAL-WORLD FLY BRAIN EXPERIMENT',hero:'Let a fly brain<br><em>see your world.</em>',desc:"Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.",openCamera:'OPEN CAMERA',privacy:'Camera frames stay on your device.',needCamera:'Fly Eye needs camera access',needCameraBody:'We use the live image only inside your browser to estimate motion, looming and brightness. Raw camera frames are not uploaded.',tryAgain:'TRY AGAIN',challenge:'CHALLENGE',sneak:'Sneak up on the fly',challengeBody:'Move your hand slowly toward the fly. Get close without triggering escape.',threat:'THREAT',liveBrain:'LIVE BRAIN',flyVision:'FLY VISION',scienceNote:'Loading the real MaleCNS-derived graph locally…',calm:'CALM',reset:'RESET FLY',escaped:'ESCAPE TRIGGERED',resultTitle:'You woke up<br><em>the escape circuit.</em>',maxThreat:'MAX THREAT',again:'TRY AGAIN',share:'SHARE',whatFlySees:'WHAT THE FLY SEES',visionExplain:'A deliberately simplified compound-eye view used to explain the sensory pipeline.',science:'SCIENCE',scienceTitle:'Camera → sensory signals → fly behavior',scienceBody:'Fly Eye v0.2 loads a signed MaleCNS-derived connectome subgraph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.'},
+  zh:{eyebrow:'现实世界果蝇大脑实验',hero:'让果蝇的大脑<br><em>看见你的世界。</em>',desc:'你的摄像头会成为果蝇的视觉世界。运动、逼近和亮度都在你的设备本地处理。',openCamera:'打开摄像头',privacy:'摄像头画面不会上传。',needCamera:'Fly Eye 需要摄像头权限',needCameraBody:'浏览器只在本地分析运动、逼近和亮度，不上传原始摄像头画面。',tryAgain:'重试',challenge:'挑战',sneak:'慢慢靠近果蝇',challengeBody:'把手慢慢靠近它，尽量接近，但不要触发逃逸。',threat:'威胁',liveBrain:'实时神经活动',flyVision:'果蝇视角',scienceNote:'正在本地加载真实 MaleCNS 衍生连接图…',calm:'平静',reset:'重置果蝇',escaped:'触发逃逸',resultTitle:'你唤醒了<br><em>逃逸回路。</em>',maxThreat:'最高威胁',again:'再试一次',share:'分享',whatFlySees:'果蝇看到的世界',visionExplain:'这是为了解释感觉输入流程而做的简化复眼视图。',science:'科学说明',scienceTitle:'摄像头 → 感觉信号 → 果蝇行为',scienceBody:'Fly Eye v0.2 会在 Web Worker 中加载真实的 MaleCNS 衍生有符号连接子图，并在本地传播神经脉冲。摄像头到神经元的感觉编码和神经动力学仍属于模型，并不是完整生物果蝇复制体。'}
 };
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
@@ -23,10 +23,48 @@ const fly={x:.56,y:.55,vx:0,vy:0,state:'idle',escapeUntil:0,wing:0,blink:0};
 const sensory={motion:0,light:0,loom:0};
 const neural={r:0,lc4:0,lplc2:0,dnp:0,motor:0};
 
+const connectome={status:'loading',worker:null,pending:false,lastSent:0,escape:0,network:0,spikes:0,neurons:0,edges:0,error:''};
+function initConnectome(){
+  try{
+    connectome.worker=new Worker('/connectome-worker.js');
+    connectome.worker.onmessage=(event)=>{
+      const msg=event.data||{};
+      if(msg.type==='ready'){
+        connectome.status='ready';connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.pending=false;updateConnectomeStatus();
+      }else if(msg.type==='state'){
+        connectome.pending=false;
+        connectome.escape=smooth(connectome.escape,clamp(msg.escape||0),.42);
+        connectome.network=smooth(connectome.network,clamp(msg.network||0),.3);
+        connectome.spikes=msg.spikeCount||0;
+        neural.r=connectome.network;
+        neural.lc4=smooth(neural.lc4,clamp(msg.lc4||0),.45);
+        neural.lplc2=smooth(neural.lplc2,clamp(msg.dnLeft||0),.4);
+        neural.dnp=smooth(neural.dnp,clamp(msg.dnRight||0),.4);
+        neural.motor=smooth(neural.motor,clamp(msg.flight||0),.4);
+      }else if(msg.type==='error'){
+        connectome.status='error';connectome.error=msg.message||'graph load failed';connectome.pending=false;updateConnectomeStatus();
+      }
+    };
+    connectome.worker.postMessage({type:'init'});
+  }catch(err){connectome.status='error';connectome.error=String(err);updateConnectomeStatus();}
+}
+function updateConnectomeStatus(){
+  const el=$('#connectomeStatus'); if(!el)return;
+  if(connectome.status==='ready'){
+    el.textContent=lang==='zh'?`真实连接图在线 · ${connectome.neurons.toLocaleString()} 神经元 · ${connectome.edges.toLocaleString()} 条连接 · 本地 Worker`:`REAL GRAPH ONLINE · ${connectome.neurons.toLocaleString()} neurons · ${connectome.edges.toLocaleString()} edges · local Worker`;
+  }else if(connectome.status==='error'){
+    el.textContent=lang==='zh'?'连接图加载失败 · 已切换透明后备模型':'GRAPH LOAD FAILED · transparent fallback active';
+  }else{
+    el.textContent=lang==='zh'?'正在本地加载真实 MaleCNS 衍生连接图…':'Loading the real MaleCNS-derived graph locally…';
+  }
+}
+initConnectome();
+
 function resize(){W=innerWidth;H=innerHeight;D=Math.min(devicePixelRatio||1,2);fxCanvas.width=W*D;fxCanvas.height=H*D;fctx.setTransform(D,0,0,D,0,0)}
 addEventListener('resize',resize);resize();
 
 function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}
+function lerp(a,b,k){return a+(b-a)*k}
 function smooth(prev,next,k=.16){return prev+(next-prev)*k}
 
 async function openCamera(){
@@ -44,7 +82,7 @@ async function openCamera(){
   }catch(err){ console.error(err); $('#permission').classList.remove('hidden'); }
 }
 
-function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;$('#result').classList.add('hidden')}
+function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});$('#result').classList.add('hidden')}
 
 function analyzeFrame(){
   if(video.readyState<2) return;
@@ -63,6 +101,7 @@ function analyzeFrame(){
     nearWeight+=weight; nearLight+=g*weight;
     if(lastFrame){const d=Math.abs(g-lastFrame[p]);diff+=d;nearDiff+=d*weight;}
   }
+  const brightness=sum/(gray.length*255);
   const localBrightness=nearLight/(Math.max(1,nearWeight)*255);
   const motion=lastFrame ? diff/(gray.length*255) : 0;
   const nearMotion=lastFrame ? nearDiff/(Math.max(1,nearWeight)*255) : 0;
@@ -77,22 +116,36 @@ function analyzeFrame(){
   sensory.loom=smooth(sensory.loom,loom,.28);
 }
 
-function connectomeAdapter(){
+function modeledFallback(){
   neural.r=smooth(neural.r,clamp(sensory.motion*.58+sensory.light*.35),.18);
   neural.lc4=smooth(neural.lc4,clamp(sensory.loom*.9+sensory.motion*.22),.24);
-  neural.lplc2=smooth(neural.lplc2,clamp(sensory.loom*.72+sensory.motion*.34),.2);
-  neural.dnp=smooth(neural.dnp,clamp((neural.lc4*.62+neural.lplc2*.55)-.22),.23);
-  neural.motor=smooth(neural.motor,clamp(neural.dnp*.9+sensory.motion*.12),.22);
-  const threat=clamp(neural.lc4*.52+neural.lplc2*.34+neural.dnp*.28);
+  neural.lplc2=smooth(neural.lplc2,clamp(sensory.loom*.5+sensory.motion*.2),.2);
+  neural.dnp=smooth(neural.dnp,clamp(neural.lc4*.5-.12),.23);
+  neural.motor=smooth(neural.motor,clamp(neural.dnp*.85),.22);
+  return clamp(neural.lc4*.52+neural.dnp*.28+neural.motor*.2);
+}
+
+function connectomeAdapter(now){
+  if(connectome.status==='ready'&&connectome.worker){
+    if(!connectome.pending&&now-connectome.lastSent>90){
+      connectome.pending=true;connectome.lastSent=now;
+      connectome.worker.postMessage({type:'sensory',motion:sensory.motion,light:sensory.light,loom:sensory.loom});
+    }
+    const threat=connectome.escape;
+    maxThreat=Math.max(maxThreat,threat);
+    if(!escaped&&sensory.loom>.12&&threat>.20)triggerEscape(threat);
+    return threat;
+  }
+  const threat=modeledFallback();
   maxThreat=Math.max(maxThreat,threat);
-  if(!escaped && threat>.76){triggerEscape()}
+  if(!escaped&&threat>.76)triggerEscape(threat);
   return threat;
 }
 
-function triggerEscape(){
+function triggerEscape(threat){
   escaped=true; fly.state='escape'; fly.escapeUntil=performance.now()+1050;
   const a=Math.random()*Math.PI*2; fly.vx=Math.cos(a)*(rear?.008:.007); fly.vy=Math.sin(a)*.006-.003;
-  setTimeout(()=>{if(!running)return; $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';$('#resultExplain').textContent=lang==='zh'?'快速增强的逼近刺激把 LC4 / LPLC2 活动推入了逃逸通路。':'Looming rose quickly, pushing LC4/LPLC2 activity into the escape pathway.';$('#result').classList.remove('hidden')},420)
+  setTimeout(()=>{if(!running)return; $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';$('#resultExplain').textContent=connectome.status==='ready'?(lang==='zh'?'摄像头的逼近输入刺激了 LC4，活动沿真实 MaleCNS 衍生连接图传播到下降/飞行通路并触发逃逸。':'Camera looming drove LC4; activity propagated through the real MaleCNS-derived graph into descending/flight pathways and triggered escape.'):(lang==='zh'?'连接图不可用，本次使用透明后备模型触发逃逸。':'The graph was unavailable, so this run used the transparent fallback controller.');$('#result').classList.remove('hidden')},420)
 }
 
 function updateFly(dt,now,threat){
@@ -128,7 +181,7 @@ function setBar(id,v){$('#'+id+'Bar').style.width=Math.round(v*100)+'%';$('#'+id
 function updateUI(threat){
   $('#threatBar').style.width=Math.round(threat*100)+'%';$('#threatValue').textContent=Math.round(threat*100)+'%';
   setBar('motion',sensory.motion);setBar('light',sensory.light);setBar('loom',sensory.loom);setBar('r',neural.r);setBar('lc4',neural.lc4);setBar('lplc2',neural.lplc2);setBar('dnp',neural.dnp);setBar('motor',neural.motor);
-  const state=threat>.72?'ESCAPE READY':threat>.4?'ALERT':'CALM'; $('#brainState').textContent=lang==='zh'?(state==='CALM'?'平静':state==='ALERT'?'警觉':'即将逃逸'):state; $('#statusPill').textContent=$('#brainState').textContent;
+  const state=connectome.status==='ready'?(threat>.18?'ESCAPE READY':threat>.08?'ALERT':'CALM'):(threat>.72?'ESCAPE READY':threat>.4?'ALERT':'CALM'); $('#brainState').textContent=lang==='zh'?(state==='CALM'?'平静':state==='ALERT'?'警觉':'即将逃逸'):state; $('#statusPill').textContent=$('#brainState').textContent;
 }
 
 function drawMosaic(){
@@ -136,13 +189,14 @@ function drawMosaic(){
   for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const sx=Math.floor(x/cols*w),sy=Math.floor(y/rows*h),g=lastFrame[sy*w+sx]||0;const r=Math.min(cw,ch)*.43;mctx.fillStyle=`rgb(${g},${Math.min(255,g*1.08)},${Math.min(255,g*.78)})`;mctx.beginPath();mctx.arc(x*cw+cw/2,y*ch+ch/2,r,0,Math.PI*2);mctx.fill()}
 }
 
-function loop(now){if(!running)return;const dt=Math.min(32,now-lastTs);lastTs=now;frameCounter++;if(frameCounter%2===0)analyzeFrame();const threat=connectomeAdapter();updateFly(dt,now,threat);drawFly(now);updateUI(threat);if(!$('#flyVisionPanel').classList.contains('hidden')&&frameCounter%4===0)drawMosaic();requestAnimationFrame(loop)}
+function loop(now){if(!running)return;const dt=Math.min(32,now-lastTs);lastTs=now;frameCounter++;if(frameCounter%2===0)analyzeFrame();const threat=connectomeAdapter(now);updateFly(dt,now,threat);drawFly(now);updateUI(threat);if(!$('#flyVisionPanel').classList.contains('hidden')&&frameCounter%4===0)drawMosaic();requestAnimationFrame(loop)}
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
 
 $('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#resetBtn').onclick=resetFly;$('#againBtn').onclick=()=>{resetFly();$('#result').classList.add('hidden')};
-$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang()};
+$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();updateConnectomeStatus()};
 $('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#closeScience').onclick=()=>$('#scienceDrawer').classList.remove('open');
 $('#flyVisionBtn').onclick=()=>{$('#flyVisionPanel').classList.remove('hidden');drawMosaic()};$('#closeVision').onclick=()=>$('#flyVisionPanel').classList.add('hidden');
 $('#shareBtn').onclick=async()=>{const data={title:'Fly Eye',text:lang==='zh'?'让一只果蝇的大脑看看你的世界。':'Let a fly brain see your world.',url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);toast(lang==='zh'?'链接已复制':'Link copied')}}catch{}};
+
 addEventListener('visibilitychange',()=>{if(document.hidden){sensory.motion=sensory.loom=0}});
