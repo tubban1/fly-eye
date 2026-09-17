@@ -1,6 +1,6 @@
-const MP_MODULE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs';
-const MP_WASM = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm';
-const HAND_MODEL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+const MP_MODULE = '/vendor/mediapipe/vision_bundle.mjs';
+const MP_WASM = '/vendor/mediapipe/wasm';
+const HAND_MODEL = '/vendor/mediapipe/hand_landmarker.task';
 
 const clamp = (v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth = (a,b,k)=>a+(b-a)*k;
