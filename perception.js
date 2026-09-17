@@ -37,7 +37,7 @@ export class PerceptionEngine {
   }
 
   reset(){
-    this.prev=null; this.reference=null; this.referenceTs=0;
+    this.prev=null; this.reference=null; this.referenceTs=0; this.frame=null;
     this.calibrationStart=0; this.calibrated=false;
     this.motionFloor=.018; this.shiftFloor=.35;
     this.prevHand=null; this.hand=null;
@@ -80,7 +80,7 @@ export class PerceptionEngine {
     const slow=this.reference?localMotionCompensated(gray,this.reference,w,h,fx,fy,{dx:0,dy:0}):{near:0,global:0};
 
     if(!this.reference || now-this.referenceTs>420){ this.reference=gray.slice(); this.referenceTs=now; }
-    this.prev=gray;
+    this.prev=gray; this.frame=gray;
 
     const shiftMag=Math.hypot(shift.dx,shift.dy);
     const globalMotion=clamp(shiftMag/4 + local.global*2.2);
