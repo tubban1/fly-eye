@@ -1,0 +1,47 @@
+name: Build reusable escape graph
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build_escape_graph.py"
+      - ".github/workflows/build-escape-graph.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download pinned source graph
+        run: |
+          mkdir -p /tmp/fly-eye-source
+          curl -L --fail --retry 3             https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/graph.bin             -o /tmp/fly-eye-source/graph.bin
+          curl -L --fail --retry 3             https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/manifest.json             -o /tmp/fly-eye-source/manifest.json
+
+      - name: Build escape-v1
+        run: |
+          python scripts/build_escape_graph.py             --graph /tmp/fly-eye-source/graph.bin             --manifest /tmp/fly-eye-source/manifest.json             --out-dir data/escape-v1
+          ls -lh data/escape-v1/graph.bin data/escape-v1/manifest.json
+
+      - name: Commit generated graph if changed
+        run: |
+          git config user.name "fly-eye-graph-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/escape-v1/graph.bin data/escape-v1/manifest.json
+          if git diff --cached --quiet; then
+            echo "escape-v1 is already up to date"
+          else
+            git commit -m "Build reusable escape-v1 graph"
+            git push
+          fi
