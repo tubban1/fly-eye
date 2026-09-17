@@ -11,7 +11,7 @@ export class PerceptionEngine {
     this.getFly=getFly; this.isRear=isRear;
     this.w=96; this.h=54; this.canvas.width=this.w; this.canvas.height=this.h;
     this.handLandmarker=null; this.handStatus='loading'; this.handError='';
-    this.lastHandRun=0; this.handInterval=90;
+    this.lastHandRun=0; this.handInterval=110;
     this.reset();
   }
 
