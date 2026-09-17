@@ -3,7 +3,7 @@ import argparse, hashlib, json, struct
 from pathlib import Path
 from collections import deque, defaultdict
 
-MAGIC=b"FLYGRAPH"
+BUILDER_VERSION="escape-v1.0.1"\nMAGIC=b"FLYGRAPH"
 HEADER=20
 
 def load_graph(path):
@@ -133,7 +133,7 @@ def main():
     out_manifest={
         "schemaVersion":1,
         "dataset":"MaleCNS v1.0",
-        "profile":"escape-v1",
+        "profile":"escape-v1",\n        "builderVersion":BUILDER_VERSION,
         "purpose":"LC4 looming-to-descending-neuron escape corridor",
         "neuronCount":len(old),
         "edgeCount":len(new_pres),
