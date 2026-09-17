@@ -103,8 +103,11 @@ export class PerceptionEngine {
     let semantic=0;
     if(hm.detected && cameraStable && hm.distance<.52 && evidenceCount>=2){
       semantic=clamp(hm.growth*.42+hm.approach*.38+opticalLoom*.20);
-    }else if(!hm.detected && cameraStable && opticalLoom>.32 && residual>.055){
-      semantic=clamp(opticalLoom*.34); // cautious optical-only fallback
+    }else if(!hm.detected && cameraStable && opticalLoom>.58 && residual>.075 && globalMotion<.24){
+      // Conservative fallback for a fingertip or another approaching object that
+      // is too partial for a semantic hand detection. Strong local evidence is
+      // required and global camera motion must stay low.
+      semantic=clamp(.12+opticalLoom*.52);
     }
 
     this.approachEvidence = semantic>this.approachEvidence
