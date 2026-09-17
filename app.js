@@ -16,6 +16,10 @@ function t(k){ return dict[lang][k] || dict.en[k] || k }
 function applyLang(){document.documentElement.lang=lang==='zh'?'zh-CN':'en';document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));$('#langBtn').textContent=lang==='en'?'中文':'EN';localStorage.setItem('flyEye_lang',lang)}
 applyLang();
 
+const mobileOverride=document.createElement('style');
+mobileOverride.textContent='@media(max-width:760px){.brain .channel{display:grid!important;grid-template-columns:60px 1fr 26px!important;margin:4px 0!important}.brain .channel label{font-size:8px!important}.brain .channel b{font-size:9px!important}}';
+document.head.appendChild(mobileOverride);
+
 let W=innerWidth,H=innerHeight,D=Math.min(devicePixelRatio||1,2);
 let stream=null, running=false, rear=false, lastFrame=null, lastEnergy=0, lastNearMotion=0, lastTs=performance.now();
 let maxThreat=0, escaped=false, frameCounter=0;
@@ -60,11 +64,25 @@ function updateConnectomeStatus(){
 }
 initConnectome();
 
+const DEBUG_MODE = new URLSearchParams(location.search).get('debug') === '1';
+let debugStart = performance.now();
+function startDebugMode(){
+  if(!DEBUG_MODE) return;
+  $('#landing').classList.add('hidden');
+  $('#hud').classList.remove('hidden');
+  $('#result').classList.add('hidden');
+  document.body.classList.add('debug-mode');
+  running=true;
+  resetFly();
+  lastTs=performance.now();
+  requestAnimationFrame(loop);
+  toast(lang==='zh'?'DEBUG：自动产生逼近刺激':'DEBUG: synthetic looming pulses enabled');
+}
+
 function resize(){W=innerWidth;H=innerHeight;D=Math.min(devicePixelRatio||1,2);fxCanvas.width=W*D;fxCanvas.height=H*D;fctx.setTransform(D,0,0,D,0,0)}
 addEventListener('resize',resize);resize();
 
 function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}
-function lerp(a,b,k){return a+(b-a)*k}
 function smooth(prev,next,k=.16){return prev+(next-prev)*k}
 
 async function openCamera(){
@@ -101,7 +119,6 @@ function analyzeFrame(){
     nearWeight+=weight; nearLight+=g*weight;
     if(lastFrame){const d=Math.abs(g-lastFrame[p]);diff+=d;nearDiff+=d*weight;}
   }
-  const brightness=sum/(gray.length*255);
   const localBrightness=nearLight/(Math.max(1,nearWeight)*255);
   const motion=lastFrame ? diff/(gray.length*255) : 0;
   const nearMotion=lastFrame ? nearDiff/(Math.max(1,nearWeight)*255) : 0;
@@ -142,7 +159,7 @@ function connectomeAdapter(now){
   return threat;
 }
 
-function triggerEscape(threat){
+function triggerEscape(){
   escaped=true; fly.state='escape'; fly.escapeUntil=performance.now()+1050;
   const a=Math.random()*Math.PI*2; fly.vx=Math.cos(a)*(rear?.008:.007); fly.vy=Math.sin(a)*.006-.003;
   setTimeout(()=>{if(!running)return; $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';$('#resultExplain').textContent=connectome.status==='ready'?(lang==='zh'?'摄像头的逼近输入刺激了 LC4，活动沿真实 MaleCNS 衍生连接图传播到下降/飞行通路并触发逃逸。':'Camera looming drove LC4; activity propagated through the real MaleCNS-derived graph into descending/flight pathways and triggered escape.'):(lang==='zh'?'连接图不可用，本次使用透明后备模型触发逃逸。':'The graph was unavailable, so this run used the transparent fallback controller.');$('#result').classList.remove('hidden')},420)
@@ -189,7 +206,23 @@ function drawMosaic(){
   for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const sx=Math.floor(x/cols*w),sy=Math.floor(y/rows*h),g=lastFrame[sy*w+sx]||0;const r=Math.min(cw,ch)*.43;mctx.fillStyle=`rgb(${g},${Math.min(255,g*1.08)},${Math.min(255,g*.78)})`;mctx.beginPath();mctx.arc(x*cw+cw/2,y*ch+ch/2,r,0,Math.PI*2);mctx.fill()}
 }
 
-function loop(now){if(!running)return;const dt=Math.min(32,now-lastTs);lastTs=now;frameCounter++;if(frameCounter%2===0)analyzeFrame();const threat=connectomeAdapter(now);updateFly(dt,now,threat);drawFly(now);updateUI(threat);if(!$('#flyVisionPanel').classList.contains('hidden')&&frameCounter%4===0)drawMosaic();requestAnimationFrame(loop)}
+function loop(now){
+  if(!running)return;
+  const dt=Math.min(32,now-lastTs);lastTs=now;frameCounter++;
+  if(DEBUG_MODE){
+    const phase=((now-debugStart)%4200)/4200;
+    const pulse=phase>.28&&phase<.52?Math.sin((phase-.28)/.24*Math.PI):0;
+    sensory.loom=smooth(sensory.loom,pulse,.22);
+    sensory.motion=smooth(sensory.motion,pulse*.58,.18);
+    sensory.light=smooth(sensory.light,.55,.08);
+  }else if(frameCounter%2===0){
+    analyzeFrame();
+  }
+  const threat=connectomeAdapter(now);
+  updateFly(dt,now,threat);drawFly(now);updateUI(threat);
+  if(!$('#flyVisionPanel').classList.contains('hidden')&&frameCounter%4===0)drawMosaic();
+  requestAnimationFrame(loop)
+}
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
 
@@ -199,4 +232,13 @@ $('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#close
 $('#flyVisionBtn').onclick=()=>{$('#flyVisionPanel').classList.remove('hidden');drawMosaic()};$('#closeVision').onclick=()=>$('#flyVisionPanel').classList.add('hidden');
 $('#shareBtn').onclick=async()=>{const data={title:'Fly Eye',text:lang==='zh'?'让一只果蝇的大脑看看你的世界。':'Let a fly brain see your world.',url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);toast(lang==='zh'?'链接已复制':'Link copied')}}catch{}};
 
-addEventListener('visibilitychange',()=>{if(document.hidden){sensory.motion=sensory.loom=0}});
+addEventListener('visibilitychange',()=>{if(document.hidden&&!DEBUG_MODE){sensory.motion=sensory.loom=0}});
+
+if(DEBUG_MODE){
+  const diag=document.createElement('div');
+  diag.id='debugStatus';
+  diag.style.cssText='position:absolute;z-index:99;left:10px;top:56px;padding:8px 10px;background:#000;color:#dfff55;font:11px monospace;border:1px solid #dfff55;border-radius:8px';
+  document.body.appendChild(diag);
+  setInterval(()=>{diag.textContent=`graph=${connectome.status} n=${connectome.neurons} e=${connectome.edges} loom=${sensory.loom.toFixed(2)} lc4=${neural.lc4.toFixed(2)} dnL=${neural.lplc2.toFixed(2)} dnR=${neural.dnp.toFixed(2)} flight=${neural.motor.toFixed(2)} spikes=${connectome.spikes}`},120);
+  startDebugMode();
+}
