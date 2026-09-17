@@ -1,6 +1,7 @@
 const UPSTREAM_COMMIT = 'bff49a376f0844c918eb7f2be83e95f2699b0d14';
-const MANIFEST_URL = '/data/brain/manifest.json';
-const GRAPH_URL = '/data/brain/graph.bin';
+const FAST_PROFILE = { name:'escape-v1', manifest:'/data/escape-v1/manifest.json', graph:'/data/escape-v1/graph.bin' };
+const FULL_PROFILE = { name:'70k', manifest:'/data/brain/manifest.json', graph:'/data/brain/graph.bin' };
+let activeProfile = FULL_PROFILE;
 
 const PARAMS = Object.freeze({
   tau: 20,
@@ -54,19 +55,25 @@ self.onmessage = async (event) => {
 
 async function init() {
   loading = true;
-  self.postMessage({ type: 'status', status: 'manifest' });
+  self.postMessage({ type: 'status', status: 'profile-check', profile: FAST_PROFILE.name });
   try {
-    const manifestRes = await fetch(MANIFEST_URL, { cache: 'force-cache' });
-    if (!manifestRes.ok) throw new Error(`Manifest download failed (${manifestRes.status})`);
-    manifest = await manifestRes.json();
+    let loaded;
+    try {
+      loaded = await loadProfile(FAST_PROFILE);
+      activeProfile = FAST_PROFILE;
+    } catch (fastError) {
+      self.postMessage({ type: 'status', status: 'profile-fallback', profile: FULL_PROFILE.name, reason: fastError?.message || String(fastError) });
+      loaded = await loadProfile(FULL_PROFILE);
+      activeProfile = FULL_PROFILE;
+    }
 
-    self.postMessage({ type: 'status', status: 'graph-download', loaded: 0, total: expectedGraphBytes(manifest) });
-    const buffer = await fetchArrayBufferWithProgress(GRAPH_URL, expectedGraphBytes(manifest));
+    manifest = loaded.manifest;
+    const buffer = loaded.buffer;
 
-    self.postMessage({ type: 'status', status: 'graph-parse', loaded: buffer.byteLength, total: buffer.byteLength });
+    self.postMessage({ type: 'status', status: 'graph-parse', profile: activeProfile.name, loaded: buffer.byteLength, total: buffer.byteLength });
     parseGraph(buffer);
 
-    self.postMessage({ type: 'status', status: 'metadata' });
+    self.postMessage({ type: 'status', status: 'metadata', profile: activeProfile.name });
     buildMetadata();
     resetState();
 
@@ -74,6 +81,7 @@ async function init() {
     loading = false;
     self.postMessage({
       type: 'ready',
+      profile: activeProfile.name,
       neurons: n,
       edges: edgeCount,
       loomCount: groups.loom?.length || 0,
@@ -89,13 +97,24 @@ async function init() {
   }
 }
 
+async function loadProfile(profile) {
+  self.postMessage({ type: 'status', status: 'manifest', profile: profile.name });
+  const manifestRes = await fetch(profile.manifest, { cache: 'force-cache' });
+  if (!manifestRes.ok) throw new Error(`${profile.name} manifest failed (${manifestRes.status})`);
+  const profileManifest = await manifestRes.json();
+  const expected = Number(profileManifest.graphBytes) || expectedGraphBytes(profileManifest);
+  self.postMessage({ type: 'status', status: 'graph-download', profile: profile.name, loaded: 0, total: expected });
+  const buffer = await fetchArrayBufferWithProgress(profile.graph, expected, profile.name);
+  return { manifest: profileManifest, buffer };
+}
+
 function expectedGraphBytes(m) {
   const neurons = Number(m?.neuronCount) || 0;
   const edges = Number(m?.edgeCount) || 0;
   return 20 + (neurons + 1) * 4 + edges * 12;
 }
 
-async function fetchArrayBufferWithProgress(url, expectedTotal = 0) {
+async function fetchArrayBufferWithProgress(url, expectedTotal = 0, profile = 'graph') {
   const response = await fetch(url, { cache: 'force-cache' });
   if (!response.ok) throw new Error(`Graph download failed (${response.status})`);
   const total = Number(response.headers.get('content-length')) || expectedTotal || 0;
@@ -113,10 +132,10 @@ async function fetchArrayBufferWithProgress(url, expectedTotal = 0) {
     const now = performance.now();
     if (now - lastReport > 120) {
       lastReport = now;
-      self.postMessage({ type: 'status', status: 'graph-download', loaded, total });
+      self.postMessage({ type: 'status', status: 'graph-download', profile, loaded, total });
     }
   }
-  self.postMessage({ type: 'status', status: 'graph-download', loaded, total });
+  self.postMessage({ type: 'status', status: 'graph-download', profile, loaded, total });
   const merged = new Uint8Array(loaded);
   let offset = 0;
   for (const chunk of chunks) {
