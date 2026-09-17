@@ -18,8 +18,8 @@ const dict = {
   en:{eyebrow:'A REAL-WORLD FLY BRAIN EXPERIMENT',hero:'Let a fly brain<br><em>see your world.</em>',desc:"Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.",openCamera:'OPEN CAMERA',privacy:'Camera frames stay on your device.',needCamera:'Fly Eye needs camera access',needCameraBody:'We use the live image only inside your browser to estimate motion, looming and brightness. Raw camera frames are not uploaded.',tryAgain:'TRY AGAIN',challenge:'CHALLENGE',sneak:'Sneak up on the fly',challengeBody:'Move your hand slowly toward the fly. Get close without triggering escape.',threat:'THREAT',liveBrain:'LIVE BRAIN',flyVision:'FLY VISION',scienceNote:'Loading the real MaleCNS-derived graph locally…',calm:'CALM',reset:'RESET FLY',escaped:'ESCAPE TRIGGERED',resultTitle:'You woke up<br><em>the escape circuit.</em>',maxThreat:'MAX THREAT',again:'TRY AGAIN',share:'SHARE',whatFlySees:'WHAT THE FLY SEES',visionExplain:'A deliberately simplified compound-eye view used to explain the sensory pipeline.',science:'SCIENCE',scienceTitle:'Camera → sensory signals → fly behavior',scienceBody:'Fly Eye v0.4 loads a signed MaleCNS-derived connectome subgraph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.',viewReplay:'VIEW REPLAY',replayEyebrow:'NEURAL REPLAY',replayTitle:'What just happened?',replayBefore:'before escape',replayEscapeMark:'ESCAPE',pauseReplay:'PAUSE',playReplay:'PLAY',continueBtn:'CONTINUE',replayPrivacy:'Replay frames and neural samples stay only in this browser tab.'},
   zh:{eyebrow:'现实世界果蝇大脑实验',hero:'让果蝇的大脑<br><em>看见你的世界。</em>',desc:'你的摄像头会成为果蝇的视觉世界。运动、逼近和亮度都在你的设备本地处理。',openCamera:'打开摄像头',privacy:'摄像头画面不会上传。',needCamera:'Fly Eye 需要摄像头权限',needCameraBody:'浏览器只在本地分析运动、逼近和亮度，不上传原始摄像头画面。',tryAgain:'重试',challenge:'挑战',sneak:'慢慢靠近果蝇',challengeBody:'把手慢慢靠近它，尽量接近，但不要触发逃逸。',threat:'威胁',liveBrain:'实时神经活动',flyVision:'果蝇视角',scienceNote:'正在本地加载真实 MaleCNS 衍生连接图…',calm:'平静',reset:'重置果蝇',escaped:'触发逃逸',resultTitle:'你唤醒了<br><em>逃逸回路。</em>',maxThreat:'最高威胁',again:'再试一次',share:'分享',whatFlySees:'果蝇看到的世界',visionExplain:'这是为了解释感觉输入流程而做的简化复眼视图。',science:'科学说明',scienceTitle:'摄像头 → 感觉信号 → 果蝇行为',scienceBody:'Fly Eye v0.4 会在 Web Worker 中加载真实的 MaleCNS 衍生有符号连接子图，并在本地传播神经脉冲。摄像头到神经元的感觉编码和神经动力学仍属于模型，并不是完整生物果蝇复制体。',viewReplay:'查看回放',replayEyebrow:'神经回放',replayTitle:'刚才发生了什么？',replayBefore:'距离逃逸',replayEscapeMark:'逃逸',pauseReplay:'暂停',playReplay:'播放',continueBtn:'继续',replayPrivacy:'回放视觉帧和神经采样只保存在当前浏览器标签页内。'}
 };
-Object.assign(dict.en,{calibrating:'CALIBRATING VISION…',loadingHands:'LOADING HAND TRACKER…',waitingGraph:'WAITING FOR CONNECTOME…',holdSteady:'HOLD CAMERA STEADY',readyPerception:'READY — BRING YOUR HAND TOWARD THE FLY',handSeen:'HAND DETECTED',approaching:'APPROACHING',perceptionAlert:'VALID LOOMING DETECTED',trackerError:'HAND TRACKER FAILED',graphError:'CONNECTOME FAILED'});
-Object.assign(dict.zh,{calibrating:'正在校准视觉…',loadingHands:'正在加载手部追踪…',waitingGraph:'正在等待连接图…',holdSteady:'请保持手机稳定',readyPerception:'准备完成——把手慢慢靠近果蝇',handSeen:'检测到手',approaching:'正在靠近',perceptionAlert:'确认有效逼近',trackerError:'手部追踪加载失败',graphError:'连接图加载失败'});
+Object.assign(dict.en,{calibrating:'CALIBRATING VISION…',loadingHands:'OPTICAL MODE READY · HAND TRACKER WARMING…',waitingGraph:'WAITING FOR CONNECTOME…',holdSteady:'HOLD CAMERA STEADY',readyPerception:'READY — BRING YOUR HAND TOWARD THE FLY',handSeen:'HAND DETECTED',approaching:'APPROACHING',perceptionAlert:'VALID LOOMING DETECTED',trackerError:'OPTICAL MODE ACTIVE · HAND TRACKER OFF',graphError:'CONNECTOME FAILED'});
+Object.assign(dict.zh,{calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',holdSteady:'请保持手机稳定',readyPerception:'准备完成——把手慢慢靠近果蝇',handSeen:'检测到手',approaching:'正在靠近',perceptionAlert:'确认有效逼近',trackerError:'光流模式可用 · 手部追踪暂不可用',graphError:'连接图加载失败'});
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
 function applyLang(){document.documentElement.lang=lang==='zh'?'zh-CN':'en';document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));$('#langBtn').textContent=lang==='en'?'中文':'EN';localStorage.setItem('flyEye_lang',lang)}
@@ -39,14 +39,14 @@ const replay={frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
 
-const connectome={status:'loading',phase:'manifest',profile:'auto',loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
+const connectome={status:'loading',phase:'manifest',profile:'auto',aggregate:false,groups:0,aggregateLinks:0,representedNeurons:0,loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
   try{
     connectome.worker=new Worker('/connectome-worker.js');
     connectome.worker.onmessage=(event)=>{
       const msg=event.data||{};
       if(msg.type==='ready'){
-        connectome.status='ready';connectome.phase='ready';connectome.profile=msg.profile||connectome.profile;connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();
+        connectome.status='ready';connectome.phase='ready';connectome.profile=msg.profile||connectome.profile;connectome.aggregate=!!msg.aggregate;connectome.groups=msg.groups||0;connectome.aggregateLinks=msg.aggregateLinks||0;connectome.representedNeurons=msg.representedNeurons||msg.neurons||0;connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();updatePerceptionUI(perceptionState);
       }else if(msg.type==='status'){
         connectome.status='loading';connectome.phase=msg.status||'loading';connectome.profile=msg.profile||connectome.profile;connectome.loaded=msg.loaded||0;connectome.total=msg.total||connectome.total;connectome.reason=msg.reason||connectome.reason;updateConnectomeStatus();updatePerceptionUI(perceptionState);
       }else if(msg.type==='state'){
@@ -73,10 +73,14 @@ function updateConnectomeLoadProgress(){
   let p=0,label=lang==='zh'?'连接图':'CONNECTOME',d='';
   if(connectome.status==='ready'){
     p=100;
-    label=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
-    d=lang==='zh'
-      ? connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接 · 已就绪'
-      : connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges · READY';
+    label=connectome.profile==='escape-fast-v1'?'ESCAPE FAST v1':(connectome.profile==='escape-v1'?'ESCAPE v1':'70K');
+    d=connectome.aggregate
+      ? (lang==='zh'
+          ? connectome.groups+' 个通路组 · '+connectome.aggregateLinks+' 条聚合连接 · 已就绪'
+          : connectome.groups+' pathway groups · '+connectome.aggregateLinks+' aggregate links · READY')
+      : (lang==='zh'
+          ? connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接 · 已就绪'
+          : connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges · READY');
   }else if(connectome.status==='error'){
     p=100;label=lang==='zh'?'加载失败':'LOAD FAILED';d=connectome.error||connectome.reason||'';
   }else if(connectome.phase==='profile-check'){
@@ -101,10 +105,14 @@ function updateConnectomeStatus(){
   const el=$('#connectomeStatus'),badge=$('#graphBadge');
   updateConnectomeLoadProgress();
   if(connectome.status==='ready'){
-    if(el) el.textContent=lang==='zh'
-      ? '真实连接图在线 · '+connectome.profile+' · '+connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接'
-      : 'REAL GRAPH ONLINE · '+connectome.profile+' · '+connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges';
-    if(badge){badge.textContent=lang==='zh'?'真实图在线':'REAL GRAPH';badge.dataset.state='ready'}
+    if(el) el.textContent=connectome.aggregate
+      ? (lang==='zh'
+          ? '快速逃逸图在线 · MaleCNS 真实聚合连接 · '+connectome.groups+' 个通路组 · '+connectome.aggregateLinks+' 条连接'
+          : 'FAST ESCAPE GRAPH ONLINE · real MaleCNS aggregate connections · '+connectome.groups+' pathway groups · '+connectome.aggregateLinks+' links')
+      : (lang==='zh'
+          ? '真实连接图在线 · '+connectome.profile+' · '+connectome.neurons.toLocaleString()+' 神经元 · '+connectome.edges.toLocaleString()+' 条连接'
+          : 'REAL GRAPH ONLINE · '+connectome.profile+' · '+connectome.neurons.toLocaleString()+' neurons · '+connectome.edges.toLocaleString()+' edges');
+    if(badge){badge.textContent=connectome.aggregate?(lang==='zh'?'快速图在线':'FAST GRAPH'):(lang==='zh'?'真实图在线':'REAL GRAPH');badge.dataset.state='ready'}
   }else if(connectome.status==='error'){
     if(el) el.textContent=lang==='zh'?'连接图加载失败 · 挑战已暂停':'GRAPH LOAD FAILED · challenge paused';
     if(badge){badge.textContent=lang==='zh'?'连接图错误':'GRAPH ERROR';badge.dataset.state='error'}
@@ -182,7 +190,6 @@ function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.esc
 
 function experienceArmed(){
   return DEBUG_MODE || (
-    perceptionEngine.handStatus==='ready' &&
     perceptionState.phase!=='calibrating' &&
     connectome.status==='ready'
   );
@@ -378,47 +385,19 @@ function updatePerceptionUI(p){
   const status=$('#perceptionStatus');
   if(!status)return;
   let key='readyPerception',state='ready';
+
   if(connectome.status==='error'){key='graphError';state='error'}
-  else if(perceptionEngine.handStatus==='error'){key='trackerError';state='error'}
-  else if(perceptionEngine.handStatus!=='ready'){key='loadingHands';state='loading'}
   else if(p.phase==='calibrating'){key='calibrating';state='loading'}
-  else if(connectome.status!=='ready'){
-    state='loading';
-    if(connectome.phase==='graph-download'){
-      const loaded=(connectome.loaded/1e6).toFixed(1),total=(connectome.total/1e6).toFixed(1);
-      const profile=connectome.profile==='escape-v1'?'ESCAPE v1':'70K';
-      status.textContent=lang==='zh'?profile+' 下载 '+loaded+' / '+total+' MB':profile+' · '+loaded+' / '+total+' MB';
-      status.dataset.state=state;
-    }else if(connectome.phase==='graph-parse'){
-      status.textContent=lang==='zh'?(connectome.profile==='escape-v1'?'Escape v1':'70K')+' 已下载，正在解析…':(connectome.profile==='escape-v1'?'ESCAPE v1':'70K')+' DOWNLOADED · PARSING…';
-      status.dataset.state=state;
-    }else if(connectome.phase==='metadata'){
-      status.textContent=lang==='zh'?'正在建立 LC4 / DN 读出…':'BUILDING LC4 / DN READOUTS…';
-      status.dataset.state=state;
-    }else if(connectome.phase==='profile-check'){
-      const secs=((performance.now()-connectome.startedAt)/1000).toFixed(1);
-      status.textContent=lang==='zh'?'正在查找快速 Escape Graph… '+secs+'s':'CHECKING FAST ESCAPE GRAPH… '+secs+'s';
-      status.dataset.state=state;
-    }else if(connectome.phase==='profile-fallback'){
-      const why=connectome.reason?(' · '+connectome.reason):'';
-      status.textContent=lang==='zh'?'快速图不可用，正在切换 70K 图'+why:'FAST GRAPH UNAVAILABLE · FALLING BACK TO 70K'+why;
-      status.dataset.state='moving';
-    }else if(connectome.phase==='manifest'){
-      const profile=connectome.profile==='escape-v1'?'Escape v1':'70K';
-      status.textContent=lang==='zh'?'正在读取 '+profile+' 清单…':'READING '+profile+' MANIFEST…';
-      status.dataset.state=state;
-    }else{
-      key='waitingGraph';
-    }
-  }
+  else if(connectome.status!=='ready'){key='waitingGraph';state='loading'}
   else if(p.phase==='camera-moving'){key='holdSteady';state='moving'}
   else if(p.phase==='hand-detected'){key='handSeen';state='ready'}
   else if(p.phase==='approaching'){key='approaching';state='ready'}
   else if(p.phase==='alert'){key='perceptionAlert';state='ready'}
-  if(!(connectome.status!=='ready' && ['graph-download','graph-parse','metadata','profile-check','profile-fallback','manifest'].includes(connectome.phase))){
-    status.textContent=t(key); status.dataset.state=state;
-  }
-  $('#handStatus').textContent=p.handDetected?(lang==='zh'?'检测到':'YES'):(lang==='zh'?'未检测':'NO');
+  else if(perceptionEngine.handStatus==='error'){key='trackerError';state='moving'}
+  else if(perceptionEngine.handStatus!=='ready'){key='loadingHands';state='ready'}
+
+  status.textContent=t(key); status.dataset.state=state;
+  $('#handStatus').textContent=p.handDetected?(lang==='zh'?'检测到':'YES'):(perceptionEngine.handStatus==='ready'?(lang==='zh'?'未检测':'NO'):(lang==='zh'?'后台加载':'WARMING'));
   $('#cameraStatus').textContent=p.cameraStable?(lang==='zh'?'稳定':'STABLE'):(p.phase==='calibrating'?'—':(lang==='zh'?'移动':'MOVING'));
   $('#approachValue').textContent=Math.round((p.approach||0)*100)+'%';
   $('#validLoomValue').textContent=Math.round((p.looming||0)*100)+'%';
