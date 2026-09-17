@@ -1,8 +1,16 @@
 {
   "name": "fly-eye",
   "private": true,
-  "version": "0.4.3",
+  "version": "0.4.4",
   "type": "module",
-  "scripts": {"dev":"vite --host 0.0.0.0","build":"node scripts/prepare-escape-graph.mjs && vite build","preview":"vite preview --host 0.0.0.0","test":"node tests/connectome-worker.test.mjs"},
-  "devDependencies": {"vite":"^7.1.5"}
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node tests/connectome-worker.test.mjs",
+    "build:escape-neuron": "node scripts/prepare-escape-graph.mjs"
+  },
+  "devDependencies": {
+    "vite": "^7.1.5"
+  }
 }
