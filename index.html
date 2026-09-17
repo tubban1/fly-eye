@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>FLY EYE — Let a fly brain see your world</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app" id="app">
+    <video id="camera" playsinline muted></video>
+    <canvas id="visionCanvas" aria-hidden="true"></canvas>
+    <canvas id="fxCanvas" aria-hidden="true"></canvas>
+    <div class="vignette"></div>
+
+    <header class="topbar">
+      <div class="brand">FLY <span>EYE</span></div>
+      <div class="top-actions">
+        <button class="ghost" id="langBtn">中文</button>
+        <button class="ghost" id="scienceBtn">BRAIN</button>
+      </div>
+    </header>
+
+    <section class="landing" id="landing">
+      <div class="eyebrow" data-i18n="eyebrow">A REAL-WORLD FLY BRAIN EXPERIMENT</div>
+      <h1 data-i18n-html="hero">Let a fly brain<br><em>see your world.</em></h1>
+      <p data-i18n="desc">Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.</p>
+      <button class="cta" id="openCamera" data-i18n="openCamera">OPEN CAMERA</button>
+      <div class="privacy" data-i18n="privacy">Camera frames stay on your device.</div>
+    </section>
+
+    <section class="permission hidden" id="permission">
+      <div class="card">
+        <div class="fly-icon">◉</div>
+        <h2 data-i18n="needCamera">Fly Eye needs camera access</h2>
+        <p data-i18n="needCameraBody">We use the live image only inside your browser to estimate motion, looming and brightness. Raw camera frames are not uploaded.</p>
+        <button class="cta" id="retryCamera" data-i18n="tryAgain">TRY AGAIN</button>
+      </div>
+    </section>
+
+    <section class="hud hidden" id="hud">
+      <div class="challenge-card glass">
+        <span data-i18n="challenge">CHALLENGE</span>
+        <strong data-i18n="sneak">Sneak up on the fly</strong>
+        <p data-i18n="challengeBody">Move your hand slowly toward the fly. Get close without triggering escape.</p>
+        <div class="threat-row"><span data-i18n="threat">THREAT</span><b id="threatValue">0%</b></div>
+        <div class="threat-track"><i id="threatBar"></i></div>
+      </div>
+
+      <aside class="brain glass" id="brainPanel">
+        <div class="brain-head">
+          <div>
+            <span data-i18n="liveBrain">LIVE BRAIN</span>
+            <strong id="brainState">CALM</strong>
+          </div>
+          <button class="tiny-btn" id="flyVisionBtn" data-i18n="flyVision">FLY VISION</button>
+        </div>
+        <div class="channel"><label>MOTION</label><div><i id="motionBar"></i></div><b id="motionVal">0</b></div>
+        <div class="channel"><label>LIGHT</label><div><i id="lightBar"></i></div><b id="lightVal">0</b></div>
+        <div class="channel"><label>LOOMING</label><div><i id="loomBar"></i></div><b id="loomVal">0</b></div>
+        <div class="divider"></div>
+        <div class="channel neural"><label>R1–R6</label><div><i id="rBar"></i></div><b id="rVal">0</b></div>
+        <div class="channel neural"><label>LC4</label><div><i id="lc4Bar"></i></div><b id="lc4Val">0</b></div>
+        <div class="channel neural"><label>LPLC2</label><div><i id="lplc2Bar"></i></div><b id="lplc2Val">0</b></div>
+        <div class="channel neural"><label>DNp01</label><div><i id="dnpBar"></i></div><b id="dnpVal">0</b></div>
+        <div class="channel neural"><label>MOTOR</label><div><i id="motorBar"></i></div><b id="motorVal">0</b></div>
+        <p class="science-note" data-i18n="scienceNote">v0.1 uses a transparent modeled controller. Full MaleCNS graph runtime is the next milestone.</p>
+      </aside>
+
+      <div class="status-pill glass" id="statusPill" data-i18n="calm">CALM</div>
+      <button class="reset-btn glass" id="resetBtn" data-i18n="reset">RESET FLY</button>
+    </section>
+
+    <section class="result hidden" id="result">
+      <div class="result-card glass">
+        <div class="eyebrow" data-i18n="escaped">ESCAPE TRIGGERED</div>
+        <h2 data-i18n-html="resultTitle">You woke up<br><em>the escape circuit.</em></h2>
+        <div class="score-line"><span data-i18n="maxThreat">MAX THREAT</span><b id="maxThreat">0%</b></div>
+        <p id="resultExplain">Looming rose quickly, pushing LC4/LPLC2 activity into the escape pathway.</p>
+        <div class="result-actions">
+          <button class="cta" id="againBtn" data-i18n="again">TRY AGAIN</button>
+          <button class="ghost big" id="shareBtn" data-i18n="share">SHARE</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="fly-vision hidden" id="flyVisionPanel">
+      <div class="fly-vision-card glass">
+        <div class="fly-vision-head"><span data-i18n="whatFlySees">WHAT THE FLY SEES</span><button class="tiny-btn" id="closeVision">×</button></div>
+        <canvas id="mosaicCanvas" width="320" height="180"></canvas>
+        <p data-i18n="visionExplain">A deliberately simplified compound-eye view used to explain the sensory pipeline.</p>
+      </div>
+    </section>
+
+    <section class="science-drawer" id="scienceDrawer">
+      <button class="drawer-close" id="closeScience">×</button>
+      <div class="eyebrow" data-i18n="science">SCIENCE</div>
+      <h2 data-i18n="scienceTitle">Camera → sensory signals → fly behavior</h2>
+      <p data-i18n="scienceBody">Fly Eye currently extracts motion, looming and brightness locally from camera frames. Those signals feed a replaceable connectome adapter. v0.1 intentionally does not claim full MaleCNS simulation.</p>
+      <div class="pipeline">
+        <div>CAMERA</div><span>↓</span><div>MOTION / LIGHT / LOOMING</div><span>↓</span><div>CONNECTOME ADAPTER</div><span>↓</span><div>ESCAPE / MOTOR</div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
