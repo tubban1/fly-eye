@@ -4,6 +4,22 @@
 
 Fly Eye is a camera-first browser experiment. Your real environment becomes sensory input for a virtual fruit fly: local motion, brightness and looming signals are converted into neural input, then the fly reacts inside the camera view.
 
+## v0.4 — Perception Layer
+
+The camera no longer sends raw motion directly into the fly brain. Real-world input is filtered first:
+
+- ~1.5 s camera calibration before the fly can react
+- global camera-motion compensation for handheld phones
+- MediaPipe Hand Landmarker as a semantic gate (with GPU→CPU fallback)
+- hand scale growth + hand-to-fly approach + local compensated optical motion
+- a cautious optical-only path for partial fingertips / non-hand looming objects
+- temporal state machine: CALIBRATING → READY → HAND DETECTED → APPROACHING → ALERT
+- connectome must be ready before neural input is armed; the main game no longer silently falls back
+- pseudo-AR background anchoring from estimated camera translation
+- separate PERCEPTION and FLY BRAIN readouts
+
+MediaPipe is used only to isolate likely player-hand pixels/landmarks. It does **not** decide whether the fly escapes. Validated visual signals are converted into modeled looming input, injected into LC4, and then propagated through the real selected signed MaleCNS-derived graph.
+
 ## v0.3 — Neural Replay
 
 - Camera-first mobile experience
@@ -41,7 +57,7 @@ The `loom` group is source-annotated LC4. Looming from the camera is a modeled i
 
 ## Privacy
 
-Raw camera frames are not uploaded by Fly Eye. Frame analysis occurs in the browser. The connectome graph itself is downloaded as a static public data asset.
+Raw camera frames are not uploaded by Fly Eye. Frame analysis, camera-motion compensation, and MediaPipe hand landmark inference occur in the browser. The connectome graph itself is downloaded as a static public data asset.
 
 ## Data attribution
 
