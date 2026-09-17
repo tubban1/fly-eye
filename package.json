@@ -1,7 +1,7 @@
 {
   "name": "fly-eye",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "scripts": {"dev":"vite --host 0.0.0.0","build":"vite build","preview":"vite preview --host 0.0.0.0","test":"node tests/connectome-worker.test.mjs"},
   "devDependencies": {"vite":"^7.1.5"}
