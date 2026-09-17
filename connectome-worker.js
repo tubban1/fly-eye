@@ -11,7 +11,7 @@ const PARAMS = Object.freeze({
   refractory: 2,
   inputScale: 0.0002,
   baselineDrive: 0.05,
-  ticksPerInput: 5,
+  ticksPerInput: 7,
 });
 
 let ready = false;
@@ -32,6 +32,7 @@ let synaptic = null;
 let injectionMask = null; // 1 = LC4 loom, 2 = retained visual group
 let groups = Object.create(null);
 let motor = null;
+let escapeTargets = new Uint32Array(0);
 
 self.onmessage = async (event) => {
   const msg = event.data || {};
@@ -72,6 +73,7 @@ async function init() {
       edges: edgeCount,
       loomCount: groups.loom?.length || 0,
       visionCount: (groups.visionL?.length || 0) + (groups.visionR?.length || 0),
+      escapeTargetCount: escapeTargets.length,
       upstreamCommit: UPSTREAM_COMMIT,
       attribution: manifest.attribution || 'Janelia FlyEM MaleCNS',
     });
@@ -130,6 +132,20 @@ function buildMetadata() {
   injectionMask = new Uint8Array(n);
   for (const i of groups.loom || []) injectionMask[i] |= 1;
   for (const id of ['visionL', 'visionR']) for (const i of groups[id] || []) injectionMask[i] |= 2;
+
+  // Derive an escape-specific descending-neuron readout directly from the
+  // published graph: rank DNs by positive one-hop LC4 input weight.
+  const dnSet = new Set([...motor.dnL, ...motor.dnR]);
+  const scores = new Map();
+  for (const source of groups.loom || []) {
+    for (let e = sourceOffsets[source]; e < sourceOffsets[source + 1]; e++) {
+      const target = targets[e], w = outWeights[e];
+      if (w > 0 && dnSet.has(target)) scores.set(target, (scores.get(target) || 0) + w);
+    }
+  }
+  escapeTargets = Uint32Array.from(
+    [...scores.entries()].sort((a,b)=>b[1]-a[1]).slice(0, 32).map(([i])=>i)
+  );
 }
 
 function resetState() {
@@ -144,8 +160,10 @@ function resetState() {
 }
 
 function advanceSensory(input) {
-  const loomCurrent = input.loom * 0.78;
-  const visualCurrent = clamp(input.motion * 0.24 + Math.max(0, input.light - 0.42) * 0.08, 0, 0.34);
+  // Camera looming is a modeled sensory encoder. A mildly nonlinear gain gives
+  // short real-world approach gestures enough duration to traverse the graph.
+  const loomCurrent = Math.pow(input.loom, 0.78) * 1.18;
+  const visualCurrent = clamp(input.motion * 0.28 + Math.max(0, input.light - 0.42) * 0.08, 0, 0.38);
   let cumulativeSpikes = 0;
   let last = null;
   for (let t = 0; t < PARAMS.ticksPerInput; t++) {
@@ -157,11 +175,17 @@ function advanceSensory(input) {
   const lc4 = last.lc4;
   const dn = clamp((last.dnL + last.dnR) * 0.5);
   const flight = clamp((last.flightL + last.flightR) * 0.5);
-  const escape = clamp(flight * 0.62 + dn * 0.28 + lc4 * 0.10);
+  const escapeDn = last.escapeDn;
+  // Calibrated behavioral readout: LC4 and its actual strong DN targets are the
+  // primary escape evidence; generic flight activity is supporting evidence.
+  // Connectivity is real; this gain/threshold mapping remains explicitly modeled.
+  const rawEscape = lc4 * 0.44 + escapeDn * 0.36 + Math.max(dn, flight) * 0.20;
+  const escape = clamp((rawEscape - 0.035) / 0.30);
   return {
     lc4,
     dnLeft: last.dnL,
     dnRight: last.dnR,
+    escapeDn,
     flight,
     network,
     escape,
@@ -213,6 +237,7 @@ function readout() {
     dnR: groupActivity(motor.dnR),
     flightL: groupActivity(groups.flightL),
     flightR: groupActivity(groups.flightR),
+    escapeDn: groupActivity(escapeTargets),
   };
 }
 
