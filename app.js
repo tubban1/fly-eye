@@ -38,14 +38,16 @@ const replay={frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
 
-const connectome={status:'loading',worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
+const connectome={status:'loading',phase:'manifest',loaded:0,total:9864604,worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
   try{
     connectome.worker=new Worker('/connectome-worker.js');
     connectome.worker.onmessage=(event)=>{
       const msg=event.data||{};
       if(msg.type==='ready'){
-        connectome.status='ready';connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.pending=false;updateConnectomeStatus();
+        connectome.status='ready';connectome.phase='ready';connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();
+      }else if(msg.type==='status'){
+        connectome.status='loading';connectome.phase=msg.status||'loading';connectome.loaded=msg.loaded||0;connectome.total=msg.total||connectome.total;updateConnectomeStatus();
       }else if(msg.type==='state'){
         connectome.pending=false;
         connectome.escape=smooth(connectome.escape,clamp(msg.escape||0),.5);
@@ -75,11 +77,29 @@ function updateConnectomeStatus(){
     if(el) el.textContent=lang==='zh'?'连接图加载失败 · 挑战已暂停':'GRAPH LOAD FAILED · challenge paused';
     if(badge){badge.textContent=lang==='zh'?'连接图错误':'GRAPH ERROR';badge.dataset.state='error'}
   }else{
-    if(el) el.textContent=lang==='zh'?'正在本地加载真实 MaleCNS 衍生连接图…':'Loading the real MaleCNS-derived graph locally…';
-    if(badge){badge.textContent=lang==='zh'?'图加载中':'GRAPH LOADING';badge.dataset.state='loading'}
+    let label=lang==='zh'?'正在读取连接图…':'LOADING CONNECTOME…';
+    let badgeLabel=lang==='zh'?'图加载中':'GRAPH LOADING';
+    if(connectome.phase==='graph-download'){
+      const loaded=(connectome.loaded/1e6).toFixed(1),total=(connectome.total/1e6).toFixed(1);
+      label=lang==='zh'?'连接图下载 '+loaded+' / '+total+' MB':'GRAPH '+loaded+' / '+total+' MB';
+      badgeLabel=Math.round((connectome.loaded/Math.max(1,connectome.total))*100)+'%';
+    }else if(connectome.phase==='graph-parse'){
+      label=lang==='zh'?'连接图已下载，正在解析约 9.9 MB 数据…':'GRAPH DOWNLOADED · PARSING ~9.9 MB…';
+      badgeLabel=lang==='zh'?'解析中':'PARSING';
+    }else if(connectome.phase==='metadata'){
+      label=lang==='zh'?'正在建立 LC4 / DN 读出…':'BUILDING LC4 / DN READOUTS…';
+      badgeLabel=lang==='zh'?'准备中':'PREPARING';
+    }else if(connectome.phase==='manifest'){
+      label=lang==='zh'?'正在读取连接图清单…':'READING GRAPH MANIFEST…';
+    }
+    if(el) el.textContent=label;
+    if(badge){badge.textContent=badgeLabel;badge.dataset.state='loading'}
   }
 }
 initConnectome();
+const prewarmHands=()=>perceptionEngine.initHands().then(()=>updatePerceptionUI(perceptionState));
+if('requestIdleCallback' in window) requestIdleCallback(prewarmHands,{timeout:1200});
+else setTimeout(prewarmHands,350);
 
 const DEBUG_MODE = new URLSearchParams(location.search).get('debug') === '1';
 let debugStart = performance.now();
