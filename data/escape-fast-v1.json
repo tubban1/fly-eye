@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "profile": "flyeye.escape-fast.v1",
+  "kind": "aggregate-connectome",
+  "dataset": "MaleCNS v1.0",
+  "source": {
+    "repository": "dzhng/fly-escape",
+    "commit": "bff49a376f0844c918eb7f2be83e95f2699b0d14",
+    "graphHash": "6218f74521ca39652c59bd7524fb6aa5fe587058ce438a3fa08e4d8eee7cd454"
+  },
+  "attribution": "Janelia FlyEM MaleCNS; https://male-cns.janelia.org/download/ (CC-BY; see source terms)",
+  "scientificBoundary": "Real MaleCNS-derived aggregate connection counts/weights between annotated pathway groups. Group-level dynamics are modeled and are not neuron-level simulation.",
+  "nodes": [
+    {
+      "id": "loom",
+      "label": "Approaching objects / LC4",
+      "neuronCount": 126
+    },
+    {
+      "id": "turnL",
+      "label": "Turning · left",
+      "neuronCount": 25
+    },
+    {
+      "id": "turnR",
+      "label": "Turning · right",
+      "neuronCount": 23
+    },
+    {
+      "id": "flightL",
+      "label": "Flight · left",
+      "neuronCount": 9
+    },
+    {
+      "id": "flightR",
+      "label": "Flight · right",
+      "neuronCount": 9
+    }
+  ],
+  "edges": [
+    {
+      "source": "turnL",
+      "target": "turnL",
+      "edgeCount": 34,
+      "positiveWeight": 705,
+      "negativeWeight": 63
+    },
+    {
+      "source": "turnL",
+      "target": "turnR",
+      "edgeCount": 24,
+      "positiveWeight": 395,
+      "negativeWeight": 67
+    },
+    {
+      "source": "turnL",
+      "target": "flightL",
+      "edgeCount": 5,
+      "positiveWeight": 46,
+      "negativeWeight": 6
+    },
+    {
+      "source": "turnL",
+      "target": "flightR",
+      "edgeCount": 6,
+      "positiveWeight": 171,
+      "negativeWeight": 5
+    },
+    {
+      "source": "turnR",
+      "target": "turnL",
+      "edgeCount": 26,
+      "positiveWeight": 387,
+      "negativeWeight": 6
+    },
+    {
+      "source": "turnR",
+      "target": "turnR",
+      "edgeCount": 21,
+      "positiveWeight": 536,
+      "negativeWeight": 47
+    },
+    {
+      "source": "turnR",
+      "target": "flightL",
+      "edgeCount": 6,
+      "positiveWeight": 89,
+      "negativeWeight": 0
+    },
+    {
+      "source": "turnR",
+      "target": "flightR",
+      "edgeCount": 4,
+      "positiveWeight": 48,
+      "negativeWeight": 0
+    },
+    {
+      "source": "flightL",
+      "target": "turnL",
+      "edgeCount": 3,
+      "positiveWeight": 9,
+      "negativeWeight": 33
+    },
+    {
+      "source": "flightL",
+      "target": "turnR",
+      "edgeCount": 4,
+      "positiveWeight": 118,
+      "negativeWeight": 21
+    },
+    {
+      "source": "flightL",
+      "target": "flightL",
+      "edgeCount": 9,
+      "positiveWeight": 151,
+      "negativeWeight": 24
+    },
+    {
+      "source": "flightL",
+      "target": "flightR",
+      "edgeCount": 4,
+      "positiveWeight": 112,
+      "negativeWeight": 45
+    },
+    {
+      "source": "flightR",
+      "target": "turnL",
+      "edgeCount": 3,
+      "positiveWeight": 12,
+      "negativeWeight": 25
+    },
+    {
+      "source": "flightR",
+      "target": "turnR",
+      "edgeCount": 3,
+      "positiveWeight": 107,
+      "negativeWeight": 19
+    },
+    {
+      "source": "flightR",
+      "target": "flightL",
+      "edgeCount": 7,
+      "positiveWeight": 60,
+      "negativeWeight": 40
+    },
+    {
+      "source": "flightR",
+      "target": "flightR",
+      "edgeCount": 7,
+      "positiveWeight": 57,
+      "negativeWeight": 26
+    },
+    {
+      "source": "loom",
+      "target": "turnL",
+      "edgeCount": 84,
+      "positiveWeight": 1910,
+      "negativeWeight": 0
+    },
+    {
+      "source": "loom",
+      "target": "turnR",
+      "edgeCount": 52,
+      "positiveWeight": 678,
+      "negativeWeight": 0
+    },
+    {
+      "source": "loom",
+      "target": "flightL",
+      "edgeCount": 71,
+      "positiveWeight": 1827,
+      "negativeWeight": 0
+    },
+    {
+      "source": "loom",
+      "target": "flightR",
+      "edgeCount": 50,
+      "positiveWeight": 665,
+      "negativeWeight": 0
+    },
+    {
+      "source": "loom",
+      "target": "loom",
+      "edgeCount": 1387,
+      "positiveWeight": 9814,
+      "negativeWeight": 0
+    }
+  ]
+}
