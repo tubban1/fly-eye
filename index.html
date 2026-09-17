@@ -60,12 +60,12 @@
         <div class="channel"><label>LIGHT</label><div><i id="lightBar"></i></div><b id="lightVal">0</b></div>
         <div class="channel"><label>LOOMING</label><div><i id="loomBar"></i></div><b id="loomVal">0</b></div>
         <div class="divider"></div>
-        <div class="channel neural"><label>R1–R6</label><div><i id="rBar"></i></div><b id="rVal">0</b></div>
+        <div class="channel neural"><label>NETWORK</label><div><i id="rBar"></i></div><b id="rVal">0</b></div>
         <div class="channel neural"><label>LC4</label><div><i id="lc4Bar"></i></div><b id="lc4Val">0</b></div>
-        <div class="channel neural"><label>LPLC2</label><div><i id="lplc2Bar"></i></div><b id="lplc2Val">0</b></div>
-        <div class="channel neural"><label>DNp01</label><div><i id="dnpBar"></i></div><b id="dnpVal">0</b></div>
-        <div class="channel neural"><label>MOTOR</label><div><i id="motorBar"></i></div><b id="motorVal">0</b></div>
-        <p class="science-note" data-i18n="scienceNote">v0.1 uses a transparent modeled controller. Full MaleCNS graph runtime is the next milestone.</p>
+        <div class="channel neural"><label>DN LEFT</label><div><i id="lplc2Bar"></i></div><b id="lplc2Val">0</b></div>
+        <div class="channel neural"><label>DN RIGHT</label><div><i id="dnpBar"></i></div><b id="dnpVal">0</b></div>
+        <div class="channel neural"><label>FLIGHT DN</label><div><i id="motorBar"></i></div><b id="motorVal">0</b></div>
+        <p class="science-note" id="connectomeStatus" data-i18n="scienceNote">Loading the real MaleCNS-derived graph locally…</p>
       </aside>
 
       <div class="status-pill glass" id="statusPill" data-i18n="calm">CALM</div>
@@ -77,7 +77,7 @@
         <div class="eyebrow" data-i18n="escaped">ESCAPE TRIGGERED</div>
         <h2 data-i18n-html="resultTitle">You woke up<br><em>the escape circuit.</em></h2>
         <div class="score-line"><span data-i18n="maxThreat">MAX THREAT</span><b id="maxThreat">0%</b></div>
-        <p id="resultExplain">Looming rose quickly, pushing LC4/LPLC2 activity into the escape pathway.</p>
+        <p id="resultExplain">Camera looming drove LC4 and propagated through the connectome.</p>
         <div class="result-actions">
           <button class="cta" id="againBtn" data-i18n="again">TRY AGAIN</button>
           <button class="ghost big" id="shareBtn" data-i18n="share">SHARE</button>
@@ -97,9 +97,9 @@
       <button class="drawer-close" id="closeScience">×</button>
       <div class="eyebrow" data-i18n="science">SCIENCE</div>
       <h2 data-i18n="scienceTitle">Camera → sensory signals → fly behavior</h2>
-      <p data-i18n="scienceBody">Fly Eye currently extracts motion, looming and brightness locally from camera frames. Those signals feed a replaceable connectome adapter. v0.1 intentionally does not claim full MaleCNS simulation.</p>
+      <p data-i18n="scienceBody">Fly Eye v0.2 loads a signed MaleCNS-derived connectome subgraph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.</p>
       <div class="pipeline">
-        <div>CAMERA</div><span>↓</span><div>MOTION / LIGHT / LOOMING</div><span>↓</span><div>CONNECTOME ADAPTER</div><span>↓</span><div>ESCAPE / MOTOR</div>
+        <div>CAMERA</div><span>↓</span><div>MOTION / LIGHT / LOOMING</div><span>↓</span><div>LC4 + REAL SIGNED GRAPH</div><span>↓</span><div>DN / FLIGHT READOUT</div>
       </div>
     </section>
 
