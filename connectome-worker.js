@@ -175,7 +175,7 @@ function advanceSensory(input) {
   const lc4 = last.lc4;
   const dn = clamp((last.dnL + last.dnR) * 0.5);
   const flight = clamp((last.flightL + last.flightR) * 0.5);
-  const escapeDn = last.escapeDn;
+  const escapeDn = escapeTargets.length ? last.escapeDn : dn;
   // Calibrated behavioral readout: LC4 and its actual strong DN targets are the
   // primary escape evidence; generic flight activity is supporting evidence.
   // Connectivity is real; this gain/threshold mapping remains explicitly modeled.
