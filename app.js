@@ -18,16 +18,48 @@ const dict = {
   en:{eyebrow:'A REAL-WORLD FLY BRAIN EXPERIMENT',hero:'Let a fly brain<br><em>see your world.</em>',desc:"Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.",openCamera:'OPEN CAMERA',privacy:'Camera frames stay on your device.',needCamera:'Fly Eye needs camera access',needCameraBody:'We use the live image only inside your browser to estimate motion, looming and brightness. Raw camera frames are not uploaded.',tryAgain:'TRY AGAIN',challenge:'CHALLENGE',sneak:'Sneak up on the fly',challengeBody:'Move your hand slowly toward the fly. Get close without triggering escape.',threat:'THREAT',liveBrain:'LIVE BRAIN',flyVision:'FLY VISION',scienceNote:'Loading the real MaleCNS-derived graph locally…',calm:'CALM',reset:'RESET FLY',escaped:'ESCAPE TRIGGERED',resultTitle:'You woke up<br><em>the escape circuit.</em>',maxThreat:'MAX THREAT',again:'TRY AGAIN',share:'SHARE',whatFlySees:'WHAT THE FLY SEES',visionExplain:'A deliberately simplified compound-eye view used to explain the sensory pipeline.',science:'SCIENCE',scienceTitle:'Camera → sensory signals → fly behavior',scienceBody:'Fly Eye v0.4.4 starts with an embedded escape-fast-v1 pathway graph built from real MaleCNS aggregate connection counts and signed weights between LC4/loom, turning and flight groups. Group-level dynamics and camera-to-neural encoding are modeled. The 70K neuron-level graph is optional and no longer blocks camera interaction.',viewReplay:'VIEW REPLAY',replayEyebrow:'NEURAL REPLAY',replayTitle:'What just happened?',replayBefore:'before escape',replayEscapeMark:'ESCAPE',pauseReplay:'PAUSE',playReplay:'PLAY',continueBtn:'CONTINUE',replayPrivacy:'Replay frames and neural samples stay only in this browser tab.'},
   zh:{eyebrow:'现实世界果蝇大脑实验',hero:'让果蝇的大脑<br><em>看见你的世界。</em>',desc:'你的摄像头会成为果蝇的视觉世界。运动、逼近和亮度都在你的设备本地处理。',openCamera:'打开摄像头',privacy:'摄像头画面不会上传。',needCamera:'Fly Eye 需要摄像头权限',needCameraBody:'浏览器只在本地分析运动、逼近和亮度，不上传原始摄像头画面。',tryAgain:'重试',challenge:'挑战',sneak:'慢慢靠近果蝇',challengeBody:'把手慢慢靠近它，尽量接近，但不要触发逃逸。',threat:'威胁',liveBrain:'实时神经活动',flyVision:'果蝇视角',scienceNote:'正在本地加载真实 MaleCNS 衍生连接图…',calm:'平静',reset:'重置果蝇',escaped:'触发逃逸',resultTitle:'你唤醒了<br><em>逃逸回路。</em>',maxThreat:'最高威胁',again:'再试一次',share:'分享',whatFlySees:'果蝇看到的世界',visionExplain:'这是为了解释感觉输入流程而做的简化复眼视图。',science:'科学说明',scienceTitle:'摄像头 → 感觉信号 → 果蝇行为',scienceBody:'Fly Eye v0.4.4 默认使用内置的 escape-fast-v1：它保留 MaleCNS 中 LC4/loom、转向与飞行通路之间真实的聚合连接数量和有符号权重；组级动力学与摄像头到神经输入的编码仍是模型。70K 神经元级图改为可选，不再阻塞摄像头交互。',viewReplay:'查看回放',replayEyebrow:'神经回放',replayTitle:'刚才发生了什么？',replayBefore:'距离逃逸',replayEscapeMark:'逃逸',pauseReplay:'暂停',playReplay:'播放',continueBtn:'继续',replayPrivacy:'回放视觉帧和神经采样只保存在当前浏览器标签页内。'}
 };
-Object.assign(dict.en,{calibrating:'CALIBRATING VISION…',loadingHands:'OPTICAL MODE READY · HAND TRACKER WARMING…',waitingGraph:'WAITING FOR CONNECTOME…',holdSteady:'HOLD CAMERA STEADY',readyPerception:'READY — BRING YOUR HAND TOWARD THE FLY',handSeen:'HAND DETECTED',approaching:'APPROACHING',perceptionAlert:'VALID LOOMING DETECTED',trackerError:'OPTICAL MODE ACTIVE · HAND TRACKER OFF',graphError:'CONNECTOME FAILED'});
-Object.assign(dict.zh,{calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',holdSteady:'请保持手机稳定',readyPerception:'准备完成——把手慢慢靠近果蝇',handSeen:'检测到手',approaching:'正在靠近',perceptionAlert:'确认有效逼近',trackerError:'光流模式可用 · 手部追踪暂不可用',graphError:'连接图加载失败'});
+Object.assign(dict.en,{
+  calibrating:'CALIBRATING VISION…',loadingHands:'OPTICAL MODE READY · HAND TRACKER WARMING…',waitingGraph:'WAITING FOR CONNECTOME…',
+  holdSteady:'HOLD CAMERA STEADY',readyPerception:'READY — BRING YOUR HAND TOWARD THE FLY',handSeen:'HAND DETECTED',
+  approaching:'APPROACHING',perceptionAlert:'VALID LOOMING DETECTED',trackerError:'OPTICAL MODE ACTIVE · HAND TRACKER OFF',
+  graphError:'CONNECTOME FAILED',brainBtn:'BRAIN',connectome:'CONNECTOME',preparingRuntime:'Preparing runtime…',
+  hand:'HAND',camera:'CAMERA',approachLabel:'APPROACH',validLoom:'VALID LOOM',details:'DETAILS',hideDetails:'HIDE',
+  motion:'MOTION',light:'LIGHT',looming:'LOOMING',network:'NETWORK',dnLeft:'DN LEFT',dnRight:'DN RIGHT',flightDn:'FLIGHT DN',
+  escape:'ESCAPE',replayInitial:'Visual motion begins.',replayTimeline:'Replay timeline',
+  resultExplainInitial:'Camera looming drove LC4 and propagated through the escape pathway.',
+  pipePerception:'GLOBAL MOTION COMPENSATION + HAND LANDMARKS',pipeLoom:'VALIDATED APPROACH / LOOMING',
+  pipeGraph:'LC4 + MALECNS AGGREGATE GRAPH',pipeMotor:'DN / FLIGHT READOUT',
+  graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',
+  cameraStable:'STABLE',cameraMoving:'MOVING',handNo:'NO',handWarming:'WARMING',tip:'TIP',
+  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY'
+});
+Object.assign(dict.zh,{
+  calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',
+  holdSteady:'请保持手机稳定',readyPerception:'准备完成——把手慢慢靠近果蝇',handSeen:'检测到手',
+  approaching:'正在靠近',perceptionAlert:'确认有效逼近',trackerError:'光流模式可用 · 手部追踪暂不可用',
+  graphError:'连接图加载失败',brainBtn:'大脑',connectome:'连接图',preparingRuntime:'正在准备运行环境…',
+  hand:'手部',camera:'摄像头',approachLabel:'接近',validLoom:'有效逼近',details:'详情',hideDetails:'收起',
+  motion:'运动',light:'亮度',looming:'逼近',network:'网络',dnLeft:'左侧 DN',dnRight:'右侧 DN',flightDn:'飞行 DN',
+  escape:'逃逸',replayInitial:'视觉运动开始。',replayTimeline:'回放时间轴',
+  resultExplainInitial:'摄像头中的逼近刺激了 LC4，并沿逃逸通路传播。',
+  pipePerception:'全局运动补偿 + 手部关键点',pipeLoom:'确认后的接近 / 逼近信号',
+  pipeGraph:'LC4 + MaleCNS 聚合连接图',pipeMotor:'DN / 飞行输出',
+  graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',
+  cameraStable:'稳定',cameraMoving:'移动',handNo:'未检测',handWarming:'后台加载',tip:'指尖',
+  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸'
+});
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
-function applyLang(){document.documentElement.lang=lang==='zh'?'zh-CN':'en';document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));$('#langBtn').textContent=lang==='en'?'中文':'EN';localStorage.setItem('flyEye_lang',lang)}
+function applyLang(){
+  document.documentElement.lang=lang==='zh'?'zh-CN':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAria)));
+  $('#langBtn').textContent=lang==='en'?'中文':'EN';
+  const bt=$('#brainToggle'); if(bt) bt.textContent=document.body.classList.contains('brain-expanded')?t('hideDetails'):t('details');
+  localStorage.setItem('flyEye_lang',lang)
+}
 applyLang();
-
-const mobileOverride=document.createElement('style');
-mobileOverride.textContent='@media(max-width:760px){.brain .channel{display:grid!important;grid-template-columns:60px 1fr 26px!important;margin:4px 0!important}.brain .channel label{font-size:8px!important}.brain .channel b{font-size:9px!important}}';
-document.head.appendChild(mobileOverride);
 
 let W=innerWidth,H=innerHeight,D=Math.min(devicePixelRatio||1,2);
 let stream=null, running=false, rear=false, lastFrame=null, lastTs=performance.now();
@@ -234,7 +266,11 @@ function resetReplay(){
   replay.raf=0;
 }
 function replaySample(now,threat,escape=0){
-  return {t:now,motion:sensory.motion,light:sensory.light,loom:sensory.loom,lc4:neural.lc4,dnL:neural.lplc2,dnR:neural.dnp,flight:neural.motor,network:neural.r,threat,escape,spikes:connectome.spikes||0};
+  return {
+    t:now,motion:sensory.motion,light:sensory.light,loom:sensory.loom,lc4:neural.lc4,dnL:neural.lplc2,dnR:neural.dnp,
+    flight:neural.motor,network:neural.r,threat,escape,spikes:connectome.spikes||0,
+    fly:{x:fly.x,y:fly.y,state:fly.state},mirrored:!rear
+  };
 }
 function recordReplay(now,threat){
   if(escaped || now-replay.lastCapture<72) return;
@@ -270,6 +306,19 @@ function replayCaption(sample){
   if(sample.motion>.12) return lang==='zh'?'果蝇附近出现视觉运动。':'Visual motion appears near the fly.';
   return lang==='zh'?'视觉场保持平静。':'The visual field remains calm.';
 }
+function drawReplayFly(ctx,x,y,state='idle'){
+  const s=Math.max(.62,Math.min(replayCanvas.width,replayCanvas.height)/300);
+  ctx.save();ctx.translate(x,y);
+  ctx.globalAlpha=.44;ctx.fillStyle='#dffcff';
+  ctx.beginPath();ctx.ellipse(-14*s,-8*s,20*s,7*s,-.4,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(14*s,-8*s,20*s,7*s,.4,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;ctx.fillStyle='#6f4b2d';ctx.beginPath();ctx.ellipse(0,8*s,10*s,17*s,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#8c5d32';ctx.beginPath();ctx.ellipse(0,-7*s,13*s,12*s,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#d4302c';ctx.beginPath();ctx.arc(-7*s,-9*s,6*s,0,Math.PI*2);ctx.arc(7*s,-9*s,6*s,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-9*s,-11*s,1.8*s,0,Math.PI*2);ctx.arc(5*s,-11*s,1.8*s,0,Math.PI*2);ctx.fill();
+  if(state==='alert'||state==='escape'){ctx.strokeStyle=state==='escape'?'#ff5a3b':'#dfff55';ctx.lineWidth=2*s;ctx.beginPath();ctx.arc(0,0,28*s,0,Math.PI*2);ctx.stroke()}
+  ctx.restore();
+}
 function drawReplayFrame(frame,sample){
   const cw=replayCanvas.width,ch=replayCanvas.height;
   replayCtx.fillStyle='#050505'; replayCtx.fillRect(0,0,cw,ch);
@@ -278,15 +327,18 @@ function drawReplayFrame(frame,sample){
     for(let i=0;i<frame.gray.length;i++){const g=frame.gray[i];const p=i*4;data[p]=g;data[p+1]=g;data[p+2]=g;data[p+3]=255}
     replaySourceCtx.putImageData(new ImageData(data,96,54),0,0);
     replayCtx.imageSmoothingEnabled=true;
-    replayCtx.drawImage(replaySource,0,0,cw,ch);
+    if(sample?.mirrored){
+      replayCtx.save();replayCtx.translate(cw,0);replayCtx.scale(-1,1);replayCtx.drawImage(replaySource,0,0,cw,ch);replayCtx.restore();
+    }else replayCtx.drawImage(replaySource,0,0,cw,ch);
   }else{
     const g=replayCtx.createRadialGradient(cw*.5,ch*.5,5,cw*.5,ch*.5,cw*.55);
     g.addColorStop(0,'#39452b');g.addColorStop(1,'#050505');replayCtx.fillStyle=g;replayCtx.fillRect(0,0,cw,ch);
   }
+  if(sample?.fly) drawReplayFly(replayCtx,sample.fly.x*cw,sample.fly.y*ch,sample.fly.state);
   const threat=clamp(sample?.threat||0);
   replayCtx.strokeStyle=threat>.35?'rgba(255,80,56,.85)':'rgba(223,255,85,.62)';
-  replayCtx.lineWidth=2+threat*6;
-  replayCtx.beginPath();replayCtx.arc(cw*.5,ch*.5,28+threat*56,0,Math.PI*2);replayCtx.stroke();
+  replayCtx.lineWidth=2+threat*5;
+  replayCtx.beginPath();replayCtx.arc((sample?.fly?.x??.5)*cw,(sample?.fly?.y??.5)*ch,28+threat*50,0,Math.PI*2);replayCtx.stroke();
 }
 function renderReplay(progress){
   if(!replay.frozen) return;
@@ -356,7 +408,9 @@ function triggerEscape(threat=connectome.escape){
   const now=performance.now();
   escaped=true; freezeReplay(now,threat); fly.state='escape'; fly.escapeUntil=now+1050;
   const a=Math.random()*Math.PI*2; fly.vx=Math.cos(a)*(rear?.008:.007); fly.vy=Math.sin(a)*.006-.003;
-  setTimeout(()=>{if(!running)return; $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';$('#resultExplain').textContent=connectome.status==='ready'?(lang==='zh'?'摄像头的逼近输入刺激了 LC4，活动沿真实 MaleCNS 衍生连接图传播到下降/飞行通路并触发逃逸。':'Camera looming drove LC4; activity propagated through the real MaleCNS-derived graph into descending/flight pathways and triggered escape.'):(lang==='zh'?'连接图不可用，本次使用透明后备模型触发逃逸。':'The graph was unavailable, so this run used the transparent fallback controller.');showReplay()},360)
+  setTimeout(()=>{if(!running)return; $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';$('#resultExplain').textContent=connectome.status==='ready'
+    ? (lang==='zh'?'摄像头中的有效逼近刺激了 LC4，并沿 MaleCNS 聚合逃逸通路传播到转向/飞行输出。':'Validated camera looming drove LC4 and propagated through the MaleCNS aggregate escape pathway into turning/flight output.')
+    : (lang==='zh'?'连接图不可用，无法完成本次神经回放。':'The connectome runtime was unavailable, so this neural replay could not complete.');showReplay()},360)
 }
 
 function updateFly(dt,now,threat){
@@ -407,9 +461,9 @@ function updatePerceptionUI(p){
 
   status.textContent=t(key); status.dataset.state=state;
   $('#handStatus').textContent=p.handDetected
-    ? ((lang==='zh'?'指尖 ':'TIP ')+Math.round((p.handTipDistance??1)*100)+'%')
-    : (perceptionEngine.handStatus==='ready'?(lang==='zh'?'未检测':'NO'):(lang==='zh'?'后台加载':'WARMING'));
-  $('#cameraStatus').textContent=p.cameraStable?(lang==='zh'?'稳定':'STABLE'):(p.phase==='calibrating'?'—':(lang==='zh'?'移动':'MOVING'));
+    ? (t('tip')+' '+Math.round((p.handTipDistance??1)*100)+'%')
+    : (perceptionEngine.handStatus==='ready'?t('handNo'):t('handWarming'));
+  $('#cameraStatus').textContent=p.cameraStable?t('cameraStable'):(p.phase==='calibrating'?'—':t('cameraMoving'));
   $('#approachValue').textContent=Math.round((p.approach||0)*100)+'%';
   $('#validLoomValue').textContent=Math.round((p.looming||0)*100)+'%';
 }
@@ -417,7 +471,8 @@ function updatePerceptionUI(p){
 function updateUI(threat){
   $('#threatBar').style.width=Math.round(threat*100)+'%';$('#threatValue').textContent=Math.round(threat*100)+'%';
   setBar('motion',sensory.motion);setBar('light',sensory.light);setBar('loom',sensory.loom);setBar('r',neural.r);setBar('lc4',neural.lc4);setBar('lplc2',neural.lplc2);setBar('dnp',neural.dnp);setBar('motor',neural.motor);
-  const state=threat>.46?'ESCAPE READY':threat>.16?'ALERT':'CALM'; $('#brainState').textContent=lang==='zh'?(state==='CALM'?'平静':state==='ALERT'?'警觉':'即将逃逸'):state; $('#statusPill').textContent=$('#brainState').textContent;
+  const state=threat>.46?'escapeReadyState':threat>.16?'alertState':'calmState';
+  $('#brainState').textContent=t(state); $('#statusPill').textContent=t(state);
 }
 
 function drawMosaic(){
@@ -454,6 +509,10 @@ $('#replayPlay').onclick=()=>replay.playing?pauseReplay():playReplay(true);
 $('#replayScrubber').oninput=(e)=>{pauseReplay();renderReplay(Number(e.target.value)/1000)};
 $('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();updateConnectomeStatus();updatePerceptionUI(perceptionState)};
 $('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#closeScience').onclick=()=>$('#scienceDrawer').classList.remove('open');
+$('#brainToggle').onclick=()=>{
+  document.body.classList.toggle('brain-expanded');
+  $('#brainToggle').textContent=document.body.classList.contains('brain-expanded')?t('hideDetails'):t('details');
+};
 $('#flyVisionBtn').onclick=()=>{$('#flyVisionPanel').classList.remove('hidden');drawMosaic()};$('#closeVision').onclick=()=>$('#flyVisionPanel').classList.add('hidden');
 $('#shareBtn').onclick=async()=>{const data={title:'Fly Eye',text:lang==='zh'?'让一只果蝇的大脑看看你的世界。':'Let a fly brain see your world.',url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);toast(lang==='zh'?'链接已复制':'Link copied')}}catch{}};
 
