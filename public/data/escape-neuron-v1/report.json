@@ -1,0 +1,228 @@
+{
+  "source": {
+    "neurons": 70000,
+    "edges": 798715,
+    "bytes": 9864604
+  },
+  "compact": {
+    "neurons": 3376,
+    "edges": 78797,
+    "bytes": 959092
+  },
+  "compression": {
+    "neuronFraction": 0.048228571428571426,
+    "edgeFraction": 0.09865471413457867,
+    "byteFraction": 0.09722559567520399,
+    "byteReductionPercent": 90.27744043247961
+  },
+  "directEscapeTargets": [
+    {
+      "index": 3080,
+      "positiveWeight": 6811,
+      "negativeWeight": 0,
+      "edgeCount": 71,
+      "sourceIndex": 54303,
+      "bodyId": "531898"
+    },
+    {
+      "index": 286,
+      "positiveWeight": 4786,
+      "negativeWeight": 0,
+      "edgeCount": 55,
+      "sourceIndex": 954,
+      "bodyId": "11137"
+    },
+    {
+      "index": 1,
+      "positiveWeight": 3782,
+      "negativeWeight": 0,
+      "edgeCount": 71,
+      "sourceIndex": 6,
+      "bodyId": "10010"
+    },
+    {
+      "index": 0,
+      "positiveWeight": 2580,
+      "negativeWeight": 0,
+      "edgeCount": 55,
+      "sourceIndex": 0,
+      "bodyId": "10001"
+    },
+    {
+      "index": 59,
+      "positiveWeight": 2279,
+      "negativeWeight": 0,
+      "edgeCount": 71,
+      "sourceIndex": 166,
+      "bodyId": "10197"
+    },
+    {
+      "index": 81,
+      "positiveWeight": 1998,
+      "negativeWeight": 0,
+      "edgeCount": 60,
+      "sourceIndex": 221,
+      "bodyId": "10259"
+    },
+    {
+      "index": 35,
+      "positiveWeight": 1926,
+      "negativeWeight": 0,
+      "edgeCount": 53,
+      "sourceIndex": 98,
+      "bodyId": "10117"
+    },
+    {
+      "index": 191,
+      "positiveWeight": 1827,
+      "negativeWeight": 0,
+      "edgeCount": 71,
+      "sourceIndex": 636,
+      "bodyId": "10752"
+    },
+    {
+      "index": 31,
+      "positiveWeight": 1634,
+      "negativeWeight": 0,
+      "edgeCount": 49,
+      "sourceIndex": 88,
+      "bodyId": "10106"
+    },
+    {
+      "index": 2985,
+      "positiveWeight": 676,
+      "negativeWeight": 0,
+      "edgeCount": 42,
+      "sourceIndex": 52892,
+      "bodyId": "524001"
+    },
+    {
+      "index": 66,
+      "positiveWeight": 669,
+      "negativeWeight": 0,
+      "edgeCount": 58,
+      "sourceIndex": 194,
+      "bodyId": "10228"
+    },
+    {
+      "index": 251,
+      "positiveWeight": 665,
+      "negativeWeight": 0,
+      "edgeCount": 50,
+      "sourceIndex": 837,
+      "bodyId": "10989"
+    },
+    {
+      "index": 260,
+      "positiveWeight": 579,
+      "negativeWeight": 0,
+      "edgeCount": 35,
+      "sourceIndex": 863,
+      "bodyId": "11020"
+    },
+    {
+      "index": 110,
+      "positiveWeight": 479,
+      "negativeWeight": 0,
+      "edgeCount": 36,
+      "sourceIndex": 302,
+      "bodyId": "10361"
+    },
+    {
+      "index": 159,
+      "positiveWeight": 429,
+      "negativeWeight": 0,
+      "edgeCount": 48,
+      "sourceIndex": 493,
+      "bodyId": "10584"
+    },
+    {
+      "index": 228,
+      "positiveWeight": 407,
+      "negativeWeight": 0,
+      "edgeCount": 34,
+      "sourceIndex": 778,
+      "bodyId": "10923"
+    },
+    {
+      "index": 68,
+      "positiveWeight": 161,
+      "negativeWeight": 0,
+      "edgeCount": 23,
+      "sourceIndex": 199,
+      "bodyId": "10234"
+    },
+    {
+      "index": 153,
+      "positiveWeight": 145,
+      "negativeWeight": 0,
+      "edgeCount": 19,
+      "sourceIndex": 469,
+      "bodyId": "10558"
+    },
+    {
+      "index": 90,
+      "positiveWeight": 103,
+      "negativeWeight": 0,
+      "edgeCount": 16,
+      "sourceIndex": 241,
+      "bodyId": "10283"
+    },
+    {
+      "index": 362,
+      "positiveWeight": 78,
+      "negativeWeight": 0,
+      "edgeCount": 12,
+      "sourceIndex": 1343,
+      "bodyId": "11573"
+    },
+    {
+      "index": 130,
+      "positiveWeight": 64,
+      "negativeWeight": 0,
+      "edgeCount": 11,
+      "sourceIndex": 373,
+      "bodyId": "10449"
+    },
+    {
+      "index": 121,
+      "positiveWeight": 63,
+      "negativeWeight": 0,
+      "edgeCount": 9,
+      "sourceIndex": 349,
+      "bodyId": "10417"
+    },
+    {
+      "index": 163,
+      "positiveWeight": 54,
+      "negativeWeight": 0,
+      "edgeCount": 7,
+      "sourceIndex": 507,
+      "bodyId": "10601"
+    },
+    {
+      "index": 3182,
+      "positiveWeight": 16,
+      "negativeWeight": 0,
+      "edgeCount": 3,
+      "sourceIndex": 56677,
+      "bodyId": "575082"
+    },
+    {
+      "index": 15,
+      "positiveWeight": 13,
+      "negativeWeight": 0,
+      "edgeCount": 2,
+      "sourceIndex": 49,
+      "bodyId": "10065"
+    },
+    {
+      "index": 36,
+      "positiveWeight": 5,
+      "negativeWeight": 0,
+      "edgeCount": 1,
+      "sourceIndex": 99,
+      "bodyId": "10118"
+    }
+  ]
+}
