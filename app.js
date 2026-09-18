@@ -67,7 +67,10 @@ let maxThreat=0, escaped=false, frameCounter=0;
 const fly={x:.56,y:.55,vx:0,vy:0,state:'idle',escapeUntil:0,wing:0,blink:0};
 const sensory={motion:0,light:0,loom:0};
 const neural={r:0,lc4:0,lplc2:0,dnp:0,motor:0};
-const replay={frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0,progress:0,wallStart:0,startProgress:0};
+const replay={
+  frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0,progress:0,wallStart:0,startProgress:0,
+  triggerTime:0,postRollUntil:0,pendingFinalize:false
+};
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
 
@@ -264,6 +267,7 @@ function analyzeFrame(now){
 
 function resetReplay(){
   replay.frames=[]; replay.samples=[]; replay.frozen=null; replay.lastCapture=0; replay.progress=0; replay.playing=false;
+  replay.triggerTime=0; replay.postRollUntil=0; replay.pendingFinalize=false;
   if(replay.raf) cancelAnimationFrame(replay.raf);
   replay.raf=0;
 }
@@ -275,19 +279,44 @@ function replaySample(now,threat,escape=0){
   };
 }
 function recordReplay(now,threat){
-  if(escaped || now-replay.lastCapture<72) return;
+  if(now-replay.lastCapture<72) return;
   replay.lastCapture=now;
-  replay.samples.push(replaySample(now,threat,0));
+  replay.samples.push(replaySample(now,threat,replay.triggerTime?1:0));
   replay.frames.push({t:now,gray:lastFrame?lastFrame.slice():null});
-  const cutoff=now-2200;
-  while(replay.samples.length&&replay.samples[0].t<cutoff) replay.samples.shift();
-  while(replay.frames.length&&replay.frames[0].t<cutoff) replay.frames.shift();
+
+  if(!replay.triggerTime){
+    const cutoff=now-2200;
+    while(replay.samples.length&&replay.samples[0].t<cutoff) replay.samples.shift();
+    while(replay.frames.length&&replay.frames[0].t<cutoff) replay.frames.shift();
+  }else if(replay.pendingFinalize && now>=replay.postRollUntil){
+    finalizeReplay(now,threat);
+  }
 }
-function freezeReplay(now,threat){
-  const samples=replay.samples.map(v=>({...v}));
-  samples.push(replaySample(now,threat,1));
-  const frames=replay.frames.map(v=>({t:v.t,gray:v.gray?v.gray.slice():null}));
-  replay.frozen={samples,frames,start:samples[0]?.t??now-1200,end:now};
+function markReplayTrigger(now,threat){
+  replay.triggerTime=now;
+  replay.postRollUntil=now+1150;
+  replay.pendingFinalize=true;
+  replay.samples.push(replaySample(now,threat,1));
+  replay.frames.push({t:now,gray:lastFrame?lastFrame.slice():null});
+}
+function finalizeReplay(now,threat){
+  if(!replay.pendingFinalize)return;
+  replay.pendingFinalize=false;
+  replay.samples.push(replaySample(now,threat,1));
+  replay.frames.push({t:now,gray:lastFrame?lastFrame.slice():null});
+  const start=Math.max(replay.samples[0]?.t??replay.triggerTime-1800,replay.triggerTime-2000);
+  const samples=replay.samples.filter(v=>v.t>=start).map(v=>({...v,fly:{...v.fly}}));
+  const frames=replay.frames.filter(v=>v.t>=start).map(v=>({t:v.t,gray:v.gray?v.gray.slice():null}));
+  replay.frozen={samples,frames,start,end:now,trigger:replay.triggerTime};
+  finishEscapeExperience();
+}
+function finishEscapeExperience(){
+  if(!running||!replay.frozen)return;
+  $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';
+  $('#resultExplain').textContent=connectome.status==='ready'
+    ? (lang==='zh'?'摄像头中的有效逼近刺激了 LC4，并沿 MaleCNS 聚合逃逸通路传播到转向/飞行输出。':'Validated camera looming drove LC4 and propagated through the MaleCNS aggregate escape pathway into turning/flight output.')
+    : (lang==='zh'?'连接图不可用，无法完成本次神经回放。':'The connectome runtime was unavailable, so this neural replay could not complete.');
+  showReplay();
 }
 function nearestByTime(items,t){
   if(!items?.length) return null;
@@ -408,11 +437,11 @@ function connectomeAdapter(now){
 
 function triggerEscape(threat=connectome.escape){
   const now=performance.now();
-  escaped=true; fly.state='escape'; freezeReplay(now,threat); fly.escapeUntil=now+1050;
-  const a=Math.random()*Math.PI*2; fly.vx=Math.cos(a)*(rear?.008:.007); fly.vy=Math.sin(a)*.006-.003;
-  setTimeout(()=>{if(!running)return; $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';$('#resultExplain').textContent=connectome.status==='ready'
-    ? (lang==='zh'?'摄像头中的有效逼近刺激了 LC4，并沿 MaleCNS 聚合逃逸通路传播到转向/飞行输出。':'Validated camera looming drove LC4 and propagated through the MaleCNS aggregate escape pathway into turning/flight output.')
-    : (lang==='zh'?'连接图不可用，无法完成本次神经回放。':'The connectome runtime was unavailable, so this neural replay could not complete.');showReplay()},360)
+  escaped=true; fly.state='escape'; fly.escapeUntil=now+1050;
+  const a=Math.random()*Math.PI*2;
+  fly.vx=Math.cos(a)*(rear?.008:.007);
+  fly.vy=Math.sin(a)*.006-.003;
+  markReplayTrigger(now,threat);
 }
 
 function updateFly(dt,now,threat){
