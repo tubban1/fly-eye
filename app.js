@@ -13,6 +13,10 @@ const replayCtx = replayCanvas.getContext('2d');
 const replaySource = document.createElement('canvas');
 replaySource.width = 96; replaySource.height = 54;
 const replaySourceCtx = replaySource.getContext('2d');
+const visionLayerSource=document.createElement('canvas');
+visionLayerSource.width=96;visionLayerSource.height=54;
+const visionLayerCtx=visionLayerSource.getContext('2d');
+let flyVisionMode='human';
 
 const dict = {
   en:{eyebrow:'A REAL-WORLD FLY BRAIN EXPERIMENT',hero:'Let a fly brain<br><em>see your world.</em>',desc:"Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.",openCamera:'OPEN CAMERA',privacy:'Camera frames stay on your device.',needCamera:'Fly Eye needs camera access',needCameraBody:'We use the live image only inside your browser to estimate motion, looming and brightness. Raw camera frames are not uploaded.',tryAgain:'TRY AGAIN',challenge:'CHALLENGE',sneak:'Sneak up on the fly',challengeBody:'Move your hand slowly toward the fly. Get close without triggering escape.',threat:'THREAT',liveBrain:'LIVE BRAIN',flyVision:'FLY VISION',scienceNote:'Loading the real MaleCNS-derived graph locally…',calm:'CALM',reset:'RESET FLY',escaped:'ESCAPE TRIGGERED',resultTitle:'You woke up<br><em>the escape circuit.</em>',maxThreat:'MAX THREAT',again:'TRY AGAIN',share:'SHARE',whatFlySees:'WHAT THE FLY SEES',visionExplain:'A deliberately simplified compound-eye view used to explain the sensory pipeline.',science:'SCIENCE',scienceTitle:'Camera → sensory signals → fly behavior',scienceBody:'Fly Eye v0.4.10 starts with an embedded escape-fast-v1 pathway graph built from real MaleCNS aggregate connection counts and signed weights between LC4/loom, turning and flight groups. Group-level dynamics and camera-to-neural encoding are modeled. The 70K neuron-level graph is optional and no longer blocks camera interaction.',viewReplay:'VIEW REPLAY',replayEyebrow:'NEURAL REPLAY',replayTitle:'What just happened?',replayBefore:'relative to escape',replayEscapeMark:'ESCAPE',pauseReplay:'PAUSE',playReplay:'PLAY',continueBtn:'CONTINUE',replayPrivacy:'Replay frames and neural samples stay only in this browser tab.'},
@@ -31,7 +35,7 @@ Object.assign(dict.en,{
   pipeGraph:'LC4 + MALECNS AGGREGATE GRAPH',pipeMotor:'DN / FLIGHT READOUT',
   graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',
   cameraStable:'STABLE',cameraMoving:'MOVING',handNo:'NO',handWarming:'WARMING',tip:'TIP',
-  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED',perceptionLayer:'PERCEPTION',brainLayer:'BRAIN',modelTimeline:'MODEL TIMELINE',modelTimelineNote:'Relative to modeled escape trigger',eventTip:'Fingertip enters fly zone',eventApproach:'Approach confidence rises',eventLoom:'Validated looming',eventLc4:'LC4 response',eventDn:'Descending-neuron response',eventFlight:'Flight output',eventEscape:'Modeled escape trigger',modeSneakEyebrow:'MODE A',modeSneakTitle:'Sneak Up',modeSneakBody:'Get as close as possible without making the fly escape.',modeScareEyebrow:'MODE B',modeScareTitle:'Scare Fast',modeScareBody:'Trigger the escape circuit as fast as you can.',scoreLabel:'SCORE',closestApproach:'CLOSEST',roundTime:'TIME',globalLeaderboard:'GLOBAL LEADERBOARD',leaderboardLoading:'Loading leaderboard…',leaderboardUnavailable:'Leaderboard unavailable',yourRank:'YOUR RANK',sneakWinTitle:'You stayed close.<br><em>And kept it calm.</em>',sneakEscapeTitle:'Too close.<br><em>The fly escaped.</em>',scareWinTitle:'Escape triggered.<br><em>Fast.</em>',scareTimeoutTitle:'No escape.<br><em>Try a clearer approach.</em>',sneakResultSafe:'You survived the full round without triggering escape.',sneakResultEscaped:'The fly escaped before the round ended.',scareResultSuccess:'The escape circuit triggered in {time}.',scareResultTimeout:'No validated escape was triggered inside 15 seconds.',roundComplete:'ROUND COMPLETE',shareResultText:'I tried Fly Eye — a camera-driven fly escape-circuit experiment.',shareCardScience:'Real MaleCNS aggregate connectivity + modeled camera encoding/dynamics.',shareCardPrivacy:'No raw camera frame is included in this result card.',shareCopied:'Result link copied'
+  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED',perceptionLayer:'PERCEPTION',brainLayer:'BRAIN',modelTimeline:'MODEL TIMELINE',modelTimelineNote:'Relative to modeled escape trigger',eventTip:'Fingertip enters fly zone',eventApproach:'Approach confidence rises',eventLoom:'Validated looming',eventLc4:'LC4 response',eventDn:'Descending-neuron response',eventFlight:'Flight output',eventEscape:'Modeled escape trigger',modeSneakEyebrow:'MODE A',modeSneakTitle:'Sneak Up',modeSneakBody:'Get as close as possible without making the fly escape.',modeScareEyebrow:'MODE B',modeScareTitle:'Scare Fast',modeScareBody:'Trigger the escape circuit as fast as you can.',scoreLabel:'SCORE',closestApproach:'CLOSEST',roundTime:'TIME',globalLeaderboard:'GLOBAL LEADERBOARD',leaderboardLoading:'Loading leaderboard…',leaderboardUnavailable:'Leaderboard unavailable',yourRank:'YOUR RANK',sneakWinTitle:'You stayed close.<br><em>And kept it calm.</em>',sneakEscapeTitle:'Too close.<br><em>The fly escaped.</em>',scareWinTitle:'Escape triggered.<br><em>Fast.</em>',scareTimeoutTitle:'No escape.<br><em>Try a clearer approach.</em>',sneakResultSafe:'You survived the full round without triggering escape.',sneakResultEscaped:'The fly escaped before the round ended.',scareResultSuccess:'The escape circuit triggered in {time}.',scareResultTimeout:'No validated escape was triggered inside 15 seconds.',roundComplete:'ROUND COMPLETE',shareResultText:'I tried Fly Eye — a camera-driven fly escape-circuit experiment.',shareCardScience:'Real MaleCNS aggregate connectivity + modeled camera encoding/dynamics.',shareCardPrivacy:'No raw camera frame is included in this result card.',shareCopied:'Result link copied',flyVisionPipeline:'FLY VISION PIPELINE',visionHuman:'HUMAN',visionStabilized:'STABILIZED',visionMotion:'MOTION',visionLoom:'LOOM EVIDENCE',visionLc4:'LC4 INPUT',visionHumanExplain:'Camera luminance used as the human reference view.',visionStabilizedExplain:'The camera image after translation compensation. This suppresses phone movement before threat analysis.',visionMotionExplain:'Compensated local motion evidence. Bright areas changed after camera motion was subtracted.',visionLoomExplain:'Modeled fly-centered looming evidence. This is an explanatory model layer, not biological imaging.',visionLc4Explain:'Modeled LC4 input evidence derived from validated looming confidence, not a neural recording.'
 });
 Object.assign(dict.zh,{
   calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',
@@ -46,7 +50,7 @@ Object.assign(dict.zh,{
   pipeGraph:'LC4 + MaleCNS 聚合连接图',pipeMotor:'DN / 飞行输出',
   graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',
   cameraStable:'稳定',cameraMoving:'移动',handNo:'未检测',handWarming:'后台加载',tip:'指尖',
-  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪',perceptionLayer:'感知层',brainLayer:'大脑层',modelTimeline:'模型时间线',modelTimelineNote:'相对模型逃逸触发时间',eventTip:'指尖进入果蝇区域',eventApproach:'接近置信度上升',eventLoom:'确认有效逼近',eventLc4:'LC4 开始响应',eventDn:'下降神经元响应',eventFlight:'飞行输出上升',eventEscape:'模型触发逃逸',modeSneakEyebrow:'模式 A',modeSneakTitle:'潜行靠近',modeSneakBody:'尽可能靠近果蝇，但不要让它逃跑。',modeScareEyebrow:'模式 B',modeScareTitle:'快速惊吓',modeScareBody:'尽快触发果蝇的逃逸回路。',scoreLabel:'得分',closestApproach:'最近距离',roundTime:'时间',globalLeaderboard:'全球排行榜',leaderboardLoading:'正在加载排行榜…',leaderboardUnavailable:'排行榜暂不可用',yourRank:'你的排名',sneakWinTitle:'你靠得很近，<br><em>但它没有逃跑。</em>',sneakEscapeTitle:'太近了，<br><em>果蝇逃跑了。</em>',scareWinTitle:'成功触发逃逸，<br><em>而且很快。</em>',scareTimeoutTitle:'没有触发逃逸，<br><em>再试一次更明确的逼近。</em>',sneakResultSafe:'你完成了整轮挑战，没有触发逃逸。',sneakResultEscaped:'果蝇在本轮结束前逃跑了。',scareResultSuccess:'逃逸回路在 {time} 内被触发。',scareResultTimeout:'15 秒内没有触发有效逃逸。',roundComplete:'本轮完成',shareResultText:'我刚刚体验了 Fly Eye——一个由摄像头驱动的果蝇逃逸回路实验。',shareCardScience:'真实 MaleCNS 聚合连接 + 建模的摄像头编码/动力学。',shareCardPrivacy:'这张结果卡不包含原始摄像头画面。',shareCopied:'结果链接已复制'
+  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪',perceptionLayer:'感知层',brainLayer:'大脑层',modelTimeline:'模型时间线',modelTimelineNote:'相对模型逃逸触发时间',eventTip:'指尖进入果蝇区域',eventApproach:'接近置信度上升',eventLoom:'确认有效逼近',eventLc4:'LC4 开始响应',eventDn:'下降神经元响应',eventFlight:'飞行输出上升',eventEscape:'模型触发逃逸',modeSneakEyebrow:'模式 A',modeSneakTitle:'潜行靠近',modeSneakBody:'尽可能靠近果蝇，但不要让它逃跑。',modeScareEyebrow:'模式 B',modeScareTitle:'快速惊吓',modeScareBody:'尽快触发果蝇的逃逸回路。',scoreLabel:'得分',closestApproach:'最近距离',roundTime:'时间',globalLeaderboard:'全球排行榜',leaderboardLoading:'正在加载排行榜…',leaderboardUnavailable:'排行榜暂不可用',yourRank:'你的排名',sneakWinTitle:'你靠得很近，<br><em>但它没有逃跑。</em>',sneakEscapeTitle:'太近了，<br><em>果蝇逃跑了。</em>',scareWinTitle:'成功触发逃逸，<br><em>而且很快。</em>',scareTimeoutTitle:'没有触发逃逸，<br><em>再试一次更明确的逼近。</em>',sneakResultSafe:'你完成了整轮挑战，没有触发逃逸。',sneakResultEscaped:'果蝇在本轮结束前逃跑了。',scareResultSuccess:'逃逸回路在 {time} 内被触发。',scareResultTimeout:'15 秒内没有触发有效逃逸。',roundComplete:'本轮完成',shareResultText:'我刚刚体验了 Fly Eye——一个由摄像头驱动的果蝇逃逸回路实验。',shareCardScience:'真实 MaleCNS 聚合连接 + 建模的摄像头编码/动力学。',shareCardPrivacy:'这张结果卡不包含原始摄像头画面。',shareCopied:'结果链接已复制',flyVisionPipeline:'果蝇视觉流程',visionHuman:'人类视图',visionStabilized:'稳定视图',visionMotion:'运动证据',visionLoom:'逼近证据',visionLc4:'LC4 输入',visionHumanExplain:'作为参考的人类摄像头亮度视图。',visionStabilizedExplain:'经过平移补偿后的摄像头图像，用于在威胁判断前尽量去除手机移动。',visionMotionExplain:'去除相机整体运动后的局部运动证据。较亮区域表示发生了更明显的变化。',visionLoomExplain:'以果蝇为中心的建模逼近证据。这是解释层，不是生物成像。',visionLc4Explain:'根据确认后的逼近置信度生成的 LC4 建模输入证据，不是神经记录。'
 });
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
@@ -945,9 +949,64 @@ function updateUI(threat){
   $('#brainState').textContent=t(state); $('#statusPill').textContent=t(state);
 }
 
+function flyVisionCopyKey(mode){
+  return {
+    human:'visionHumanExplain',
+    stabilized:'visionStabilizedExplain',
+    motion:'visionMotionExplain',
+    loom:'visionLoomExplain',
+    lc4:'visionLc4Explain'
+  }[mode]||'visionHumanExplain';
+}
+function flyVisionLabelKey(mode){
+  return {
+    human:'visionHuman',
+    stabilized:'visionStabilized',
+    motion:'visionMotion',
+    loom:'visionLoom',
+    lc4:'visionLc4'
+  }[mode]||'visionHuman';
+}
+function updateFlyVisionCopy(){
+  const label=$('#visionModeLabel'),desc=$('#visionExplain');
+  if(label)label.textContent=t(flyVisionLabelKey(flyVisionMode));
+  if(desc)desc.textContent=t(flyVisionCopyKey(flyVisionMode));
+}
 function drawMosaic(){
-  if(!lastFrame)return; const w=96,h=54,cols=20,rows=11,cw=mosaicCanvas.width/cols,ch=mosaicCanvas.height/rows; mctx.fillStyle='#090909';mctx.fillRect(0,0,mosaicCanvas.width,mosaicCanvas.height);
-  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const sx=Math.floor(x/cols*w),sy=Math.floor(y/rows*h),g=lastFrame[sy*w+sx]||0;const r=Math.min(cw,ch)*.43;mctx.fillStyle=`rgb(${g},${Math.min(255,g*1.08)},${Math.min(255,g*.78)})`;mctx.beginPath();mctx.arc(x*cw+cw/2,y*ch+ch/2,r,0,Math.PI*2);mctx.fill()}
+  const layers=perceptionEngine.visual;
+  const layer=layers?.[flyVisionMode]||lastFrame;
+  if(!layer)return;
+
+  const w=96,h=54;
+  const data=new Uint8ClampedArray(w*h*4);
+  for(let i=0;i<layer.length;i++){
+    const v=layer[i]||0,p=i*4;
+    if(flyVisionMode==='motion'){
+      data[p]=Math.round(v*.18);data[p+1]=Math.round(v*.78);data[p+2]=v;
+    }else if(flyVisionMode==='loom'){
+      data[p]=Math.round(v*.90);data[p+1]=v;data[p+2]=Math.round(v*.18);
+    }else if(flyVisionMode==='lc4'){
+      data[p]=v;data[p+1]=Math.round(v*.34);data[p+2]=Math.round(v*.12);
+    }else{
+      data[p]=v;data[p+1]=v;data[p+2]=v;
+    }
+    data[p+3]=255;
+  }
+
+  visionLayerCtx.putImageData(new ImageData(data,w,h),0,0);
+  mctx.clearRect(0,0,mosaicCanvas.width,mosaicCanvas.height);
+  mctx.imageSmoothingEnabled=flyVisionMode==='human'||flyVisionMode==='stabilized';
+  mctx.drawImage(visionLayerSource,0,0,mosaicCanvas.width,mosaicCanvas.height);
+
+  const px=(rear?fly.x:1-fly.x)*mosaicCanvas.width;
+  const py=fly.y*mosaicCanvas.height;
+  mctx.save();
+  mctx.strokeStyle='rgba(255,255,255,.72)';
+  mctx.lineWidth=1.5;
+  mctx.beginPath();mctx.arc(px,py,12,0,Math.PI*2);mctx.stroke();
+  mctx.beginPath();mctx.moveTo(px-18,py);mctx.lineTo(px+18,py);mctx.moveTo(px,py-18);mctx.lineTo(px,py+18);mctx.stroke();
+  mctx.restore();
+  updateFlyVisionCopy();
 }
 
 function loop(now){
@@ -1098,13 +1157,21 @@ document.querySelectorAll('.replay-speed [data-speed]').forEach(btn=>{
 });
 $('#replayPlay').onclick=()=>replay.playing?pauseReplay():playReplay(true);
 $('#replayScrubber').oninput=(e)=>{pauseReplay();renderReplay(Number(e.target.value)/1000)};
-$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();applyModeUI();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard();if(!$('#result').classList.contains('hidden'))updateResultUI()};
+$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();applyModeUI();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard();updateFlyVisionCopy();if(!$('#result').classList.contains('hidden'))updateResultUI()};
 $('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#closeScience').onclick=()=>$('#scienceDrawer').classList.remove('open');
 $('#brainToggle').onclick=()=>{
   document.body.classList.toggle('brain-expanded');
   $('#brainToggle').textContent=document.body.classList.contains('brain-expanded')?t('hideDetails'):t('details');
 };
-$('#flyVisionBtn').onclick=()=>{$('#flyVisionPanel').classList.remove('hidden');drawMosaic()};$('#closeVision').onclick=()=>$('#flyVisionPanel').classList.add('hidden');
+document.querySelectorAll('[data-vision]').forEach(btn=>{
+  btn.onclick=()=>{
+    flyVisionMode=btn.dataset.vision||'human';
+    document.querySelectorAll('[data-vision]').forEach(b=>b.classList.toggle('active',b===btn));
+    drawMosaic();
+  };
+});
+$('#flyVisionBtn').onclick=()=>{$('#flyVisionPanel').classList.remove('hidden');updateFlyVisionCopy();drawMosaic()};
+$('#closeVision').onclick=()=>$('#flyVisionPanel').classList.add('hidden');
 $('#shareBtn').onclick=shareRoundResult;
 
 addEventListener('visibilitychange',()=>{if(document.hidden&&!DEBUG_MODE){sensory.motion=sensory.loom=0}});
