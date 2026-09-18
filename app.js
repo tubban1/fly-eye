@@ -106,6 +106,7 @@ const round={
   closestApproach:1,dangerMs:0,survivedMs:0,escapeLatencyMs:0,
   escaped:false,score:null,rank:null,submitting:false
 };
+const leaderboardState={mode:null,offset:0,hasMore:true,loading:false};
 
 
 const connectome={status:'loading',phase:'manifest',profile:'auto',aggregate:false,groups:0,aggregateLinks:0,representedNeurons:0,loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
@@ -356,7 +357,9 @@ function resetRound(){
   const timer=$('#roundTimer'); if(timer) timer.textContent=gameMode==='scare_fast'?'0.0 s':'20.0 s';
   const score=$('#resultScore'); if(score) score.textContent='—';
   const rank=$('#playerRank'); if(rank) rank.textContent='—';
+  const viewerCard=$('#viewerRankCard'); if(viewerCard){viewerCard.innerHTML='';viewerCard.classList.add('hidden')}
   const list=$('#leaderboardList'); if(list) list.innerHTML='';
+  leaderboardState.mode=gameMode;leaderboardState.offset=0;leaderboardState.hasMore=true;leaderboardState.loading=false;
   const status=$('#leaderboardStatus'); if(status) status.textContent=t('leaderboardLoading');
 }
 
@@ -484,14 +487,14 @@ async function submitRoundResult(){
     round.rank=data.rank;
     updateResultUI();
     $('#playerRank').textContent=t('yourRank')+' #'+data.rank;
-    await loadLeaderboard();
+    await loadLeaderboard({reset:true});
   }catch(err){
     console.warn('score submit failed',err);
     // A rejected round must not make the leaderboard look offline.
     $('#leaderboardStatus').textContent=String(err?.message||'').includes('score 400')
       ? t('scoreRejected')
       : t('leaderboardUnavailable');
-    await loadLeaderboard();
+    await loadLeaderboard({reset:true});
   }finally{
     round.submitting=false;
   }
@@ -506,8 +509,53 @@ function syncPlayerNameUI(){
   if(input && input.value!==playerName) input.value=playerName;
 }
 
+function entryPublicName(entry){
+  const fallback=entry.is_viewer?(lang==='zh'?'你':'YOU'):(lang==='zh'?'匿名果蝇':'Anonymous Fly');
+  return (entry.is_viewer&&playerName)?playerName:(entry.display_name||fallback);
+}
+
+function buildLeaderboardRow(entry,{viewerCard=false}={}){
+  const row=document.createElement('div');
+  row.className=(viewerCard?'viewer-rank-row':'leaderboard-row')+(entry.is_viewer?' me':'');
+  row.dataset.rank=String(entry.rank);
+
+  const rank=document.createElement('b');
+  const medal=entry.rank===1?'🥇 ':entry.rank===2?'🥈 ':entry.rank===3?'🥉 ':'';
+  rank.textContent=medal+'#'+entry.rank;
+
+  const who=document.createElement('span');
+  const publicName=entryPublicName(entry);
+  who.textContent=entry.is_viewer
+    ? publicName+' · '+(lang==='zh'?'你':'YOU')
+    : publicName;
+
+  const score=document.createElement('strong');
+  score.textContent=Number(entry.score).toLocaleString();
+
+  row.append(rank,who,score);
+  return row;
+}
+
+function renderViewerRank(entry){
+  const card=$('#viewerRankCard');
+  const rankLabel=$('#playerRank');
+  if(!card)return;
+
+  if(!entry){
+    card.innerHTML='';
+    card.classList.add('hidden');
+    if(rankLabel) rankLabel.textContent='—';
+    return;
+  }
+
+  card.innerHTML='';
+  card.appendChild(buildLeaderboardRow({...entry,is_viewer:true},{viewerCard:true}));
+  card.classList.remove('hidden');
+  if(rankLabel) rankLabel.textContent=t('yourRank')+' #'+entry.rank;
+}
+
 function repaintViewerName(){
-  document.querySelectorAll('.leaderboard-row.me span').forEach(el=>{
+  document.querySelectorAll('.leaderboard-row.me span,.viewer-rank-row.me span').forEach(el=>{
     if(playerName) el.textContent=playerName+' · '+(lang==='zh'?'你':'YOU');
   });
 }
@@ -535,7 +583,7 @@ async function savePlayerName(){
     syncPlayerNameUI();
     repaintViewerName();
     if(status) status.textContent=t('nameSaved')+' ✓';
-    await loadLeaderboard();
+    await loadLeaderboard({reset:true});
   }catch(err){
     console.warn('player name save failed',err);
     if(status) status.textContent=t('leaderboardUnavailable');
@@ -544,33 +592,62 @@ async function savePlayerName(){
   }
 }
 
-async function loadLeaderboard(){
+async function loadLeaderboard({reset=true}={}){
+  if(leaderboardState.loading)return;
+  if(!reset && !leaderboardState.hasMore)return;
+
+  const host=$('#leaderboardList');
+  const status=$('#leaderboardStatus');
+  if(!host)return;
+
+  if(reset || leaderboardState.mode!==gameMode){
+    leaderboardState.mode=gameMode;
+    leaderboardState.offset=0;
+    leaderboardState.hasMore=true;
+    host.innerHTML='';
+    if(status) status.textContent=t('leaderboardLoading');
+  }
+
+  leaderboardState.loading=true;
   try{
-    const params=new URLSearchParams({mode:gameMode,limit:'10',viewer_id:userId});
-    const resp=await fetch('/api/leaderboard?'+params.toString());
+    const params=new URLSearchParams({
+      mode:gameMode,
+      limit:'25',
+      offset:String(leaderboardState.offset),
+      viewer_id:userId
+    });
+    const resp=await fetch('/api/leaderboard?'+params.toString(),{cache:'no-store'});
     if(!resp.ok) throw new Error('leaderboard '+resp.status);
     const data=await resp.json();
-    const host=$('#leaderboardList'); host.innerHTML='';
+
+    renderViewerRank(data.viewer_entry||null);
+
     for(const entry of data.entries||[]){
-      const row=document.createElement('div');
-      row.className='leaderboard-row'+(entry.is_viewer?' me':'');
-      row.dataset.rank=String(entry.rank);
-      const rank=document.createElement('b');
-      const medal=entry.rank===1?'🥇 ':entry.rank===2?'🥈 ':entry.rank===3?'🥉 ':'';
-      rank.textContent=medal+'#'+entry.rank;
-      const who=document.createElement('span');
-      const fallback=entry.is_viewer?(lang==='zh'?'你':'YOU'):(lang==='zh'?'匿名果蝇':'Anonymous Fly');
-      const publicName=(entry.is_viewer&&playerName)?playerName:(entry.display_name||fallback);
-      who.textContent=entry.is_viewer && entry.display_name
-        ? publicName+' · '+(lang==='zh'?'你':'YOU')
-        : publicName;
-      const score=document.createElement('strong'); score.textContent=Number(entry.score).toLocaleString();
-      row.append(rank,who,score);host.appendChild(row);
+      host.appendChild(buildLeaderboardRow(entry));
     }
-    $('#leaderboardStatus').textContent='';
+
+    leaderboardState.offset=Number(data.next_offset??(leaderboardState.offset+(data.entries?.length||0)));
+    leaderboardState.hasMore=!!data.has_more;
+
+    if(status){
+      if(!host.children.length) status.textContent=lang==='zh'?'还没有比赛成绩。':'No scores yet.';
+      else status.textContent=leaderboardState.hasMore
+        ? (lang==='zh'?'继续向下滚动加载更多排名…':'Scroll for more rankings…')
+        : (lang==='zh'?'已显示全部排名。':'All rankings loaded.');
+    }
   }catch(err){
     console.warn('leaderboard load failed',err);
-    $('#leaderboardStatus').textContent=t('leaderboardUnavailable');
+    if(status) status.textContent=t('leaderboardUnavailable');
+  }finally{
+    leaderboardState.loading=false;
+  }
+}
+
+function maybeLoadMoreLeaderboard(){
+  const host=$('#leaderboardList');
+  if(!host || leaderboardState.loading || !leaderboardState.hasMore)return;
+  if(host.scrollTop+host.clientHeight>=host.scrollHeight-120){
+    loadLeaderboard({reset:false});
   }
 }
 
@@ -1345,7 +1422,7 @@ document.querySelectorAll('.replay-speed [data-speed]').forEach(btn=>{
 });
 $('#replayPlay').onclick=()=>replay.playing?pauseReplay():playReplay(true);
 $('#replayScrubber').oninput=(e)=>{pauseReplay();renderReplay(Number(e.target.value)/1000)};
-$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();applyModeUI();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard();updateFlyVisionCopy();updateDetailedGraphUI();if(!$('#result').classList.contains('hidden'))updateResultUI()};
+$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();applyModeUI();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard();updateFlyVisionCopy();updateDetailedGraphUI();if(!$('#result').classList.contains('hidden')){updateResultUI();loadLeaderboard({reset:true})}};
 $('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#closeScience').onclick=()=>$('#scienceDrawer').classList.remove('open');
 $('#loadDetailedGraph').onclick=loadDetailedGraph;
 $('#brainToggle').onclick=()=>{
@@ -1368,6 +1445,7 @@ $('#feedbackModal').onclick=(event)=>{if(event.target===$('#feedbackModal')) $('
 $('#submitFeedback').onclick=submitFeedback;
 $('#savePlayerName').onclick=savePlayerName;
 $('#playerName').onkeydown=(event)=>{if(event.key==='Enter'){event.preventDefault();savePlayerName()}};
+$('#leaderboardList')?.addEventListener('scroll',maybeLoadMoreLeaderboard,{passive:true});
 
 addEventListener('visibilitychange',()=>{if(document.hidden&&!DEBUG_MODE){sensory.motion=sensory.loom=0}});
 
