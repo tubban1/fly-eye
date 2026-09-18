@@ -47,6 +47,13 @@ export class PerceptionEngine {
 
   reset(){
     this.prev=null; this.reference=null; this.referenceTs=0; this.frame=null;
+    this.visual={
+      human:new Uint8Array(this.w*this.h),
+      stabilized:new Uint8Array(this.w*this.h),
+      motion:new Uint8Array(this.w*this.h),
+      loom:new Uint8Array(this.w*this.h),
+      lc4:new Uint8Array(this.w*this.h)
+    };
     this.calibrationStart=0; this.calibrated=false;
     this.motionFloor=.018; this.shiftFloor=.35;
     this.prevHand=null; this.hand=null;
@@ -219,8 +226,6 @@ export class PerceptionEngine {
       }
     }
 
-    this.prev=gray; this.frame=gray;
-
     this.approachEvidence = semantic>this.approachEvidence
       ? smooth(this.approachEvidence,semantic,.46)
       : this.approachEvidence*.88;
@@ -262,6 +267,13 @@ export class PerceptionEngine {
           fingertipConfidence*.22
         )
       : 0;
+
+    this.visual=buildVisualLayers(
+      gray,this.prev,w,h,fx,fy,shift,
+      cameraStable?looming:0,
+      finalLoomConfidence
+    );
+    this.prev=gray; this.frame=gray;
 
     this.last={
       phase,cameraStable,globalMotion,localMotion:clamp(residual*7),opticalLoom,
@@ -470,6 +482,37 @@ function estimateGlobalShift(cur,prev,w,h,fx,fy,handBox){
     }
   }
   return best;
+}
+
+function buildVisualLayers(cur,prev,w,h,fx,fy,shift,looming,lc4Confidence){
+  const human=cur.slice();
+  const stabilized=new Uint8Array(w*h);
+  const motion=new Uint8Array(w*h);
+  const loom=new Uint8Array(w*h);
+  const lc4=new Uint8Array(w*h);
+
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const sx=Math.max(0,Math.min(w-1,Math.round(x-shift.dx)));
+      const sy=Math.max(0,Math.min(h-1,Math.round(y-shift.dy)));
+      const i=y*w+x;
+      const source=cur[sy*w+sx];
+      stabilized[i]=source;
+
+      if(!prev) continue;
+      const d=Math.abs(source-prev[i])/255;
+      const m=clamp(d*3.2);
+      motion[i]=Math.round(m*255);
+
+      const nx=(x-fx)/(w*.28),ny=(y-fy)/(h*.38);
+      const radial=Math.exp(-(nx*nx+ny*ny)*1.35);
+      const loomEvidence=clamp(m*radial*(.25+looming*.95));
+      loom[i]=Math.round(loomEvidence*255);
+      lc4[i]=Math.round(clamp(loomEvidence*lc4Confidence*1.35)*255);
+    }
+  }
+
+  return {human,stabilized,motion,loom,lc4};
 }
 
 function localMotionCompensated(cur,prev,w,h,fx,fy,shift){
