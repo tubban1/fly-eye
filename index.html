@@ -209,9 +209,22 @@
 
     <section class="fly-vision hidden" id="flyVisionPanel">
       <div class="fly-vision-card glass">
-        <div class="fly-vision-head"><span data-i18n="whatFlySees">WHAT THE FLY SEES</span><button class="tiny-btn" id="closeVision">×</button></div>
-        <canvas id="mosaicCanvas" width="320" height="180"></canvas>
-        <p data-i18n="visionExplain">A deliberately simplified compound-eye view used to explain the sensory pipeline.</p>
+        <div class="fly-vision-head">
+          <div>
+            <span data-i18n="flyVisionPipeline">FLY VISION PIPELINE</span>
+            <strong id="visionModeLabel">HUMAN</strong>
+          </div>
+          <button class="tiny-btn" id="closeVision">×</button>
+        </div>
+        <div class="vision-tabs">
+          <button class="tiny-btn active" data-vision="human" data-i18n="visionHuman">HUMAN</button>
+          <button class="tiny-btn" data-vision="stabilized" data-i18n="visionStabilized">STABILIZED</button>
+          <button class="tiny-btn" data-vision="motion" data-i18n="visionMotion">MOTION</button>
+          <button class="tiny-btn" data-vision="loom" data-i18n="visionLoom">LOOM EVIDENCE</button>
+          <button class="tiny-btn" data-vision="lc4" data-i18n="visionLc4">LC4 INPUT</button>
+        </div>
+        <canvas id="mosaicCanvas" width="384" height="216"></canvas>
+        <p id="visionExplain" data-i18n="visionHumanExplain">Camera luminance used as the human reference view.</p>
       </div>
     </section>
 
