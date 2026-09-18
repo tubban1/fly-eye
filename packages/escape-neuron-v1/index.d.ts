@@ -1,4 +1,4 @@
-import type { LoadedNeuronGraph } from '@flyeye/graph-core';
+import type { LoadedNeuronGraph } from '@fly-eye/graph-core';
 
 export declare const PROFILE_ID: 'flyeye.escape-neuron.v1';
 
