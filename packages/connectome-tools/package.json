@@ -1,0 +1,17 @@
+{
+  "name": "@flyeye/connectome-tools",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI tools for inspecting and extracting FlyEye FLYGRAPH connectome profiles",
+  "license": "MIT",
+  "bin": {
+    "flyeye-connectome": "./bin/flyeye-connectome.js"
+  },
+  "dependencies": {
+    "@flyeye/graph-core": "0.1.0"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ]
+}
