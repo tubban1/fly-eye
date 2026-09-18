@@ -1,5 +1,20 @@
 # FlyEye
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22829797.svg)](https://doi.org/10.5281/zenodo.22829797)
+[![CI](https://github.com/tubban1/fly-eye/actions/workflows/ci.yml/badge.svg)](https://github.com/tubban1/fly-eye/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/tubban1/fly-eye?include_prereleases&label=release)](https://github.com/tubban1/fly-eye/releases)
+[![License](https://img.shields.io/github/license/tubban1/fly-eye)](https://github.com/tubban1/fly-eye/blob/main/LICENSE)
+[![Live Demo](https://img.shields.io/badge/live%20demo-fly.fde.fan-brightgreen)](https://fly.fde.fan)
+
+[![npm graph-core](https://img.shields.io/npm/v/%40fly-eye%2Fgraph-core?label=%40fly-eye%2Fgraph-core)](https://www.npmjs.com/package/@fly-eye/graph-core)
+[![npm runtime](https://img.shields.io/npm/v/%40fly-eye%2Fruntime?label=%40fly-eye%2Fruntime)](https://www.npmjs.com/package/@fly-eye/runtime)
+[![npm escape-neuron-v1](https://img.shields.io/npm/v/%40fly-eye%2Fescape-neuron-v1?label=%40fly-eye%2Fescape-neuron-v1)](https://www.npmjs.com/package/@fly-eye/escape-neuron-v1)
+[![npm connectome-tools](https://img.shields.io/npm/v/%40fly-eye%2Fconnectome-tools?label=%40fly-eye%2Fconnectome-tools)](https://www.npmjs.com/package/@fly-eye/connectome-tools)
+[![npm benchmarks](https://img.shields.io/npm/v/%40fly-eye%2Fbenchmarks?label=%40fly-eye%2Fbenchmarks)](https://www.npmjs.com/package/@fly-eye/benchmarks)
+[![PyPI](https://img.shields.io/pypi/v/flyeye-graphs?label=PyPI%20flyeye-graphs)](https://pypi.org/project/flyeye-graphs/)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-yellow)](https://huggingface.co/datasets/Tubban/flyeye-escape-neuron-v1)
+
+
 **Let a fly brain see your world — and let developers run real connectome-derived circuits.**
 
 FlyEye is a browser experiment and developer kit built around a real, signed **Drosophila MaleCNS-derived connectome subgraph**. It turns camera-derived looming signals into modeled neural input, propagates activity through a compact escape circuit, and exposes the same graph/runtime stack as reusable JavaScript and Python packages.
@@ -26,7 +41,7 @@ The first public developer-kit packages are now available across npm, PyPI and H
 | PyPI | `flyeye-graphs` | 0.1.0 | https://pypi.org/project/flyeye-graphs/0.1.0/ |
 | Hugging Face | `Tubban/flyeye-escape-neuron-v1` | dataset | https://huggingface.co/datasets/Tubban/flyeye-escape-neuron-v1 |
 | GitHub Releases | FlyEye publication release | v0.5.0-alpha.9 | https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9 |
-| Zenodo | GitHub integration | pending DOI | DOI link will be added after archival |
+| Zenodo | Archived release | DOI | https://doi.org/10.5281/zenodo.22829797 |
 
 The compact neuron-level dataset contains **3,376 neurons / 78,797 signed edges** in a **959,092-byte FLYGRAPH** asset.
 
@@ -209,9 +224,7 @@ This separation keeps the public experience fast while preserving a reproducible
 
 ## Citation
 
-A permanent Zenodo DOI will be added here as soon as the enabled GitHub integration completes archival.
-
-Until then, cite the tagged GitHub release and the Hugging Face dataset above.
+Zenodo DOI: **[10.5281/zenodo.22829797](https://doi.org/10.5281/zenodo.22829797)**\n\nFor archival citation, use the Zenodo DOI above together with the tagged GitHub release and published dataset metadata.
 
 ---
 
