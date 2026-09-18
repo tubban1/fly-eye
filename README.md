@@ -1,3 +1,16 @@
+## v0.5.0-alpha.8 — FlyEye Developer Kit
+
+Six reusable foundation packages are now implemented and covered by CI:
+
+- `@flyeye/escape-neuron-v1` — self-contained 3,376-neuron / 78,797-edge MaleCNS-derived escape corridor (~0.959 MB)
+- `@flyeye/graph-core` — FLYGRAPH parser, validators, loaders and adjacency helpers
+- `@flyeye/runtime` — declared modeled aggregate escape dynamics
+- `flyeye-graphs` Python SDK — standard-library loader with optional NetworkX conversion
+- `@flyeye/connectome-tools` — generic inspect/cut CLI for task-specific pathway extraction
+- `@flyeye/benchmarks` — cross-runtime vectors and graph-integrity checks
+
+See `docs/FLYEYE_DEVELOPER_KIT.md`.
+
 ## v0.5.0-alpha.7 — Optional neuron-level advanced mode
 
 - camera gameplay remains on zero-download `escape-fast-v1`
