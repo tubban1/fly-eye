@@ -1,8 +1,8 @@
-# @flyeye/runtime
+# @fly-eye/runtime
 
 Modeled group-level dynamics for FlyEye aggregate profiles.
 
-This package is intentionally separate from `@flyeye/graph-core`:
+This package is intentionally separate from `@fly-eye/graph-core`:
 
 - `graph-core` = data parsing and provenance
 - `runtime` = declared product model
@@ -10,7 +10,7 @@ This package is intentionally separate from `@flyeye/graph-core`:
 The default `EscapeRuntime` is not a biological recording or validated full-brain simulation.
 
 ```js
-import { EscapeRuntime } from '@flyeye/runtime';
+import { EscapeRuntime } from '@fly-eye/runtime';
 
 const runtime=new EscapeRuntime(profile);
 const state=runtime.step({looming:0.7});
