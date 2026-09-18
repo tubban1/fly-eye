@@ -73,6 +73,7 @@ const replay={
 };
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
+let perceptionRuntimeError='';
 
 const connectome={status:'loading',phase:'manifest',profile:'auto',aggregate:false,groups:0,aggregateLinks:0,representedNeurons:0,loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
@@ -245,24 +246,38 @@ function interactionReady(){
 }
 
 function analyzeFrame(now){
-  perceptionState=perceptionEngine.analyze(now);
-  lastFrame=perceptionEngine.frame;
+  try{
+    perceptionState=perceptionEngine.analyze(now);
+    perceptionRuntimeError='';
+    lastFrame=perceptionEngine.frame;
 
-  // Pseudo-AR anchor: compensate small camera translations so the fly follows
-  // the background instead of being glued to screen coordinates.
-  if(perceptionState.phase!=='calibrating'){
-    const sx=perceptionState.shiftX/96, sy=perceptionState.shiftY/54;
-    if(Math.hypot(perceptionState.shiftX,perceptionState.shiftY)<3.7){
-      fly.x=clamp(fly.x+(rear?-sx:sx)*.82,.08,.92);
-      fly.y=clamp(fly.y-sy*.82,.18,.84);
+    // Pseudo-AR anchor: compensate small camera translations so the fly follows
+    // the background instead of being glued to screen coordinates.
+    if(perceptionState.phase!=='calibrating'){
+      const sx=perceptionState.shiftX/96, sy=perceptionState.shiftY/54;
+      if(Math.hypot(perceptionState.shiftX,perceptionState.shiftY)<3.7){
+        fly.x=clamp(fly.x+(rear?-sx:sx)*.82,.08,.92);
+        fly.y=clamp(fly.y-sy*.82,.18,.84);
+      }
+    }
+
+    const gate=interactionReady();
+    sensory.motion=gate?perceptionState.localMotion:0;
+    sensory.light=perceptionState.light;
+    sensory.loom=gate?perceptionState.looming:0;
+    updatePerceptionUI(perceptionState);
+  }catch(err){
+    perceptionRuntimeError=String(err?.message||err);
+    console.error('Perception frame failed',err);
+    sensory.motion=0;sensory.loom=0;
+    const status=$('#perceptionStatus');
+    if(status){
+      status.dataset.state='error';
+      status.textContent=lang==='zh'
+        ? '感知模块错误：'+perceptionRuntimeError
+        : 'PERCEPTION ERROR: '+perceptionRuntimeError;
     }
   }
-
-  const gate=interactionReady();
-  sensory.motion=gate?perceptionState.localMotion:0;
-  sensory.light=perceptionState.light;
-  sensory.loom=gate?perceptionState.looming:0;
-  updatePerceptionUI(perceptionState);
 }
 
 function resetReplay(){
