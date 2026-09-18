@@ -31,7 +31,7 @@ Object.assign(dict.en,{
   pipeGraph:'LC4 + MALECNS AGGREGATE GRAPH',pipeMotor:'DN / FLIGHT READOUT',
   graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',
   cameraStable:'STABLE',cameraMoving:'MOVING',handNo:'NO',handWarming:'WARMING',tip:'TIP',
-  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED'
+  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED',perceptionLayer:'PERCEPTION',brainLayer:'BRAIN',modelTimeline:'MODEL TIMELINE',modelTimelineNote:'Relative to modeled escape trigger',eventTip:'Fingertip enters fly zone',eventApproach:'Approach confidence rises',eventLoom:'Validated looming',eventLc4:'LC4 response',eventDn:'Descending-neuron response',eventFlight:'Flight output',eventEscape:'Modeled escape trigger'
 });
 Object.assign(dict.zh,{
   calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',
@@ -46,7 +46,7 @@ Object.assign(dict.zh,{
   pipeGraph:'LC4 + MaleCNS 聚合连接图',pipeMotor:'DN / 飞行输出',
   graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',
   cameraStable:'稳定',cameraMoving:'移动',handNo:'未检测',handWarming:'后台加载',tip:'指尖',
-  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪'
+  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪',perceptionLayer:'感知层',brainLayer:'大脑层',modelTimeline:'模型时间线',modelTimelineNote:'相对模型逃逸触发时间',eventTip:'指尖进入果蝇区域',eventApproach:'接近置信度上升',eventLoom:'确认有效逼近',eventLc4:'LC4 开始响应',eventDn:'下降神经元响应',eventFlight:'飞行输出上升',eventEscape:'模型触发逃逸'
 });
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
@@ -69,7 +69,7 @@ const sensory={motion:0,light:0,loom:0};
 const neural={r:0,lc4:0,lplc2:0,dnp:0,motor:0};
 const replay={
   frames:[],samples:[],frozen:null,lastCapture:0,playing:false,raf:0,progress:0,wallStart:0,startProgress:0,
-  triggerTime:0,postRollUntil:0,pendingFinalize:false
+  triggerTime:0,postRollUntil:0,pendingFinalize:false,speed:.5,showPerception:true,showBrain:true
 };
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
@@ -393,10 +393,23 @@ function resetReplay(){
   replay.raf=0;
 }
 function replaySample(now,threat,escape=0){
+  const p=perceptionState||{};
   return {
     t:now,motion:sensory.motion,light:sensory.light,loom:sensory.loom,lc4:neural.lc4,dnL:neural.lplc2,dnR:neural.dnp,
     flight:neural.motor,network:neural.r,threat,escape,spikes:connectome.spikes||0,
-    fly:{x:fly.x,y:fly.y,state:fly.state},mirrored:!rear
+    fly:{x:fly.x,y:fly.y,state:fly.state},mirrored:!rear,
+    perception:{
+      tipDetected:!!p.tipDetected,
+      tipSource:p.tipSource||'none',
+      tipX:Number.isFinite(p.tipX)?p.tipX:.5,
+      tipY:Number.isFinite(p.tipY)?p.tipY:.5,
+      tipDistance:p.tipDistance??1,
+      tipApproach:p.tipApproach??0,
+      cameraStable:!!p.cameraStable,
+      approach:p.approach??0,
+      looming:p.looming??0,
+      confidence:{...(p.confidence||{})}
+    }
   };
 }
 function recordReplay(now,threat){
@@ -426,7 +439,7 @@ function finalizeReplay(now,threat){
   replay.samples.push(replaySample(now,threat,1));
   replay.frames.push({t:now,gray:lastFrame?lastFrame.slice():null});
   const start=Math.max(replay.samples[0]?.t??replay.triggerTime-1800,replay.triggerTime-2000);
-  const samples=replay.samples.filter(v=>v.t>=start).map(v=>({...v,fly:{...v.fly}}));
+  const samples=replay.samples.filter(v=>v.t>=start).map(v=>({...v,fly:{...v.fly},perception:{...v.perception,confidence:{...(v.perception?.confidence||{})}}}));
   const frames=replay.frames.filter(v=>v.t>=start).map(v=>({t:v.t,gray:v.gray?v.gray.slice():null}));
   replay.frozen={samples,frames,start,end:now,trigger:replay.triggerTime};
   finishEscapeExperience();
@@ -438,6 +451,50 @@ function finishEscapeExperience(){
     ? (lang==='zh'?'摄像头中的有效逼近刺激了 LC4，并沿 MaleCNS 聚合逃逸通路传播到转向/飞行输出。':'Validated camera looming drove LC4 and propagated through the MaleCNS aggregate escape pathway into turning/flight output.')
     : (lang==='zh'?'连接图不可用，无法完成本次神经回放。':'The connectome runtime was unavailable, so this neural replay could not complete.');
   showReplay();
+}
+function buildModelTimeline(){
+  if(!replay.frozen?.samples?.length)return [];
+  const samples=replay.frozen.samples;
+  const trigger=replay.frozen.trigger;
+  const find=(predicate)=>samples.find(predicate);
+  const events=[];
+  const add=(key,sample,value='')=>{
+    if(!sample)return;
+    events.push({key,t:sample.t,rel:Math.round(sample.t-trigger),value});
+  };
+  add('eventTip',find(v=>v.perception?.tipDetected));
+  add('eventApproach',find(v=>(v.perception?.approach||0)>.14));
+  add('eventLoom',find(v=>(v.loom||0)>.16));
+  add('eventLc4',find(v=>(v.lc4||0)>.08));
+  add('eventDn',find(v=>Math.max(v.dnL||0,v.dnR||0)>.08));
+  add('eventFlight',find(v=>(v.flight||0)>.08));
+  add('eventEscape',nearestByTime(samples,trigger));
+  const seen=new Set();
+  return events
+    .filter(e=>{const k=e.key+'@'+e.rel;if(seen.has(k))return false;seen.add(k);return true})
+    .sort((a,b)=>a.t-b.t);
+}
+function renderModelTimeline(){
+  const host=$('#modelTimelineEvents');
+  if(!host)return;
+  const events=buildModelTimeline();
+  host.innerHTML='';
+  for(const event of events){
+    const row=document.createElement('div');
+    row.className='model-event';
+    row.dataset.time=String(event.t);
+    const time=document.createElement('b');
+    time.textContent=(event.rel===0?'0':(event.rel>0?'+':'')+event.rel)+' ms';
+    const label=document.createElement('span');
+    label.textContent=t(event.key);
+    row.append(time,label);
+    host.appendChild(row);
+  }
+}
+function updateModelTimelineActive(target){
+  document.querySelectorAll('.model-event').forEach(el=>{
+    el.classList.toggle('active',Number(el.dataset.time)<=target);
+  });
 }
 function nearestByTime(items,t){
   if(!items?.length) return null;
@@ -491,6 +548,41 @@ function drawReplayTrail(target){
   replayCtx.stroke();
   replayCtx.restore();
 }
+function drawReplayPerception(sample){
+  if(!replay.showPerception||!sample?.perception)return;
+  const p=sample.perception;
+  const cw=replayCanvas.width,ch=replayCanvas.height;
+  const flyX=(sample.fly?.x??.5)*cw,flyY=(sample.fly?.y??.5)*ch;
+
+  const loom=clamp(p.looming||sample.loom||0);
+  if(loom>0){
+    replayCtx.save();
+    replayCtx.strokeStyle='rgba(223,255,85,'+(0.18+loom*.62)+')';
+    replayCtx.lineWidth=1.5+loom*4;
+    replayCtx.setLineDash([7,6]);
+    replayCtx.beginPath();
+    replayCtx.arc(flyX,flyY,42+loom*72,0,Math.PI*2);
+    replayCtx.stroke();
+    replayCtx.restore();
+  }
+
+  if(p.tipDetected){
+    const tx=(sample.mirrored?1-p.tipX:p.tipX)*cw;
+    const ty=p.tipY*ch;
+    replayCtx.save();
+    replayCtx.strokeStyle=p.tipSource==='optical'?'rgba(98,221,255,.95)':'rgba(223,255,85,.95)';
+    replayCtx.fillStyle=p.tipSource==='optical'?'rgba(98,221,255,.18)':'rgba(223,255,85,.18)';
+    replayCtx.lineWidth=2;
+    replayCtx.beginPath();replayCtx.arc(tx,ty,10,0,Math.PI*2);replayCtx.fill();replayCtx.stroke();
+    replayCtx.setLineDash([5,5]);
+    replayCtx.beginPath();replayCtx.moveTo(tx,ty);replayCtx.lineTo(flyX,flyY);replayCtx.stroke();
+    replayCtx.setLineDash([]);
+    replayCtx.font='700 9px system-ui,sans-serif';
+    replayCtx.fillStyle='#fff';
+    replayCtx.fillText((p.tipSource==='optical'?'OPT TIP':'TIP')+' '+Math.round((1-(p.tipDistance||1))*100)+'%',tx+13,ty-8);
+    replayCtx.restore();
+  }
+}
 function drawReplayFrame(frame,sample,target){
   const cw=replayCanvas.width,ch=replayCanvas.height;
   replayCtx.fillStyle='#050505'; replayCtx.fillRect(0,0,cw,ch);
@@ -507,8 +599,9 @@ function drawReplayFrame(frame,sample,target){
     g.addColorStop(0,'#39452b');g.addColorStop(1,'#050505');replayCtx.fillStyle=g;replayCtx.fillRect(0,0,cw,ch);
   }
   drawReplayTrail(target);
+  drawReplayPerception(sample);
   if(sample?.fly) drawReplayFly(replayCtx,sample.fly.x*cw,sample.fly.y*ch,sample.fly.state);
-  const threat=clamp(sample?.threat||0);
+  const threat=replay.showBrain?clamp(sample?.threat||0):0;
   replayCtx.strokeStyle=threat>.35?'rgba(255,80,56,.85)':'rgba(223,255,85,.62)';
   replayCtx.lineWidth=2+threat*5;
   replayCtx.beginPath();replayCtx.arc((sample?.fly?.x??.5)*cw,(sample?.fly?.y??.5)*ch,28+threat*50,0,Math.PI*2);replayCtx.stroke();
@@ -525,10 +618,12 @@ function renderReplay(progress){
   $('#replayCaption').textContent=replayCaption(sample);
   setReplayBar('replayLoom',sample?.loom||0);setReplayBar('replayLc4',sample?.lc4||0);setReplayBar('replayDnL',sample?.dnL||0);setReplayBar('replayDnR',sample?.dnR||0);setReplayBar('replayFlight',sample?.flight||0);setReplayBar('replayEscape',sample?.escape||sample?.threat||0);
   $('#replayScrubber').value=Math.round(replay.progress*1000);
+  updateModelTimelineActive(target);
 }
 function replayTick(now){
   if(!replay.playing||!replay.frozen) return;
-  const duration=4800;
+  const modelDuration=Math.max(1,replay.frozen.end-replay.frozen.start);
+  const duration=modelDuration/Math.max(.1,replay.speed);
   const p=replay.startProgress+(now-replay.wallStart)/duration;
   if(p>=1){replay.playing=false;renderReplay(1);$('#replayPlay').textContent=t('playReplay');return}
   renderReplay(p);replay.raf=requestAnimationFrame(replayTick);
@@ -546,7 +641,9 @@ function pauseReplay(){
 }
 function showReplay(){
   if(!replay.frozen){$('#result').classList.remove('hidden');return}
-  $('#result').classList.add('hidden');$('#replayPanel').classList.remove('hidden');renderReplay(0);playReplay(false);
+  $('#result').classList.add('hidden');$('#replayPanel').classList.remove('hidden');
+  $('#replayPanel').classList.toggle('hide-brain-layer',!replay.showBrain);
+  renderModelTimeline();renderReplay(0);playReplay(false);
 }
 function closeReplay(showResult=true){
   pauseReplay();$('#replayPanel').classList.add('hidden');if(showResult)$('#result').classList.remove('hidden');
@@ -681,6 +778,24 @@ $('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#wiz
 $('#viewReplayBtn').onclick=showReplay;
 $('#closeReplay').onclick=()=>closeReplay(true);
 $('#replayContinue').onclick=()=>closeReplay(true);
+$('#replayPerceptionToggle').onclick=()=>{
+  replay.showPerception=!replay.showPerception;
+  $('#replayPerceptionToggle').classList.toggle('active',replay.showPerception);
+  renderReplay(replay.progress);
+};
+$('#replayBrainToggle').onclick=()=>{
+  replay.showBrain=!replay.showBrain;
+  $('#replayBrainToggle').classList.toggle('active',replay.showBrain);
+  $('#replayPanel').classList.toggle('hide-brain-layer',!replay.showBrain);
+  renderReplay(replay.progress);
+};
+document.querySelectorAll('.replay-speed [data-speed]').forEach(btn=>{
+  btn.onclick=()=>{
+    replay.speed=Number(btn.dataset.speed)||.5;
+    document.querySelectorAll('.replay-speed [data-speed]').forEach(b=>b.classList.toggle('active',b===btn));
+    if(replay.playing) playReplay(true);
+  };
+});
 $('#replayPlay').onclick=()=>replay.playing?pauseReplay():playReplay(true);
 $('#replayScrubber').oninput=(e)=>{pauseReplay();renderReplay(Number(e.target.value)/1000)};
 $('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard()};
