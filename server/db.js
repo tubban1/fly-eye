@@ -44,35 +44,3 @@ export function ensureSchema(){
   })().catch(err=>{schemaPromise=null;throw err});
   return schemaPromise;
 }
-
-export function clamp01(value){
-  const n=Number(value);
-  if(!Number.isFinite(n)) return 0;
-  return Math.max(0,Math.min(1,n));
-}
-
-export function calculateScore(mode,metrics={}){
-  const closest=clamp01(metrics.closest_approach ?? 1);
-  const maxThreat=clamp01(metrics.max_threat ?? 0);
-  const survived=Math.max(0,Math.min(30000,Math.round(Number(metrics.survived_ms)||0)));
-  const escaped=!!metrics.escaped;
-  const latency=Math.max(0,Math.min(30000,Math.round(Number(metrics.escape_latency_ms)||0)));
-
-  if(mode==='sneak_up'){
-    const proximity=Math.round((1-closest)*7000);
-    const survival=Math.round(Math.min(1,survived/20000)*2500);
-    const control=Math.round((1-maxThreat)*500);
-    return Math.max(0,Math.min(10000,proximity+survival+control-(escaped?2500:0)));
-  }
-
-  if(mode==='scare_fast'){
-    if(!escaped || !latency) return 0;
-    return Math.max(0,Math.min(10000,10000-Math.round(latency*1.6)));
-  }
-
-  throw new Error('Unsupported mode');
-}
-
-export function validUuid(value){
-  return typeof value==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
