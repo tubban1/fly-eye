@@ -350,7 +350,25 @@ function drawReplayFly(ctx,x,y,state='idle'){
   if(state==='alert'||state==='escape'){ctx.strokeStyle=state==='escape'?'#ff5a3b':'#dfff55';ctx.lineWidth=2*s;ctx.beginPath();ctx.arc(0,0,28*s,0,Math.PI*2);ctx.stroke()}
   ctx.restore();
 }
-function drawReplayFrame(frame,sample){
+function drawReplayTrail(target){
+  if(!replay.frozen?.samples?.length)return;
+  const cw=replayCanvas.width,ch=replayCanvas.height;
+  const pts=replay.frozen.samples.filter(v=>v.t>=replay.frozen.trigger&&v.t<=target&&v.fly);
+  if(pts.length<2)return;
+  replayCtx.save();
+  replayCtx.strokeStyle='rgba(255,141,92,.92)';
+  replayCtx.lineWidth=3;
+  replayCtx.lineCap='round';
+  replayCtx.lineJoin='round';
+  replayCtx.beginPath();
+  pts.forEach((p,i)=>{
+    const x=p.fly.x*cw,y=p.fly.y*ch;
+    if(i===0) replayCtx.moveTo(x,y); else replayCtx.lineTo(x,y);
+  });
+  replayCtx.stroke();
+  replayCtx.restore();
+}
+function drawReplayFrame(frame,sample,target){
   const cw=replayCanvas.width,ch=replayCanvas.height;
   replayCtx.fillStyle='#050505'; replayCtx.fillRect(0,0,cw,ch);
   if(frame?.gray){
@@ -365,6 +383,7 @@ function drawReplayFrame(frame,sample){
     const g=replayCtx.createRadialGradient(cw*.5,ch*.5,5,cw*.5,ch*.5,cw*.55);
     g.addColorStop(0,'#39452b');g.addColorStop(1,'#050505');replayCtx.fillStyle=g;replayCtx.fillRect(0,0,cw,ch);
   }
+  drawReplayTrail(target);
   if(sample?.fly) drawReplayFly(replayCtx,sample.fly.x*cw,sample.fly.y*ch,sample.fly.state);
   const threat=clamp(sample?.threat||0);
   replayCtx.strokeStyle=threat>.35?'rgba(255,80,56,.85)':'rgba(223,255,85,.62)';
@@ -377,9 +396,9 @@ function renderReplay(progress){
   const {start,end,samples,frames}=replay.frozen;
   const target=start+(end-start)*replay.progress;
   const sample=nearestByTime(samples,target),frame=nearestByTime(frames,target);
-  drawReplayFrame(frame,sample);
-  const remaining=Math.max(0,end-target);
-  $('#replayTime').textContent=remaining<16?'0 ms':'-'+Math.round(remaining)+' ms';
+  drawReplayFrame(frame,sample,target);
+  const rel=target-(replay.frozen.trigger??end);
+  $('#replayTime').textContent=Math.abs(rel)<16?'0 ms':(rel<0?'-':'+')+Math.round(Math.abs(rel))+' ms';
   $('#replayCaption').textContent=replayCaption(sample);
   setReplayBar('replayLoom',sample?.loom||0);setReplayBar('replayLc4',sample?.lc4||0);setReplayBar('replayDnL',sample?.dnL||0);setReplayBar('replayDnR',sample?.dnR||0);setReplayBar('replayFlight',sample?.flight||0);setReplayBar('replayEscape',sample?.escape||sample?.threat||0);
   $('#replayScrubber').value=Math.round(replay.progress*1000);
@@ -491,8 +510,8 @@ function updatePerceptionUI(p){
   else if(perceptionEngine.handStatus!=='ready'){key='loadingHands';state='ready'}
 
   status.textContent=t(key); status.dataset.state=state;
-  $('#handStatus').textContent=p.handDetected
-    ? (t('tip')+' '+Math.round((p.handTipDistance??1)*100)+'%')
+  $('#handStatus').textContent=p.tipDetected
+    ? ((p.tipSource==='optical'?(lang==='zh'?'视觉指尖 ':'OPT TIP '):t('tip')+' ')+Math.round((p.tipDistance??1)*100)+'%')
     : (perceptionEngine.handStatus==='ready'?t('handNo'):t('handWarming'));
   $('#cameraStatus').textContent=p.cameraStable?t('cameraStable'):(p.phase==='calibrating'?'—':t('cameraMoving'));
   $('#approachValue').textContent=Math.round((p.approach||0)*100)+'%';
@@ -554,6 +573,6 @@ if(DEBUG_MODE){
   diag.id='debugStatus';
   diag.style.cssText='position:absolute;z-index:99;left:10px;top:56px;padding:8px 10px;background:#000;color:#dfff55;font:11px monospace;border:1px solid #dfff55;border-radius:8px';
   document.body.appendChild(diag);
-  setInterval(()=>{diag.textContent=`perception=${perceptionState.phase} hand=${perceptionState.handDetected} tip=${(perceptionState.handTipDistance??1).toFixed(2)} tipApproach=${(perceptionState.handTipApproach??0).toFixed(2)} camera=${perceptionState.cameraStable} graph=${connectome.status} n=${connectome.neurons} e=${connectome.edges} loom=${sensory.loom.toFixed(2)} lc4=${neural.lc4.toFixed(2)} dnL=${neural.lplc2.toFixed(2)} dnR=${neural.dnp.toFixed(2)} escapeDN=${connectome.escapeDn.toFixed(2)} flight=${neural.motor.toFixed(2)} threat=${connectome.escape.toFixed(2)} spikes=${connectome.spikes}`},120);
+  setInterval(()=>{diag.textContent=`perception=${perceptionState.phase} hand=${perceptionState.handDetected} tipSource=${perceptionState.tipSource} tip=${(perceptionState.tipDistance??1).toFixed(2)} tipApproach=${(perceptionState.tipApproach??0).toFixed(2)} camera=${perceptionState.cameraStable} graph=${connectome.status} n=${connectome.neurons} e=${connectome.edges} loom=${sensory.loom.toFixed(2)} lc4=${neural.lc4.toFixed(2)} dnL=${neural.lplc2.toFixed(2)} dnR=${neural.dnp.toFixed(2)} escapeDN=${connectome.escapeDn.toFixed(2)} flight=${neural.motor.toFixed(2)} threat=${connectome.escape.toFixed(2)} spikes=${connectome.spikes}`},120);
   startDebugMode();
 }
