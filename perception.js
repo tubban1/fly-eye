@@ -50,12 +50,14 @@ export class PerceptionEngine {
     this.calibrationStart=0; this.calibrated=false;
     this.motionFloor=.018; this.shiftFloor=.35;
     this.prevHand=null; this.hand=null;
-    this.prevOpticalTip=null; this.opticalTip=null;
+    this.prevOpticalTip=null; this.opticalTip=null; this.opticalTipStreak=0;
+    this.stableSince=0; this.motionBlockUntil=0;
     this.approachEvidence=0; this.approachSince=0; this.alertSince=0;
     this.last={
       phase:'calibrating',cameraStable:false,globalMotion:0,localMotion:0,opticalLoom:0,
       handDetected:false,handConfidence:0,handArea:0,handDistance:1,handGrowth:0,handApproach:0,
       tipDetected:false,tipSource:'none',tipDistance:1,tipApproach:0,tipConfidence:0,
+      stableFor:0,motionBlocked:true,localDominance:0,
       approach:0,looming:0,shiftX:0,shiftY:0,light:.5
     };
   }
@@ -97,9 +99,7 @@ export class PerceptionEngine {
     const residual=Math.max(0,local.near-local.global*1.12);
     const slowResidual=Math.max(0,slow.near-slow.global*1.08);
     const opticalLoom=clamp(residual*6.5 + slowResidual*2.1);
-    const opticalTip=this.prev
-      ? detectMovingTip(gray,this.prev,w,h,fx,fy,shift,this.motionFloor)
-      : null;
+    const localDominance=local.near/Math.max(.012,local.global);
 
     const elapsed=now-this.calibrationStart;
     if(elapsed<1500){
@@ -108,14 +108,47 @@ export class PerceptionEngine {
     }else{
       this.calibrated=true;
     }
-    const cameraStable=this.calibrated && shiftMag < Math.max(3.4,this.shiftFloor*4.2+1.0) &&
-      local.global < Math.max(.16,this.motionFloor*6.0+.045);
+
+    const shiftLimit=Math.max(2.0,this.shiftFloor*3.0+.55);
+    const globalLimit=Math.max(.105,this.motionFloor*4.5+.028);
+    const rawCameraStable=this.calibrated && shiftMag<shiftLimit && local.global<globalLimit;
+    const definiteCameraMotion=this.calibrated && (
+      shiftMag>shiftLimit*1.18 ||
+      local.global>globalLimit*1.20 ||
+      globalMotion>.58
+    );
+
+    if(definiteCameraMotion){
+      this.motionBlockUntil=now+420;
+      this.stableSince=0;
+      this.approachEvidence=0;
+      this.approachSince=0;
+      this.alertSince=0;
+      this.prevOpticalTip=null;
+      this.opticalTip=null;
+      this.opticalTipStreak=0;
+      this.prevHand=null;
+    }else if(rawCameraStable){
+      if(!this.stableSince)this.stableSince=now;
+    }else{
+      this.stableSince=0;
+    }
+
+    const stableFor=this.stableSince?Math.max(0,now-this.stableSince):0;
+    const cameraStable=this.calibrated &&
+      rawCameraStable &&
+      now>=this.motionBlockUntil &&
+      stableFor>=260;
+
+    const opticalTip=(this.prev && cameraStable && localDominance>1.45)
+      ? detectMovingTip(gray,this.prev,w,h,fx,fy,shift,this.motionFloor)
+      : null;
 
     const hm=this.handMetrics(now,fx/w,fy/h);
     const om=this.opticalTipMetrics(now,opticalTip,fx/w,fy/h);
     let semantic=0;
 
-    if(cameraStable){
+    if(cameraStable && globalMotion<.34){
       let handEvidence=0;
       if(hm.detected){
         const proximity=clamp(1-hm.tipDistance);
@@ -146,8 +179,8 @@ export class PerceptionEngine {
       semantic=Math.max(handEvidence,opticalTipEvidence);
 
       // Last-resort looming path for a partial object too small to track as a tip.
-      if(!hm.detected && !om.detected && opticalLoom>.42 && residual>.055 && globalMotion<.34){
-        semantic=Math.max(semantic,clamp(.08+opticalLoom*.42+residual*1.3));
+      if(!hm.detected && !om.detected && opticalLoom>.46 && residual>.055 && globalMotion<.28 && localDominance>1.65){
+        semantic=Math.max(semantic,clamp(.06+opticalLoom*.38+residual*1.15));
       }
     }
 
@@ -167,7 +200,8 @@ export class PerceptionEngine {
 
     let phase='ready';
     if(!this.calibrated) phase='calibrating';
-    else if(!cameraStable) phase='camera-moving';
+    else if(definiteCameraMotion || !rawCameraStable) phase='camera-moving';
+    else if(!cameraStable) phase='stabilizing';
     else if((hm.detected||om.detected) && !this.approachSince) phase='hand-detected';
     else if(this.approachSince && now-this.approachSince>80) phase='approaching';
     if(this.alertSince && now-this.alertSince>70) phase='alert';
@@ -184,6 +218,7 @@ export class PerceptionEngine {
       tipDistance:hm.detected?hm.tipDistance:om.distance,
       tipApproach:hm.detected?hm.tipApproach:om.approach,
       tipConfidence:hm.detected?hm.confidence:om.confidence,
+      stableFor,motionBlocked:now<this.motionBlockUntil,localDominance,
       approach:this.approachEvidence,looming,shiftX:shift.dx,shiftY:shift.dy,light
     };
     return this.last;
@@ -191,33 +226,37 @@ export class PerceptionEngine {
 
   opticalTipMetrics(now,candidate,fx,fy){
     if(!candidate){
-      if(this.prevOpticalTip && now-this.prevOpticalTip.t>260) this.prevOpticalTip=null;
+      if(this.prevOpticalTip && now-this.prevOpticalTip.t>220) this.prevOpticalTip=null;
       this.opticalTip=null;
+      this.opticalTipStreak=0;
       return {detected:false,distance:1,approach:0,confidence:0};
     }
 
     const distance=Math.hypot(candidate.x-fx,candidate.y-fy);
     let approach=0;
+    let consistent=false;
 
     if(this.prevOpticalTip){
       const dt=Math.max(.05,(now-this.prevOpticalTip.t)/1000);
       const spatialJump=Math.hypot(candidate.x-this.prevOpticalTip.x,candidate.y-this.prevOpticalTip.y);
-
-      // Only compare consecutive candidates that plausibly belong to the same
-      // moving fingertip/object edge.
-      if(spatialJump<.22){
-        approach=clamp(((this.prevOpticalTip.distance-distance)/dt)*2.6);
+      if(spatialJump<.16){
+        consistent=true;
+        approach=clamp(((this.prevOpticalTip.distance-distance)/dt)*2.25);
       }
     }
 
+    this.opticalTipStreak=consistent?Math.min(6,this.opticalTipStreak+1):1;
     this.prevOpticalTip={t:now,x:candidate.x,y:candidate.y,distance};
     this.opticalTip={...candidate,t:now,distance,approach};
 
+    const continuity=clamp((this.opticalTipStreak-1)/2);
+    const confidence=clamp(candidate.confidence*continuity);
+
     return {
-      detected:candidate.confidence>.12,
+      detected:candidate.confidence>.12 && this.opticalTipStreak>=2,
       distance:clamp(distance/.72),
       approach,
-      confidence:clamp(candidate.confidence)
+      confidence
     };
   }
 
