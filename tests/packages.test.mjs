@@ -9,10 +9,10 @@ import {
   validateNeuronManifest,
   incomingEdges,
   buildOutgoing
-} from '@flyeye/graph-core';
-import { EscapeRuntime } from '@flyeye/runtime';
-import { runEscapeBenchmarks, validateNeuronGraphIntegrity } from '@flyeye/benchmarks';
-import { loadEscapeNeuronV1 } from '@flyeye/escape-neuron-v1';
+} from '@fly-eye/graph-core';
+import { EscapeRuntime } from '@fly-eye/runtime';
+import { runEscapeBenchmarks, validateNeuronGraphIntegrity } from '@fly-eye/benchmarks';
+import { loadEscapeNeuronV1 } from '@fly-eye/escape-neuron-v1';
 
 function makeGraph(){
   const n=4;
