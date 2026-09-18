@@ -31,7 +31,7 @@ Object.assign(dict.en,{
   pipeGraph:'LC4 + MALECNS AGGREGATE GRAPH',pipeMotor:'DN / FLIGHT READOUT',
   graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',
   cameraStable:'STABLE',cameraMoving:'MOVING',handNo:'NO',handWarming:'WARMING',tip:'TIP',
-  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED',perceptionLayer:'PERCEPTION',brainLayer:'BRAIN',modelTimeline:'MODEL TIMELINE',modelTimelineNote:'Relative to modeled escape trigger',eventTip:'Fingertip enters fly zone',eventApproach:'Approach confidence rises',eventLoom:'Validated looming',eventLc4:'LC4 response',eventDn:'Descending-neuron response',eventFlight:'Flight output',eventEscape:'Modeled escape trigger'
+  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED',perceptionLayer:'PERCEPTION',brainLayer:'BRAIN',modelTimeline:'MODEL TIMELINE',modelTimelineNote:'Relative to modeled escape trigger',eventTip:'Fingertip enters fly zone',eventApproach:'Approach confidence rises',eventLoom:'Validated looming',eventLc4:'LC4 response',eventDn:'Descending-neuron response',eventFlight:'Flight output',eventEscape:'Modeled escape trigger',modeSneakEyebrow:'MODE A',modeSneakTitle:'Sneak Up',modeSneakBody:'Get as close as possible without making the fly escape.',modeScareEyebrow:'MODE B',modeScareTitle:'Scare Fast',modeScareBody:'Trigger the escape circuit as fast as you can.',scoreLabel:'SCORE',closestApproach:'CLOSEST',roundTime:'TIME',globalLeaderboard:'GLOBAL LEADERBOARD',leaderboardLoading:'Loading leaderboard…',leaderboardUnavailable:'Leaderboard unavailable',yourRank:'YOUR RANK',sneakWinTitle:'You stayed close.<br><em>And kept it calm.</em>',sneakEscapeTitle:'Too close.<br><em>The fly escaped.</em>',scareWinTitle:'Escape triggered.<br><em>Fast.</em>',scareTimeoutTitle:'No escape.<br><em>Try a clearer approach.</em>',sneakResultSafe:'You survived the full round without triggering escape.',sneakResultEscaped:'The fly escaped before the round ended.',scareResultSuccess:'The escape circuit triggered in {time}.',scareResultTimeout:'No validated escape was triggered inside 15 seconds.',roundComplete:'ROUND COMPLETE'
 });
 Object.assign(dict.zh,{
   calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',
@@ -46,7 +46,7 @@ Object.assign(dict.zh,{
   pipeGraph:'LC4 + MaleCNS 聚合连接图',pipeMotor:'DN / 飞行输出',
   graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',
   cameraStable:'稳定',cameraMoving:'移动',handNo:'未检测',handWarming:'后台加载',tip:'指尖',
-  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪',perceptionLayer:'感知层',brainLayer:'大脑层',modelTimeline:'模型时间线',modelTimelineNote:'相对模型逃逸触发时间',eventTip:'指尖进入果蝇区域',eventApproach:'接近置信度上升',eventLoom:'确认有效逼近',eventLc4:'LC4 开始响应',eventDn:'下降神经元响应',eventFlight:'飞行输出上升',eventEscape:'模型触发逃逸'
+  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪',perceptionLayer:'感知层',brainLayer:'大脑层',modelTimeline:'模型时间线',modelTimelineNote:'相对模型逃逸触发时间',eventTip:'指尖进入果蝇区域',eventApproach:'接近置信度上升',eventLoom:'确认有效逼近',eventLc4:'LC4 开始响应',eventDn:'下降神经元响应',eventFlight:'飞行输出上升',eventEscape:'模型触发逃逸',modeSneakEyebrow:'模式 A',modeSneakTitle:'潜行靠近',modeSneakBody:'尽可能靠近果蝇，但不要让它逃跑。',modeScareEyebrow:'模式 B',modeScareTitle:'快速惊吓',modeScareBody:'尽快触发果蝇的逃逸回路。',scoreLabel:'得分',closestApproach:'最近距离',roundTime:'时间',globalLeaderboard:'全球排行榜',leaderboardLoading:'正在加载排行榜…',leaderboardUnavailable:'排行榜暂不可用',yourRank:'你的排名',sneakWinTitle:'你靠得很近，<br><em>但它没有逃跑。</em>',sneakEscapeTitle:'太近了，<br><em>果蝇逃跑了。</em>',scareWinTitle:'成功触发逃逸，<br><em>而且很快。</em>',scareTimeoutTitle:'没有触发逃逸，<br><em>再试一次更明确的逼近。</em>',sneakResultSafe:'你完成了整轮挑战，没有触发逃逸。',sneakResultEscaped:'果蝇在本轮结束前逃跑了。',scareResultSuccess:'逃逸回路在 {time} 内被触发。',scareResultTimeout:'15 秒内没有触发有效逃逸。',roundComplete:'本轮完成'
 });
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
@@ -82,6 +82,25 @@ const calibrationWizard={
   completedAt:0,
   skipped:false
 };
+
+function getAnonymousUserId(){
+  let id=localStorage.getItem('flyEye_user_id');
+  if(id) return id;
+  if(globalThis.crypto?.randomUUID) id=crypto.randomUUID();
+  else id='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+    const r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16)
+  });
+  localStorage.setItem('flyEye_user_id',id);
+  return id;
+}
+const userId=getAnonymousUserId();
+let gameMode=localStorage.getItem('flyEye_mode')==='scare_fast'?'scare_fast':'sneak_up';
+const round={
+  active:false,finished:false,startedAt:0,endedAt:0,
+  closestApproach:1,dangerMs:0,survivedMs:0,escapeLatencyMs:0,
+  escaped:false,score:null,rank:null,submitting:false
+};
+
 
 const connectome={status:'loading',phase:'manifest',profile:'auto',aggregate:false,groups:0,aggregateLinks:0,representedNeurons:0,loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
