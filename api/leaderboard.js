@@ -37,11 +37,22 @@ export default async function handler(req,res){
           rank() over (order by b.score desc)::int as rank
         from best b
         left join fly_eye_players p on p.user_id=b.user_id
+      ),
+      top_rows as (
+        select * from ranked
+        order by score desc, created_at asc
+        limit ${limit}
+      ),
+      viewer_row as (
+        select * from ranked
+        where ${viewerId} <> ''
+          and user_id::text=${viewerId}
       )
-      select *
-      from ranked
-      order by score desc, created_at asc
-      limit ${limit}
+      select * from top_rows
+      union all
+      select * from viewer_row
+      where user_id not in (select user_id from top_rows)
+      order by rank asc, created_at asc
     `;
 
     return send(res,200,{
