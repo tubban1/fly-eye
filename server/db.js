@@ -47,6 +47,20 @@ export function ensureSchema(){
         updated_at timestamptz not null default now()
       )
     `;
+    await sql`
+      create table if not exists fly_eye_feedback (
+        id bigserial primary key,
+        user_id uuid,
+        display_name text,
+        category text not null check (category in ('bug','idea','science','other')),
+        message text not null,
+        contact text,
+        page_path text,
+        mode text,
+        created_at timestamptz not null default now()
+      )
+    `;
+    await sql`create index if not exists fly_eye_feedback_created_idx on fly_eye_feedback(created_at desc)`;
     return true;
   })().catch(err=>{schemaPromise=null;throw err});
   return schemaPromise;
