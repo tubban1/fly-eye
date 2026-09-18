@@ -99,7 +99,7 @@ function getAnonymousUserId(){
   return id;
 }
 const userId=getAnonymousUserId();
-let playerName=(localStorage.getItem('flyEye_player_name')||'').trim();
+let playerName=cleanPlayerName(localStorage.getItem('flyEye_player_name')||'')||'';
 let gameMode=localStorage.getItem('flyEye_mode')==='scare_fast'?'scare_fast':'sneak_up';
 const round={
   active:false,finished:false,startedAt:0,endedAt:0,
@@ -494,7 +494,7 @@ async function submitRoundResult(){
 }
 
 function cleanPlayerName(value){
-  return Array.from(String(value||'').normalize('NFKC').replace(/[\\u0000-\\u001F\\u007F]/g,'').replace(/\\s+/g,' ').trim()).slice(0,24).join('');
+  return Array.from(String(value||'').normalize('NFKC').replace(/[\u0000-\u001F\u007F]/g,'').replace(/\s+/g,' ').trim()).slice(0,24).join('');
 }
 
 function syncPlayerNameUI(){
