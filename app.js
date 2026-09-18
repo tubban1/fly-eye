@@ -528,7 +528,7 @@ async function openCamera(){
   }catch(err){ console.error(err); $('#permission').classList.remove('hidden'); }
 }
 
-function resetFly(){wasCameraInteractionStable=false;document.body.classList.remove('brain-expanded');const bt=$('#brainToggle');if(bt)bt.textContent=t('details');fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
+function resetFly(){resetRound();wasCameraInteractionStable=false;document.body.classList.remove('brain-expanded');const bt=$('#brainToggle');if(bt)bt.textContent=t('details');fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
 
 function experienceArmed(){
   return DEBUG_MODE || (
@@ -645,10 +645,7 @@ function finalizeReplay(now,threat){
 }
 function finishEscapeExperience(){
   if(!running||!replay.frozen)return;
-  $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';
-  $('#resultExplain').textContent=connectome.status==='ready'
-    ? (lang==='zh'?'摄像头中的有效逼近刺激了 LC4，并沿 MaleCNS 聚合逃逸通路传播到转向/飞行输出。':'Validated camera looming drove LC4 and propagated through the MaleCNS aggregate escape pathway into turning/flight output.')
-    : (lang==='zh'?'连接图不可用，无法完成本次神经回放。':'The connectome runtime was unavailable, so this neural replay could not complete.');
+  updateResultUI();
   showReplay();
 }
 function buildModelTimeline(){
@@ -869,13 +866,14 @@ function connectomeAdapter(now){
   }
   const threat=connectome.escape;
   maxThreat=Math.max(maxThreat,threat);
-  if(!escaped && perceptionState.phase==='alert' && perceptionState.cameraStable && !perceptionState.motionBlocked && (perceptionState.stableFor||0)>=320 && (perceptionState.globalMotion||0)<.30 && sensory.loom>.20 && threat>.40) triggerEscape(threat);
+  if(round.active && !round.finished && !escaped && perceptionState.phase==='alert' && perceptionState.cameraStable && !perceptionState.motionBlocked && (perceptionState.stableFor||0)>=320 && (perceptionState.globalMotion||0)<.30 && sensory.loom>.20 && threat>.40) triggerEscape(threat);
   return threat;
 }
 
 function triggerEscape(threat=connectome.escape){
   const now=performance.now();
   escaped=true; fly.state='escape'; fly.escapeUntil=now+1050;
+  finishRound('escape',now);
   const a=Math.random()*Math.PI*2;
   fly.vx=Math.cos(a)*(rear?.008:.007);
   fly.vy=Math.sin(a)*.006-.003;
@@ -965,6 +963,7 @@ function loop(now){
     analyzeFrame(now);
   }
   const threat=connectomeAdapter(now);
+  updateRound(now,dt,threat);
   recordReplay(now,threat);
   updateFly(dt,now,threat);drawFly(now);updateUI(threat);
   if(!$('#flyVisionPanel').classList.contains('hidden')&&frameCounter%4===0)drawMosaic();
@@ -972,6 +971,17 @@ function loop(now){
 }
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
+
+document.querySelectorAll('.mode-card').forEach(btn=>{
+  btn.onclick=()=>{
+    if(!$('#landing').classList.contains('hidden')){
+      gameMode=btn.dataset.mode==='scare_fast'?'scare_fast':'sneak_up';
+      applyModeUI();resetRound();
+    }
+  };
+});
+applyModeUI();
+resetRound();
 
 $('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#wizardSkip').onclick=()=>completeCalibrationWizard(true);$('#resetBtn').onclick=resetFly;$('#againBtn').onclick=()=>{resetFly();$('#result').classList.add('hidden')};
 $('#viewReplayBtn').onclick=showReplay;
@@ -997,7 +1007,7 @@ document.querySelectorAll('.replay-speed [data-speed]').forEach(btn=>{
 });
 $('#replayPlay').onclick=()=>replay.playing?pauseReplay():playReplay(true);
 $('#replayScrubber').oninput=(e)=>{pauseReplay();renderReplay(Number(e.target.value)/1000)};
-$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard()};
+$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();applyModeUI();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard();if(!$('#result').classList.contains('hidden'))updateResultUI()};
 $('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#closeScience').onclick=()=>$('#scienceDrawer').classList.remove('open');
 $('#brainToggle').onclick=()=>{
   document.body.classList.toggle('brain-expanded');
