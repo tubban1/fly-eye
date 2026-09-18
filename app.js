@@ -31,7 +31,7 @@ Object.assign(dict.en,{
   pipeGraph:'LC4 + MALECNS AGGREGATE GRAPH',pipeMotor:'DN / FLIGHT READOUT',
   graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',
   cameraStable:'STABLE',cameraMoving:'MOVING',handNo:'NO',handWarming:'WARMING',tip:'TIP',
-  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING'
+  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED'
 });
 Object.assign(dict.zh,{
   calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',
@@ -46,7 +46,7 @@ Object.assign(dict.zh,{
   pipeGraph:'LC4 + MaleCNS 聚合连接图',pipeMotor:'DN / 飞行输出',
   graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',
   cameraStable:'稳定',cameraMoving:'移动',handNo:'未检测',handWarming:'后台加载',tip:'指尖',
-  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中'
+  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪'
 });
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
@@ -75,6 +75,13 @@ const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()
 let perceptionState=perceptionEngine.last;
 let perceptionRuntimeError='';
 let wasCameraInteractionStable=false;
+const calibrationWizard={
+  active:false,
+  gestureSeen:false,
+  startedAt:0,
+  completedAt:0,
+  skipped:false
+};
 
 const connectome={status:'loading',phase:'manifest',profile:'auto',aggregate:false,groups:0,aggregateLinks:0,representedNeurons:0,loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
@@ -88,11 +95,12 @@ function initConnectome(){
       connectome.pending=false;
       updateConnectomeStatus();
       updatePerceptionUI(perceptionState);
+    updateCalibrationWizard();
     };
     connectome.worker.onmessage=(event)=>{
       const msg=event.data||{};
       if(msg.type==='ready'){
-        connectome.status='ready';connectome.phase='ready';connectome.profile=msg.profile||connectome.profile;connectome.aggregate=!!msg.aggregate;connectome.groups=msg.groups||0;connectome.aggregateLinks=msg.aggregateLinks||0;connectome.representedNeurons=msg.representedNeurons||msg.neurons||0;connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();updatePerceptionUI(perceptionState);
+        connectome.status='ready';connectome.phase='ready';connectome.profile=msg.profile||connectome.profile;connectome.aggregate=!!msg.aggregate;connectome.groups=msg.groups||0;connectome.aggregateLinks=msg.aggregateLinks||0;connectome.representedNeurons=msg.representedNeurons||msg.neurons||0;connectome.neurons=msg.neurons||0;connectome.edges=msg.edges||0;connectome.escapeTargets=msg.escapeTargetCount||0;connectome.loaded=msg.graphBytes||connectome.loaded;connectome.total=msg.graphBytes||connectome.total;connectome.pending=false;updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard();
       }else if(msg.type==='status'){
         connectome.status='loading';connectome.phase=msg.status||'loading';connectome.profile=msg.profile||connectome.profile;connectome.loaded=msg.loaded||0;connectome.total=msg.total||connectome.total;connectome.reason=msg.reason||connectome.reason;updateConnectomeStatus();updatePerceptionUI(perceptionState);
       }else if(msg.type==='state'){
@@ -215,6 +223,85 @@ addEventListener('resize',resize);resize();
 function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}
 function smooth(prev,next,k=.16){return prev+(next-prev)*k}
 
+function resetCalibrationWizard(now=performance.now()){
+  calibrationWizard.active=true;
+  calibrationWizard.gestureSeen=false;
+  calibrationWizard.startedAt=now;
+  calibrationWizard.completedAt=0;
+  calibrationWizard.skipped=false;
+  $('#calibrationWizard')?.classList.remove('hidden');
+  updateCalibrationWizard();
+}
+
+function setWizardCheck(id,value,state){
+  const row=$('#'+id),label=$('#'+id+'Value');
+  if(row) row.dataset.state=state;
+  if(label) label.textContent=value;
+}
+
+function completeCalibrationWizard(skipped=false){
+  if(!calibrationWizard.active)return;
+  calibrationWizard.skipped=skipped;
+  calibrationWizard.active=false;
+  calibrationWizard.completedAt=performance.now();
+
+  // Start the actual challenge from a clean neural state after the practice gesture.
+  sensory.motion=0;sensory.loom=0;
+  connectome.escape=0;connectome.escapeDn=0;connectome.network=0;connectome.spikes=0;
+  Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});
+  connectome.worker?.postMessage({type:'reset'});
+
+  const title=$('#wizardTitle'),hint=$('#wizardHint');
+  if(title) title.textContent=t('wizardReady');
+  if(hint) hint.textContent=skipped?t('readyPerception'):t('wizardDone');
+  setTimeout(()=>$('#calibrationWizard')?.classList.add('hidden'),skipped?180:520);
+}
+
+function updateCalibrationWizard(){
+  if(!calibrationWizard.active)return;
+  const p=perceptionState||{};
+  const c=p.confidence||{};
+  const cameraReady=!!p.cameraStable;
+  const brainReady=connectome.status==='ready';
+  const opticalReady=!!perceptionEngine.frame && p.phase!=='calibrating';
+  const fingertipReady=perceptionEngine.handStatus==='ready' || opticalReady;
+
+  setWizardCheck('wizardCamera',cameraReady?t('checkReady'):t('checkWait'),cameraReady?'ready':'wait');
+  setWizardCheck('wizardBrain',brainReady?t('checkReady'):t('checkWait'),brainReady?'ready':'wait');
+  setWizardCheck('wizardOptical',opticalReady?t('checkReady'):t('checkWait'),opticalReady?'ready':'wait');
+  setWizardCheck(
+    'wizardTip',
+    p.tipDetected?t('checkTracked'):(fingertipReady?t('checkOptical'):t('checkWait')),
+    p.tipDetected?'tracked':(fingertipReady?'ready':'wait')
+  );
+
+  const baseReady=[cameraReady,brainReady,opticalReady,fingertipReady].filter(Boolean).length;
+  $('#wizardProgress').textContent=baseReady+'/4';
+
+  const combined=clamp(
+    (c.cameraStable||0)*.34 +
+    (Math.max(c.fingertipConfidence||0,.55*(opticalReady?1:0)))*.20 +
+    (c.opticalLoomConfidence||0)*.12 +
+    (brainReady?1:0)*.34
+  );
+  $('#wizardConfidenceBar').style.width=Math.round(combined*100)+'%';
+  $('#wizardConfidenceValue').textContent=Math.round(combined*100)+'%';
+
+  const allBase=baseReady===4;
+  if(allBase){
+    $('#wizardTitle').textContent=t('wizardGesture');
+    $('#wizardHint').textContent=t('wizardMoveFinger');
+    const gesture=(p.approach||0)>.14 || (p.tipDetected && (p.tipApproach||0)>.12);
+    if(gesture){
+      calibrationWizard.gestureSeen=true;
+      completeCalibrationWizard(false);
+    }
+  }else{
+    $('#wizardTitle').textContent=t('wizardStabilize');
+    $('#wizardHint').textContent=t('wizardHoldStill');
+  }
+}
+
 async function openCamera(){
   document.body.classList.remove('brain-expanded');
   $('#permission').classList.add('hidden');
@@ -227,7 +314,9 @@ async function openCamera(){
     document.body.classList.toggle('rear-camera',rear);
     $('#landing').classList.add('hidden'); $('#hud').classList.remove('hidden'); $('#result').classList.add('hidden');
     visionCanvas.width=96; visionCanvas.height=54; lastFrame=null; maxThreat=0; escaped=false;
-    perceptionEngine.startCalibration(performance.now());
+    const calibrationNow=performance.now();
+    perceptionEngine.startCalibration(calibrationNow);
+    resetCalibrationWizard(calibrationNow);
     perceptionEngine.initHands().then(()=>updatePerceptionUI(perceptionState));
     resetFly(); running=true; lastTs=performance.now();
     requestAnimationFrame(loop);
@@ -243,7 +332,7 @@ function experienceArmed(){
   );
 }
 function interactionReady(){
-  return experienceArmed() && (DEBUG_MODE || perceptionState.cameraStable);
+  return experienceArmed() && !calibrationWizard.active && (DEBUG_MODE || perceptionState.cameraStable);
 }
 
 function analyzeFrame(now){
@@ -581,7 +670,7 @@ function loop(now){
 
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
 
-$('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#resetBtn').onclick=resetFly;$('#againBtn').onclick=()=>{resetFly();$('#result').classList.add('hidden')};
+$('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#wizardSkip').onclick=()=>completeCalibrationWizard(true);$('#resetBtn').onclick=resetFly;$('#againBtn').onclick=()=>{resetFly();$('#result').classList.add('hidden')};
 $('#viewReplayBtn').onclick=showReplay;
 $('#closeReplay').onclick=()=>closeReplay(true);
 $('#replayContinue').onclick=()=>closeReplay(true);
