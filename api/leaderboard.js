@@ -21,10 +21,16 @@ export default async function handler(req,res){
     const sql=db();
 
     const rows=await sql`
-      select user_id, score, closest_approach, max_threat, escape_latency_ms,
-             survived_ms, escaped, model_version, graph_profile, created_at
-      from fly_eye_scores
-      where mode=${mode}
+      with best as (
+        select distinct on (user_id)
+          user_id, score, closest_approach, max_threat, escape_latency_ms,
+          survived_ms, escaped, model_version, graph_profile, created_at
+        from fly_eye_scores
+        where mode=${mode}
+        order by user_id, score desc, created_at asc
+      )
+      select *
+      from best
       order by score desc, created_at asc
       limit ${limit}
     `;
