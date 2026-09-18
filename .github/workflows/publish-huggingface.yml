@@ -34,5 +34,5 @@ jobs:
       - name: Upload dataset
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_REPO_ID: ${{ vars.HF_REPO_ID }}
+          HF_REPO_ID: Tubban/flyeye-escape-neuron-v1
         run: python scripts/publish_huggingface.py
