@@ -1,3 +1,22 @@
+## v0.5.0-alpha.1 — Reliability foundation
+
+The first v0.5 milestone is now implemented:
+
+- guided camera self-check: Camera / Fingertip / Optical tracking / Fly brain
+- one practice fingertip approach before the real challenge
+- practice input is discarded before gameplay so calibration cannot trigger an escape
+- unified perception confidence model:
+  - camera stability
+  - semantic hand confidence
+  - fingertip confidence
+  - optical looming confidence
+  - approach confidence
+  - final looming confidence
+- optical mode remains a first-class fallback; MediaPipe is not a blocking dependency
+- camera shake pauses threat processing and requires stable re-arming
+- automated perception regression tests cover static readiness, shake lockout/recovery, optical-only fingertip approach, and clean post-calibration re-arm
+- calibration can be skipped and never becomes a permanent blocker
+
 ## v0.4.7 — Mobile + replay UX
 
 - replay now redraws the fly at its recorded position/state
