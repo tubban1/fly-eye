@@ -1,0 +1,41 @@
+name: Publish GitHub Release alpha.9
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".release/v0.5.0-alpha.9"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Developer Kit
+        run: |
+          npm install
+          npm test
+          test -f public/data/escape-neuron-v1/graph.bin
+          test -f packages/escape-neuron-v1/data/graph.bin
+
+      - name: Assemble release assets
+        run: |
+          mkdir -p dist/release
+          cp public/data/escape-neuron-v1/graph.bin dist/release/escape-neuron-v1.graph.bin
+          cp public/data/escape-neuron-v1/manifest.json dist/release/escape-neuron-v1.manifest.json
+          cp public/data/escape-neuron-v1/report.json dist/release/escape-neuron-v1.report.json
+          zip -r dist/release/flyeye-developer-kit-v0.5.0-alpha.9.zip             packages             docs/FLYEYE_DEVELOPER_KIT.md             docs/FLYEYE_GRAPHS.md             public/data/escape-fast-v1.json             public/data/escape-neuron-v1             public/schema             public/sdk             CITATION.cff             DATA_LICENSE.md             LICENSE
+          cd dist/release
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=v0.5.0-alpha.9
+          gh release create "$TAG"             --target "$GITHUB_SHA"             --title "FlyEye v0.5.0-alpha.9 — Publication & Citation Release"             --notes-file docs/releases/v0.5.0-alpha.9.md             --prerelease             dist/release/*
