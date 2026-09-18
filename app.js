@@ -31,7 +31,7 @@ Object.assign(dict.en,{
   pipeGraph:'LC4 + MALECNS AGGREGATE GRAPH',pipeMotor:'DN / FLIGHT READOUT',
   graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',
   cameraStable:'STABLE',cameraMoving:'MOVING',handNo:'NO',handWarming:'WARMING',tip:'TIP',
-  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY'
+  calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING…',cameraStabilizing:'STABILIZING'
 });
 Object.assign(dict.zh,{
   calibrating:'正在校准视觉…',loadingHands:'光流模式已可用 · 手部追踪后台加载中…',waitingGraph:'正在等待连接图…',
@@ -46,7 +46,7 @@ Object.assign(dict.zh,{
   pipeGraph:'LC4 + MaleCNS 聚合连接图',pipeMotor:'DN / 飞行输出',
   graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',
   cameraStable:'稳定',cameraMoving:'移动',handNo:'未检测',handWarming:'后台加载',tip:'指尖',
-  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸'
+  calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定…',cameraStabilizing:'稳定中'
 });
 let lang = localStorage.getItem('flyEye_lang') || 'en';
 function t(k){ return dict[lang][k] || dict.en[k] || k }
@@ -74,6 +74,7 @@ const replay={
 const perceptionEngine=new PerceptionEngine({video,canvas:visionCanvas,getFly:()=>fly,isRear:()=>rear});
 let perceptionState=perceptionEngine.last;
 let perceptionRuntimeError='';
+let wasCameraInteractionStable=false;
 
 const connectome={status:'loading',phase:'manifest',profile:'auto',aggregate:false,groups:0,aggregateLinks:0,representedNeurons:0,loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
@@ -233,7 +234,7 @@ async function openCamera(){
   }catch(err){ console.error(err); $('#permission').classList.remove('hidden'); }
 }
 
-function resetFly(){document.body.classList.remove('brain-expanded');const bt=$('#brainToggle');if(bt)bt.textContent=t('details');fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
+function resetFly(){wasCameraInteractionStable=false;document.body.classList.remove('brain-expanded');const bt=$('#brainToggle');if(bt)bt.textContent=t('details');fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
 
 function experienceArmed(){
   return DEBUG_MODE || (
@@ -250,6 +251,15 @@ function analyzeFrame(now){
     perceptionState=perceptionEngine.analyze(now);
     perceptionRuntimeError='';
     lastFrame=perceptionEngine.frame;
+
+    const cameraNowStable=!!perceptionState.cameraStable;
+    if(wasCameraInteractionStable && !cameraNowStable){
+      connectome.escape=0; connectome.escapeDn=0; connectome.network=0; connectome.spikes=0;
+      neural.r=0; neural.lc4=0; neural.lplc2=0; neural.dnp=0; neural.motor=0;
+      connectome.pending=false;
+      if(connectome.worker) connectome.worker.postMessage({type:'reset'});
+    }
+    wasCameraInteractionStable=cameraNowStable;
 
     // Pseudo-AR anchor: compensate small camera translations so the fly follows
     // the background instead of being glued to screen coordinates.
@@ -467,7 +477,7 @@ function connectomeAdapter(now){
   }
   const threat=connectome.escape;
   maxThreat=Math.max(maxThreat,threat);
-  if(!escaped && perceptionState.phase==='alert' && sensory.loom>.20 && threat>.40) triggerEscape(threat);
+  if(!escaped && perceptionState.phase==='alert' && perceptionState.cameraStable && !perceptionState.motionBlocked && (perceptionState.stableFor||0)>=320 && (perceptionState.globalMotion||0)<.30 && sensory.loom>.20 && threat>.40) triggerEscape(threat);
   return threat;
 }
 
@@ -520,6 +530,7 @@ function updatePerceptionUI(p){
   else if(p.phase==='calibrating'){key='calibrating';state='loading'}
   else if(connectome.status!=='ready'){key='waitingGraph';state='loading'}
   else if(p.phase==='camera-moving'){key='holdSteady';state='moving'}
+  else if(p.phase==='stabilizing'){key='stabilizing';state='moving'}
   else if(p.phase==='hand-detected'){key='handSeen';state='ready'}
   else if(p.phase==='approaching'){key='approaching';state='ready'}
   else if(p.phase==='alert'){key='perceptionAlert';state='ready'}
@@ -530,7 +541,9 @@ function updatePerceptionUI(p){
   $('#handStatus').textContent=p.tipDetected
     ? ((p.tipSource==='optical'?(lang==='zh'?'视觉指尖 ':'OPT TIP '):t('tip')+' ')+Math.round((p.tipDistance??1)*100)+'%')
     : (perceptionEngine.handStatus==='ready'?t('handNo'):t('handWarming'));
-  $('#cameraStatus').textContent=p.cameraStable?t('cameraStable'):(p.phase==='calibrating'?'—':t('cameraMoving'));
+  $('#cameraStatus').textContent=p.cameraStable
+    ? t('cameraStable')
+    : (p.phase==='calibrating'?'—':(p.phase==='stabilizing'?t('cameraStabilizing'):t('cameraMoving')));
   $('#approachValue').textContent=Math.round((p.approach||0)*100)+'%';
   $('#validLoomValue').textContent=Math.round((p.looming||0)*100)+'%';
 }
