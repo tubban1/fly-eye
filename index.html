@@ -60,6 +60,29 @@
         <div class="threat-track"><i id="threatBar"></i></div>
       </div>
 
+      <div class="calibration-wizard glass hidden" id="calibrationWizard" aria-live="polite">
+        <div class="wizard-head">
+          <div>
+            <span data-i18n="systemCheck">SYSTEM CHECK</span>
+            <strong id="wizardTitle" data-i18n="wizardStabilize">Preparing your camera…</strong>
+          </div>
+          <b id="wizardProgress">0/4</b>
+        </div>
+        <div class="wizard-checks">
+          <div class="wizard-check" id="wizardCamera" data-state="wait"><span data-i18n="camera">CAMERA</span><b id="wizardCameraValue">WAIT</b></div>
+          <div class="wizard-check" id="wizardTip" data-state="wait"><span data-i18n="fingertip">FINGERTIP</span><b id="wizardTipValue">WAIT</b></div>
+          <div class="wizard-check" id="wizardOptical" data-state="wait"><span data-i18n="opticalTracking">OPTICAL</span><b id="wizardOpticalValue">WAIT</b></div>
+          <div class="wizard-check" id="wizardBrain" data-state="wait"><span data-i18n="flyBrain">FLY BRAIN</span><b id="wizardBrainValue">WAIT</b></div>
+        </div>
+        <p id="wizardHint" data-i18n="wizardHoldStill">Hold the phone naturally for a moment.</p>
+        <div class="wizard-confidence">
+          <span data-i18n="confidence">CONFIDENCE</span>
+          <div><i id="wizardConfidenceBar"></i></div>
+          <b id="wizardConfidenceValue">0%</b>
+        </div>
+        <button class="tiny-btn wizard-skip" id="wizardSkip" data-i18n="skip">SKIP</button>
+      </div>
+
       <aside class="brain glass" id="brainPanel">
         <div class="brain-head">
           <div>
