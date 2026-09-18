@@ -26,6 +26,18 @@
       <div class="eyebrow" data-i18n="eyebrow">A REAL-WORLD FLY BRAIN EXPERIMENT</div>
       <h1 data-i18n-html="hero">Let a fly brain<br><em>see your world.</em></h1>
       <p data-i18n="desc">Your camera becomes the fly's visual world. Motion, looming and light are processed locally on your device.</p>
+      <div class="mode-picker" id="modePicker">
+        <button class="mode-card active" data-mode="sneak_up">
+          <span data-i18n="modeSneakEyebrow">MODE A</span>
+          <strong data-i18n="modeSneakTitle">Sneak Up</strong>
+          <small data-i18n="modeSneakBody">Get as close as possible without making the fly escape.</small>
+        </button>
+        <button class="mode-card" data-mode="scare_fast">
+          <span data-i18n="modeScareEyebrow">MODE B</span>
+          <strong data-i18n="modeScareTitle">Scare Fast</strong>
+          <small data-i18n="modeScareBody">Trigger the escape circuit as fast as you can.</small>
+        </button>
+      </div>
       <button class="cta" id="openCamera" data-i18n="openCamera">OPEN CAMERA</button>
       <div class="privacy" data-i18n="privacy">Camera frames stay on your device.</div>
     </section>
@@ -55,6 +67,10 @@
           <div><span data-i18n="camera">CAMERA</span><b id="cameraStatus">—</b></div>
           <div><span data-i18n="approachLabel">APPROACH</span><b id="approachValue">0%</b></div>
           <div><span data-i18n="validLoom">VALID LOOM</span><b id="validLoomValue">0%</b></div>
+        </div>
+        <div class="round-meta">
+          <span id="roundMode">SNEAK UP</span>
+          <b id="roundTimer">20.0 s</b>
         </div>
         <div class="threat-row"><span data-i18n="threat">THREAT</span><b id="threatValue">0%</b></div>
         <div class="threat-track"><i id="threatBar"></i></div>
@@ -113,10 +129,23 @@
 
     <section class="result hidden" id="result">
       <div class="result-card glass">
-        <div class="eyebrow" data-i18n="escaped">ESCAPE TRIGGERED</div>
-        <h2 data-i18n-html="resultTitle">You woke up<br><em>the escape circuit.</em></h2>
-        <div class="score-line"><span data-i18n="maxThreat">MAX THREAT</span><b id="maxThreat">0%</b></div>
+        <div class="eyebrow" id="resultEyebrow" data-i18n="escaped">ESCAPE TRIGGERED</div>
+        <h2 id="resultTitle">You woke up<br><em>the escape circuit.</em></h2>
+        <div class="result-stats">
+          <div class="score-line primary-score"><span data-i18n="scoreLabel">SCORE</span><b id="resultScore">—</b></div>
+          <div class="score-line"><span data-i18n="maxThreat">MAX THREAT</span><b id="maxThreat">0%</b></div>
+          <div class="score-line"><span data-i18n="closestApproach">CLOSEST</span><b id="closestApproach">—</b></div>
+          <div class="score-line"><span data-i18n="roundTime">TIME</span><b id="resultTime">—</b></div>
+        </div>
         <p id="resultExplain" data-i18n="resultExplainInitial">Camera looming drove LC4 and propagated through the connectome.</p>
+        <div class="leaderboard">
+          <div class="leaderboard-head">
+            <span data-i18n="globalLeaderboard">GLOBAL LEADERBOARD</span>
+            <b id="playerRank">—</b>
+          </div>
+          <div id="leaderboardList" class="leaderboard-list"></div>
+          <small id="leaderboardStatus" data-i18n="leaderboardLoading">Loading leaderboard…</small>
+        </div>
         <div class="result-actions">
           <button class="cta" id="againBtn" data-i18n="again">TRY AGAIN</button>
           <button class="ghost big" id="viewReplayBtn" data-i18n="viewReplay">VIEW REPLAY</button>
