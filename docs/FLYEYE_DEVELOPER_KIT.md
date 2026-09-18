@@ -4,19 +4,19 @@
 
 | Package | Version | Purpose | Data/model boundary |
 |---|---:|---|---|
-| `@flyeye/escape-neuron-v1` | 0.1.0 | 3,376-neuron / 78,797-edge compact escape corridor | real signed neuron-level graph, task-specific selection |
-| `@flyeye/graph-core` | 0.1.0 | parser / validator / loaders | data only, no neural dynamics |
-| `@flyeye/runtime` | 0.1.0 | group-level escape dynamics | modeled dynamics |
+| `@fly-eye/escape-neuron-v1` | 0.1.0 | 3,376-neuron / 78,797-edge compact escape corridor | real signed neuron-level graph, task-specific selection |
+| `@fly-eye/graph-core` | 0.1.0 | parser / validator / loaders | data only, no neural dynamics |
+| `@fly-eye/runtime` | 0.1.0 | group-level escape dynamics | modeled dynamics |
 | `flyeye-graphs` Python | 0.1.0 | notebooks / NetworkX / research access | loader/analysis only |
-| `@flyeye/connectome-tools` | 0.1.0 | inspect / cut task-specific graph profiles | deterministic tooling |
-| `@flyeye/benchmarks` | 0.1.0 | compatibility and integrity vectors | software benchmarks, not biological truth |
+| `@fly-eye/connectome-tools` | 0.1.0 | inspect / cut task-specific graph profiles | deterministic tooling |
+| `@fly-eye/benchmarks` | 0.1.0 | compatibility and integrity vectors | software benchmarks, not biological truth |
 
 The neuron package is self-contained: its npm package directory includes the generated `manifest.json`, `graph.bin`, `report.json`, and README.
 
 
 The developer surface is split into six deliberately separate packages so that **real connectome data**, **modeled dynamics**, **tooling**, and **benchmarks** do not get mixed together.
 
-## 1. @flyeye/escape-neuron-v1
+## 1. @fly-eye/escape-neuron-v1
 
 A compact neuron-level MaleCNS-derived escape corridor.
 
@@ -32,7 +32,7 @@ Generated asset:
 
 It preserves real signed internal edges, original source indices, MaleCNS body IDs, group annotations, source commit/hash, and extraction parameters.
 
-## 2. @flyeye/graph-core
+## 2. @fly-eye/graph-core
 
 Generic data layer:
 
@@ -45,7 +45,7 @@ Generic data layer:
 
 It contains no behavior model.
 
-## 3. @flyeye/runtime
+## 3. @fly-eye/runtime
 
 Declared modeled group dynamics.
 
@@ -70,7 +70,7 @@ Standard-library Python loader for:
 
 This is the main entry point for research / notebooks / graph analysis.
 
-## 5. @flyeye/connectome-tools
+## 5. @fly-eye/connectome-tools
 
 Generic CLI:
 
@@ -88,7 +88,7 @@ flyeye-connectome cut \
 
 This lets developers create new task-specific profiles without copying Fly Eye application code.
 
-## 6. @flyeye/benchmarks
+## 6. @fly-eye/benchmarks
 
 Compatibility vectors and graph-integrity checks.
 
@@ -106,12 +106,12 @@ Benchmarks protect software contracts, not biological ground truth:
 MaleCNS-derived data
         │
         ▼
-@flyeye/graph-core
+@fly-eye/graph-core
         │
         ├──────────────► Python / NetworkX / custom simulator
         │
         ▼
-@flyeye/runtime
+@fly-eye/runtime
         │
         ▼
 product behavior
