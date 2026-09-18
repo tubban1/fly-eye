@@ -242,6 +242,186 @@ addEventListener('resize',resize);resize();
 function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}
 function smooth(prev,next,k=.16){return prev+(next-prev)*k}
 
+function modeConfig(){
+  return gameMode==='scare_fast'
+    ? {duration:15000,title:t('modeScareTitle'),body:t('modeScareBody')}
+    : {duration:20000,title:t('modeSneakTitle'),body:t('modeSneakBody')};
+}
+
+function applyModeUI(){
+  document.querySelectorAll('.mode-card').forEach(btn=>btn.classList.toggle('active',btn.dataset.mode===gameMode));
+  const cfg=modeConfig();
+  const title=$('#challengeTitle'),body=$('#challengeBody'),mode=$('#roundMode');
+  if(title) title.textContent=cfg.title;
+  if(body) body.textContent=cfg.body;
+  if(mode) mode.textContent=gameMode==='scare_fast'?t('modeScareTitle').toUpperCase():t('modeSneakTitle').toUpperCase();
+  localStorage.setItem('flyEye_mode',gameMode);
+}
+
+function resetRound(){
+  round.active=false;round.finished=false;round.startedAt=0;round.endedAt=0;
+  round.closestApproach=1;round.dangerMs=0;round.survivedMs=0;round.escapeLatencyMs=0;
+  round.escaped=false;round.score=null;round.rank=null;round.submitting=false;
+  const timer=$('#roundTimer'); if(timer) timer.textContent=gameMode==='scare_fast'?'0.0 s':'20.0 s';
+  const score=$('#resultScore'); if(score) score.textContent='—';
+  const rank=$('#playerRank'); if(rank) rank.textContent='—';
+  const list=$('#leaderboardList'); if(list) list.innerHTML='';
+  const status=$('#leaderboardStatus'); if(status) status.textContent=t('leaderboardLoading');
+}
+
+function startRound(now){
+  if(round.active||round.finished)return;
+  round.active=true;round.startedAt=now;round.endedAt=0;
+  round.closestApproach=1;round.dangerMs=0;round.survivedMs=0;round.escapeLatencyMs=0;round.escaped=false;
+}
+
+function localScoreEstimate(){
+  const closest=clamp(round.closestApproach);
+  if(gameMode==='sneak_up'){
+    const proximity=Math.round((1-closest)*7000);
+    const survival=Math.round(Math.min(1,round.survivedMs/20000)*2500);
+    const control=Math.round((1-clamp(maxThreat))*500);
+    return Math.max(0,Math.min(10000,proximity+survival+control-(round.escaped?2500:0)));
+  }
+  if(!round.escaped||!round.escapeLatencyMs)return 0;
+  return Math.max(0,Math.min(10000,10000-Math.round(round.escapeLatencyMs*1.6)));
+}
+
+function finishRound(reason,now=performance.now()){
+  if(round.finished)return;
+  round.finished=true;round.active=false;round.endedAt=now;
+  round.survivedMs=Math.max(0,Math.round((round.startedAt?now-round.startedAt:0)));
+  round.escaped=reason==='escape';
+  if(round.escaped) round.escapeLatencyMs=Math.max(0,Math.round(now-round.startedAt));
+  round.score=localScoreEstimate();
+
+  sensory.motion=0;sensory.loom=0;
+  if(!round.escaped){
+    connectome.escape=0;connectome.escapeDn=0;connectome.network=0;
+    connectome.worker?.postMessage({type:'reset'});
+    presentRoundResult(false);
+  }
+  submitRoundResult();
+}
+
+function updateRound(now,dt,threat){
+  if(round.finished)return;
+  if(!round.active){
+    if(!calibrationWizard.active && interactionReady()) startRound(now);
+    else return;
+  }
+
+  const elapsed=Math.max(0,now-round.startedAt);
+  round.survivedMs=Math.round(elapsed);
+  if(perceptionState.tipDetected){
+    round.closestApproach=Math.min(round.closestApproach,clamp(perceptionState.tipDistance??1));
+  }
+  if((perceptionState.approach||0)>.25 || threat>.20) round.dangerMs+=dt;
+
+  const timer=$('#roundTimer');
+  if(gameMode==='scare_fast'){
+    if(timer) timer.textContent=(elapsed/1000).toFixed(1)+' s';
+    if(elapsed>=15000) finishRound('timeout',now);
+  }else{
+    const remaining=Math.max(0,20000-elapsed);
+    if(timer) timer.textContent=(remaining/1000).toFixed(1)+' s';
+    if(elapsed>=20000) finishRound('survived',now);
+  }
+}
+
+function formatClosest(){
+  if(round.closestApproach>=.999)return '—';
+  return Math.round(round.closestApproach*100)+'%';
+}
+
+function formatTime(){
+  if(gameMode==='scare_fast' && round.escaped) return (round.escapeLatencyMs/1000).toFixed(2)+' s';
+  return (round.survivedMs/1000).toFixed(1)+' s';
+}
+
+function updateResultUI(){
+  const escapedRound=round.escaped;
+  $('#resultScore').textContent=round.score==null?'—':String(round.score);
+  $('#maxThreat').textContent=Math.round(maxThreat*100)+'%';
+  $('#closestApproach').textContent=formatClosest();
+  $('#resultTime').textContent=formatTime();
+
+  if(gameMode==='sneak_up'){
+    $('#resultEyebrow').textContent=escapedRound?t('escaped'):t('roundComplete');
+    $('#resultTitle').innerHTML=escapedRound?t('sneakEscapeTitle'):t('sneakWinTitle');
+    $('#resultExplain').textContent=escapedRound?t('sneakResultEscaped'):t('sneakResultSafe');
+  }else{
+    $('#resultEyebrow').textContent=escapedRound?t('escaped'):t('roundComplete');
+    $('#resultTitle').innerHTML=escapedRound?t('scareWinTitle'):t('scareTimeoutTitle');
+    $('#resultExplain').textContent=escapedRound
+      ? t('scareResultSuccess').replace('{time}',formatTime())
+      : t('scareResultTimeout');
+  }
+  $('#viewReplayBtn').classList.toggle('hidden',!replay.frozen);
+}
+
+function presentRoundResult(showReplayButton=true){
+  updateResultUI();
+  $('#viewReplayBtn').classList.toggle('hidden',!showReplayButton||!replay.frozen);
+  $('#replayPanel').classList.add('hidden');
+  $('#result').classList.remove('hidden');
+}
+
+async function submitRoundResult(){
+  if(round.submitting)return;
+  round.submitting=true;
+  try{
+    const resp=await fetch('/api/score',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({
+        user_id:userId,
+        mode:gameMode,
+        closest_approach:round.closestApproach,
+        max_threat:maxThreat,
+        escape_latency_ms:round.escapeLatencyMs,
+        survived_ms:round.survivedMs,
+        escaped:round.escaped,
+        model_version:'0.5.0-alpha.3',
+        graph_profile:connectome.profile||'escape-fast-v1'
+      })
+    });
+    if(!resp.ok) throw new Error('score '+resp.status);
+    const data=await resp.json();
+    round.score=data.score;
+    round.rank=data.rank;
+    updateResultUI();
+    $('#playerRank').textContent=t('yourRank')+' #'+data.rank;
+    await loadLeaderboard();
+  }catch(err){
+    console.warn('score submit failed',err);
+    $('#leaderboardStatus').textContent=t('leaderboardUnavailable');
+  }finally{
+    round.submitting=false;
+  }
+}
+
+async function loadLeaderboard(){
+  try{
+    const resp=await fetch('/api/leaderboard?mode='+encodeURIComponent(gameMode)+'&limit=8');
+    if(!resp.ok) throw new Error('leaderboard '+resp.status);
+    const data=await resp.json();
+    const host=$('#leaderboardList'); host.innerHTML='';
+    for(const entry of data.entries||[]){
+      const row=document.createElement('div');
+      row.className='leaderboard-row'+(entry.user_id===userId?' me':'');
+      const rank=document.createElement('b'); rank.textContent='#'+entry.rank;
+      const who=document.createElement('span'); who.textContent=entry.user_id===userId?'YOU / 你':'Fly '+entry.user_id.slice(0,4).toUpperCase();
+      const score=document.createElement('strong'); score.textContent=String(entry.score);
+      row.append(rank,who,score);host.appendChild(row);
+    }
+    $('#leaderboardStatus').textContent='';
+  }catch(err){
+    console.warn('leaderboard load failed',err);
+    $('#leaderboardStatus').textContent=t('leaderboardUnavailable');
+  }
+}
+
 function resetCalibrationWizard(now=performance.now()){
   calibrationWizard.active=true;
   calibrationWizard.gestureSeen=false;
