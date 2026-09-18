@@ -1,0 +1,66 @@
+name: Sync publication metadata
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".publish/publication-metadata-v1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Update v0.5.0-alpha.9 release metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > /tmp/release.md <<'EOF'
+          # FlyEye v0.5.0-alpha.9 — Publication & Citation Release
+
+          FlyEye Developer Kit is now publicly distributed and archived for external reuse and citation.
+
+          ## Public distribution
+
+          - **Live demo:** https://fly.fde.fan
+          - **GitHub:** https://github.com/tubban1/fly-eye
+          - **Zenodo DOI:** https://doi.org/10.5281/zenodo.22829797
+          - **Hugging Face:** https://huggingface.co/datasets/Tubban/flyeye-escape-neuron-v1
+          - **PyPI:** https://pypi.org/project/flyeye-graphs/0.1.0/
+          - **npm:** five packages under the `@fly-eye` scope, version `0.1.0`
+
+          ## Published developer kit
+
+          - `@fly-eye/graph-core@0.1.0`
+          - `@fly-eye/runtime@0.1.0`
+          - `@fly-eye/escape-neuron-v1@0.1.0`
+          - `@fly-eye/connectome-tools@0.1.0`
+          - `@fly-eye/benchmarks@0.1.0`
+          - `flyeye-graphs==0.1.0`
+
+          ## Compact neuron graph
+
+          - **3,376 neurons**
+          - **78,797 signed edges**
+          - **959,092-byte FLYGRAPH asset**
+          - manifest, report, aggregate fast profile, citation metadata, license metadata, and checksums
+
+          ## Citation
+
+          **FlyEye Contributors (2026). _FlyEye Developer Kit: reusable Drosophila connectome graphs and runtime tooling_ (v0.5.0-alpha.9). Zenodo.**
+
+          DOI: **10.5281/zenodo.22829797**
+
+          https://doi.org/10.5281/zenodo.22829797
+
+          ## Scientific boundary
+
+          MaleCNS-derived connectivity data and FlyEye modeled dynamics remain explicitly separated. The wiring is connectome-derived; camera encoding and runtime neural dynamics are models.
+          EOF
+
+          jq -n --rawfile body /tmp/release.md '{body:$body}' > /tmp/payload.json
+          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/391430530" --input /tmp/payload.json
