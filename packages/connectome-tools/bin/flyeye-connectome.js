@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { parseFlyGraph, validateNeuronManifest, buildOutgoing } from '@flyeye/graph-core';
+import { parseFlyGraph, validateNeuronManifest, buildOutgoing } from '@fly-eye/graph-core';
 
 function die(message){ console.error(message); process.exit(1); }
 function parseArgs(argv){
