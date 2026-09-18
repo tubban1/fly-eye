@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "profile": "flyeye.escape-fast.v1",
+  "runtimeModel": "@flyeye/runtime@0.1.x",
+  "vectors": [
+    {
+      "id": "idle",
+      "description": "No looming should remain calm",
+      "steps": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "expect": {
+        "maxEscape": 0.05,
+        "maxLc4": 0.05
+      }
+    },
+    {
+      "id": "weak-loom",
+      "description": "Weak looming should activate LC4 without requiring full escape",
+      "steps": [
+        0,
+        0.15,
+        0.2,
+        0.2,
+        0.1
+      ],
+      "expect": {
+        "minLc4": 0.05,
+        "maxEscape": 0.8
+      }
+    },
+    {
+      "id": "strong-loom",
+      "description": "Sustained strong looming should recruit LC4, descending/turn and flight outputs",
+      "steps": [
+        0,
+        0.35,
+        0.6,
+        0.8,
+        0.9,
+        0.9
+      ],
+      "expect": {
+        "minLc4": 0.4,
+        "minDn": 0.05,
+        "minFlight": 0.05,
+        "minEscape": 0.3
+      }
+    },
+    {
+      "id": "reset",
+      "description": "Reset after stimulation must clear modeled state",
+      "steps": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "reset": true,
+      "expectAfterReset": {
+        "maxEscape": 0,
+        "maxLc4": 0
+      }
+    }
+  ]
+}
