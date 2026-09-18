@@ -40,6 +40,41 @@ export function ensureSchema(){
     `;
     await sql`create index if not exists fly_eye_scores_mode_score_idx on fly_eye_scores(mode, score desc, created_at asc)`;
     await sql`create index if not exists fly_eye_scores_user_idx on fly_eye_scores(user_id, created_at desc)`;
+
+    await sql`
+      create table if not exists fly_eye_sneak_scores (
+        id bigserial primary key,
+        user_id uuid not null,
+        score integer not null,
+        closest_approach double precision not null default 1,
+        max_threat double precision not null default 0,
+        survived_ms integer not null default 0,
+        escaped boolean not null default false,
+        model_version text not null,
+        graph_profile text not null,
+        created_at timestamptz not null default now()
+      )
+    `;
+    await sql`create index if not exists fly_eye_sneak_rank_idx on fly_eye_sneak_scores(escaped, closest_approach asc, survived_ms desc, max_threat asc, created_at asc)`;
+    await sql`create index if not exists fly_eye_sneak_user_idx on fly_eye_sneak_scores(user_id, created_at desc)`;
+
+    await sql`
+      create table if not exists fly_eye_scare_scores (
+        id bigserial primary key,
+        user_id uuid not null,
+        score integer not null,
+        escape_latency_ms integer,
+        max_threat double precision not null default 0,
+        survived_ms integer not null default 0,
+        escaped boolean not null default false,
+        model_version text not null,
+        graph_profile text not null,
+        created_at timestamptz not null default now()
+      )
+    `;
+    await sql`create index if not exists fly_eye_scare_rank_idx on fly_eye_scare_scores(escaped desc, escape_latency_ms asc, created_at asc)`;
+    await sql`create index if not exists fly_eye_scare_user_idx on fly_eye_scare_scores(user_id, created_at desc)`;
+
     await sql`
       create table if not exists fly_eye_players (
         user_id uuid primary key,
