@@ -1,5 +1,24 @@
 ## v0.5.0-alpha.8 — FlyEye Developer Kit
 
+## Developer releases
+
+FlyEye Developer Kit is available through multiple channels:
+
+- **GitHub Release:** [v0.5.0-alpha.9 — Publication & Citation Release](https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9)
+- **Python / PyPI:** [flyeye-graphs 0.1.0](https://pypi.org/project/flyeye-graphs/0.1.0/)
+- **Dataset / Hugging Face:** [Tubban/flyeye-escape-neuron-v1](https://huggingface.co/datasets/Tubban/flyeye-escape-neuron-v1)
+- **JavaScript / npm:** `@fly-eye/*` packages prepared; registry bootstrap pending npm token scope authorization
+- **Citation / Zenodo:** GitHub integration enabled; DOI will be added once the alpha.9 archive is processed
+
+Quick Python install:
+
+```bash
+pip install flyeye-graphs
+```
+
+The neuron-level dataset contains **3,376 neurons / 78,797 signed edges** in a compact **959,092-byte** FLYGRAPH asset.
+
+
 Six reusable foundation packages are now implemented and covered by CI:
 
 - `@fly-eye/escape-neuron-v1` — self-contained 3,376-neuron / 78,797-edge MaleCNS-derived escape corridor (~0.959 MB)
