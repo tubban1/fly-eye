@@ -31,6 +31,7 @@ export interface FlyEyeEscapeProfile {
 export interface EscapeReadout {
   profile: string;
   loom: number;
+  lc4: number;
   dnLeft: number;
   dnRight: number;
   flightLeft: number;
