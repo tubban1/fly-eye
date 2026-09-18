@@ -1,211 +1,218 @@
-## v0.5.0-alpha.8 — FlyEye Developer Kit
+# FlyEye
 
-## Developer releases
+**Let a fly brain see your world — and let developers run real connectome-derived circuits.**
 
-FlyEye Developer Kit is available through multiple channels:
+FlyEye is a browser experiment and developer kit built around a real, signed **Drosophila MaleCNS-derived connectome subgraph**. It turns camera-derived looming signals into modeled neural input, propagates activity through a compact escape circuit, and exposes the same graph/runtime stack as reusable JavaScript and Python packages.
 
-- **GitHub Release:** [v0.5.0-alpha.9 — Publication & Citation Release](https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9)
-- **Python / PyPI:** [flyeye-graphs 0.1.0](https://pypi.org/project/flyeye-graphs/0.1.0/)
-- **Dataset / Hugging Face:** [Tubban/flyeye-escape-neuron-v1](https://huggingface.co/datasets/Tubban/flyeye-escape-neuron-v1)
-- **JavaScript / npm:** `@fly-eye/*` packages prepared; registry bootstrap pending npm token scope authorization
-- **Citation / Zenodo:** GitHub integration enabled; DOI will be added once the alpha.9 archive is processed
+> **Scientific boundary:** the wiring is connectome-derived; the camera encoder and neural dynamics are models. FlyEye does not claim to reproduce a living fly or biologically exact retinal processing.
 
-Quick Python install:
+## Try it
+
+- **Live demo:** https://fly-eye-vc2t.vercel.app
+- **GitHub:** https://github.com/tubban1/fly-eye
+- **Latest release:** https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9
+
+## FlyEye Developer Kit
+
+The first public developer-kit packages are now available across npm, PyPI and Hugging Face.
+
+| Channel | Package / dataset | Version | Link |
+| --- | --- | ---: | --- |
+| npm | `@fly-eye/graph-core` | 0.1.0 | https://www.npmjs.com/package/@fly-eye/graph-core |
+| npm | `@fly-eye/runtime` | 0.1.0 | https://www.npmjs.com/package/@fly-eye/runtime |
+| npm | `@fly-eye/escape-neuron-v1` | 0.1.0 | https://www.npmjs.com/package/@fly-eye/escape-neuron-v1 |
+| npm | `@fly-eye/connectome-tools` | 0.1.0 | https://www.npmjs.com/package/@fly-eye/connectome-tools |
+| npm | `@fly-eye/benchmarks` | 0.1.0 | https://www.npmjs.com/package/@fly-eye/benchmarks |
+| PyPI | `flyeye-graphs` | 0.1.0 | https://pypi.org/project/flyeye-graphs/0.1.0/ |
+| Hugging Face | `Tubban/flyeye-escape-neuron-v1` | dataset | https://huggingface.co/datasets/Tubban/flyeye-escape-neuron-v1 |
+| GitHub Releases | FlyEye publication release | v0.5.0-alpha.9 | https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9 |
+| Zenodo | GitHub integration | pending DOI | DOI link will be added after archival |
+
+The compact neuron-level dataset contains **3,376 neurons / 78,797 signed edges** in a **959,092-byte FLYGRAPH** asset.
+
+## Install
+
+### JavaScript / TypeScript
+
+```bash
+npm install @fly-eye/graph-core @fly-eye/escape-neuron-v1
+```
+
+Additional packages:
+
+```bash
+npm install @fly-eye/runtime
+npm install @fly-eye/connectome-tools
+npm install @fly-eye/benchmarks
+```
+
+### Python
 
 ```bash
 pip install flyeye-graphs
 ```
 
-The neuron-level dataset contains **3,376 neurons / 78,797 signed edges** in a compact **959,092-byte** FLYGRAPH asset.
+## What each package does
 
+- **`@fly-eye/escape-neuron-v1`** — self-contained 3,376-neuron / 78,797-edge MaleCNS-derived escape corridor.
+- **`@fly-eye/graph-core`** — FLYGRAPH parser, validators, loaders and adjacency helpers.
+- **`@fly-eye/runtime`** — declared modeled aggregate escape dynamics.
+- **`flyeye-graphs`** — Python loader with optional NetworkX conversion.
+- **`@fly-eye/connectome-tools`** — inspect/cut CLI for task-specific connectome extraction.
+- **`@fly-eye/benchmarks`** — cross-runtime vectors and graph-integrity checks.
 
-Six reusable foundation packages are now implemented and covered by CI:
+Developer documentation: [docs/FLYEYE_DEVELOPER_KIT.md](docs/FLYEYE_DEVELOPER_KIT.md)
 
-- `@fly-eye/escape-neuron-v1` — self-contained 3,376-neuron / 78,797-edge MaleCNS-derived escape corridor (~0.959 MB)
-- `@fly-eye/graph-core` — FLYGRAPH parser, validators, loaders and adjacency helpers
-- `@fly-eye/runtime` — declared modeled aggregate escape dynamics
-- `flyeye-graphs` Python SDK — standard-library loader with optional NetworkX conversion
-- `@fly-eye/connectome-tools` — generic inspect/cut CLI for task-specific pathway extraction
-- `@fly-eye/benchmarks` — cross-runtime vectors and graph-integrity checks
+## From connectome to executable behavior
 
-See `docs/FLYEYE_DEVELOPER_KIT.md`.
+```text
+Janelia FlyEM MaleCNS
+        ↓
+signed connectome-derived graph
+        ↓
+FlyEye compact escape circuit
+3,376 neurons / 78,797 edges
+        ↓
+graph-core + escape-neuron-v1
+        ↓
+runtime / Python SDK / tooling
+        ↓
+browser experiments, analysis and prototypes
+```
 
-## v0.5.0-alpha.7 — Optional neuron-level advanced mode
+The goal of FlyEye is not merely to distribute connectome files. It provides a small developer layer for turning a measured neural wiring graph into something inspectable and runnable.
 
-- camera gameplay remains on zero-download `escape-fast-v1`
-- a separate Worker loads the pinned 70K-neuron / 798,715-edge graph only on explicit request
-- real manifest/download/parse/metadata progress is shown
-- detailed mode reports neuron count, edge count, LC4 count, and derived escape-target count
-- advanced graph failures cannot block or replace the fast gameplay runtime
-- synthetic FLYGRAPH regression test covers the detailed loader path
-- GitHub CI now runs the full regression suite plus the Vite production build
+## Browser experiment
 
-## v0.5.0-alpha.6 — FlyEye Graphs SDK
+FlyEye is also a camera-first experiment. Your environment becomes sensory input for a virtual fruit fly.
 
-- reusable `flyeye.escape-fast.v1` developer profile
-- zero-dependency browser SDK with `loadFlyEyeProfile()` and `EscapeRuntime`
-- published JSON Schema and TypeScript definitions
-- provenance and scientific-boundary documentation
-- immutable profile-versioning rule
-- automated SDK regression test for looming → turn/DN → flight → escape readout
+The current perception pipeline includes:
 
-## v0.5.0-alpha.5 — Fly Vision 2.0
+- camera calibration before neural input is armed
+- global camera-motion compensation
+- semantic hand/fingertip tracking when available
+- optical looming fallback
+- modeled LC4 input
+- signed graph propagation through the selected escape circuit
+- descending-neuron / flight readouts
+- local neural replay
+- bilingual EN / 中文 UI
 
-- five inspectable perception layers: Human / Stabilized / Motion Evidence / Loom Evidence / LC4 Input
-- layers come from the same perception engine used by gameplay
-- camera-translation compensation is visible instead of hidden
-- looming and LC4 layers are explicitly labeled modeled evidence, not biological imaging
-- mobile layer controls stay compact and camera-first
+Raw camera frames are processed locally in the browser and are not uploaded by FlyEye.
 
-## v0.5.0-alpha.4 — Shareable results
+## Data and provenance
 
-- client-side 1080×1350 result card
-- includes mode, score, closest approach, max threat, round time, and rank
-- includes scientific boundary disclosure
-- raw camera frames are deliberately excluded from the result card
-- native file sharing is used when supported, with text/link fallback
+Connectome data derives from **Janelia FlyEM MaleCNS v1.0** and is attributed in the published manifests. MaleCNS source data is published under **CC BY 4.0**; FlyEye code is released under the repository's **MIT License**.
 
-## v0.5.0-alpha.2 — Replay 2.0
+The compact public developer dataset contains:
 
-- replay records fingertip / optical-target position, source, distance, approach, and perception confidence
-- perception overlay draws fingertip marker, fly-centered looming zone, and fingertip-to-fly relation
-- independent PERCEPTION and BRAIN layer toggles
-- replay speed controls: 0.25× / 0.5× / 1×
-- generated model timeline for fingertip entry, approach, validated looming, LC4, descending-neuron response, flight output, and modeled escape trigger
-- timeline is explicitly labeled as model-relative timing, not biological millisecond precision
+- graph binary
+- manifest
+- report
+- aggregate fast profile
+- citation metadata
+- license metadata
 
-## v0.5.0-alpha.1 — Reliability foundation
+Dataset: https://huggingface.co/datasets/Tubban/flyeye-escape-neuron-v1
 
-The first v0.5 milestone is now implemented:
+## Release assets
 
-- guided camera self-check: Camera / Fingertip / Optical tracking / Fly brain
-- one practice fingertip approach before the real challenge
-- practice input is discarded before gameplay so calibration cannot trigger an escape
-- unified perception confidence model:
-  - camera stability
-  - semantic hand confidence
-  - fingertip confidence
-  - optical looming confidence
-  - approach confidence
-  - final looming confidence
-- optical mode remains a first-class fallback; MediaPipe is not a blocking dependency
-- camera shake pauses threat processing and requires stable re-arming
-- automated perception regression tests cover static readiness, shake lockout/recovery, optical-only fingertip approach, and clean post-calibration re-arm
-- calibration can be skipped and never becomes a permanent blocker
+Current publication release:
 
-## v0.4.7 — Mobile + replay UX
+**FlyEye v0.5.0-alpha.9 — Publication & Citation Release**
 
-- replay now redraws the fly at its recorded position/state
-- replay camera frames mirror correctly for front-camera sessions
-- visible UI copy is bilingual EN / 中文, including perception, brain, replay, and science labels
-- mobile challenge HUD is compact and hides graph-loading details after READY
-- mobile Brain panel is collapsed by default to LC4 + Flight and expands on demand
-- full Brain view remains available as a bottom sheet
-- v0.5 productization roadmap: `docs/V0.5_PLAN.md`
+https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9
 
-# FLY EYE
+The release includes versioned graph assets, manifests, reports, checksums and the developer-kit archive.
 
-**Let a fly brain see your world.**
-
-Fly Eye is a camera-first browser experiment. Your real environment becomes sensory input for a virtual fruit fly: local motion, brightness and looming signals are converted into neural input, then the fly reacts inside the camera view.
-
-## v0.4.4 — Zero-download fast graph
-
-Camera mode no longer waits for the 70K neuron graph.
-
-- embedded `escape-fast-v1` starts immediately in the Web Worker
-- 5 pathway groups: LC4/loom, turnL, turnR, flightL, flightR
-- 21 MaleCNS-derived aggregate links using the upstream group-level edge counts and signed weights
-- group-level neural dynamics are modeled; this is **not** neuron-level propagation
-- MediaPipe Hand Landmarker is now optional for startup: camera calibration + conservative optical looming can run while hand tracking warms in the background
-- the detailed 70K graph is no longer a blocking dependency for the camera challenge
-- reusable developer asset: `/data/escape-fast-v1.json`
-- optional neuron-level compact graph tooling remains under `scripts/build-escape-graph.mjs`
-
-## v0.4.2 — Reusable fast escape graph
-
-- visible graph progress in the mobile challenge card
-- deterministic `escape-v1` graph builder for LC4 → escape pathways
-- reusable FLYGRAPH v1 binary + manifest format for external developers
-- preserves source graph index and MaleCNS body ID mapping
-- runtime prefers `escape-v1` and falls back to the 70k graph only when necessary
-- CI builds and publishes `data/escape-v1/graph.bin` and `manifest.json`
-
-## v0.4.1 — Faster cold start and local cache
-
-- MediaPipe version pinned instead of `@latest`
-- MediaPipe module/WASM/model and connectome graph exposed through same-origin Fly Eye paths
-- heavy runtime assets cached in browser Cache Storage after first successful load
-- MediaPipe hand tracker prewarmed in the background before camera interaction
-- connectome loader now reports download progress and parsing phases
-- current selected graph: 70,000 neurons, 798,715 edges, 9,864,604-byte graph binary
-
-## v0.4 — Perception Layer
-
-The camera no longer sends raw motion directly into the fly brain. Real-world input is filtered first:
-
-- ~1.5 s camera calibration before the fly can react
-- global camera-motion compensation for handheld phones
-- MediaPipe Hand Landmarker as a semantic gate (with GPU→CPU fallback)
-- hand scale growth + hand-to-fly approach + local compensated optical motion
-- a cautious optical-only path for partial fingertips / non-hand looming objects
-- temporal state machine: CALIBRATING → READY → HAND DETECTED → APPROACHING → ALERT
-- connectome must be ready before neural input is armed; the main game no longer silently falls back
-- pseudo-AR background anchoring from estimated camera translation
-- separate PERCEPTION and FLY BRAIN readouts
-
-MediaPipe is used only to isolate likely player-hand pixels/landmarks. It does **not** decide whether the fly escapes. Validated visual signals are converted into modeled looming input, injected into LC4, and then propagated through the real selected signed MaleCNS-derived graph.
-
-## v0.3 — Neural Replay
-
-- Camera-first mobile experience
-- Local motion / looming / brightness sensory encoder
-- Real signed MaleCNS-derived connectome subgraph in a Web Worker
-- LC4 injection with downstream DN / flight readouts
-- Rolling ~2.2 s local replay buffer
-- Automatic slow-motion **What just happened?** replay after escape
-- Scrubbable neural timeline: Looming → LC4 → DN Left/Right → Flight DN → Escape
-- Replay frames and neural samples remain in browser memory only
-- `?debug=1` synthetic looming mode for camera-free graph/replay verification
-- EN / 中文 UI
-
-
-## Connectome runtime
-
-Fly Eye camera mode now uses an embedded aggregate escape graph derived from the pinned MaleCNS manifest. The detailed browser graph remains an optional development asset, pinned to upstream commit:
-
-`bff49a376f0844c918eb7f2be83e95f2699b0d14`
-
-Runtime assets:
-
-- `data/processed/brain/graph.bin`
-- `data/processed/brain/manifest.json`
-
-The binary contains a MaleCNS-derived signed sparse graph. Fly Eye loads it locally, converts the incoming CSR representation to source-oriented adjacency inside a Web Worker, and runs a lightweight LIF loop based on the upstream simulator's core parameters.
-
-## Scientific boundary
-
-The **wiring is real connectome-derived data**. The camera-to-neuron encoder and neural dynamics are models.
-
-Fly Eye does **not** claim that camera pixels are biologically exact retinal signals, that its browser dynamics reproduce a living fly, or that the selected graph is the complete 166,700-neuron MaleCNS. The current graph is a selected motor/behavior subgraph prepared by the upstream project.
-
-The `loom` group is source-annotated LC4. Looming from the camera is a modeled input into that group; downstream propagation then follows the real selected signed edges.
-
-## Privacy
-
-Raw camera frames are not uploaded by Fly Eye. Frame analysis, camera-motion compensation, and MediaPipe hand landmark inference occur in the browser. The connectome graph itself is downloaded as a static public data asset.
-
-## Data attribution
-
-Connectome data derives from **Janelia FlyEM MaleCNS v1.0**. The upstream manifest attributes Janelia FlyEM / MaleCNS and records the prepared graph provenance. MaleCNS data is published under CC BY 4.0; see the upstream source terms for details.
-
-The `dzhng/fly-escape` codebase is used as a technical/data reference; Fly Eye maintains its own browser runtime implementation.
-
-## Run locally
+## Local development
 
 ```bash
+git clone https://github.com/tubban1/fly-eye.git
+cd fly-eye
 npm install
 npm run dev
 ```
 
 Camera access requires HTTPS in production or `localhost` during local development.
+
+## Current architecture
+
+FlyEye keeps the lightweight gameplay path and the detailed developer graph separate:
+
+- **fast browser path** — embedded aggregate escape profile for immediate interaction
+- **detailed graph path** — optional neuron-level compact graph for inspection and development
+- **published SDK layer** — npm + PyPI packages for reuse outside the demo
+
+This separation keeps the public experience fast while preserving a reproducible developer path to the underlying connectome-derived data.
+
+## Selected milestones
+
+### v0.5.0-alpha.9 — Publication & citation release
+
+- GitHub publication release
+- npm developer packages
+- PyPI Python SDK
+- Hugging Face dataset
+- Zenodo integration enabled
+
+### v0.5.0-alpha.8 — Developer Kit
+
+- reusable graph/runtime/tooling packages
+- compact neuron-level escape dataset
+- cross-runtime benchmarks
+- publication metadata and provenance
+
+### v0.5.0-alpha.7 — Optional neuron-level advanced mode
+
+- detailed graph loads only on explicit request
+- gameplay remains on the zero-download fast profile
+- graph progress and metadata shown independently
+- advanced graph failures do not block gameplay
+
+### v0.5.0-alpha.6 — FlyEye Graphs SDK
+
+- reusable `flyeye.escape-fast.v1` developer profile
+- browser SDK
+- schema and TypeScript definitions
+- provenance documentation
+- automated SDK regression tests
+
+### v0.5.0-alpha.5 — Fly Vision 2.0
+
+- Human / Stabilized / Motion Evidence / Loom Evidence / LC4 Input views
+- camera-translation compensation
+- inspectable modeled perception layers
+
+### v0.5.0-alpha.4 — Shareable results
+
+- client-side result card
+- mode, score, closest approach, threat and round metrics
+- scientific-boundary disclosure
+- native sharing when available
+
+### v0.5.0-alpha.2 — Replay 2.0
+
+- fingertip/optical target replay
+- perception + brain layer toggles
+- model-relative neural event timeline
+- 0.25× / 0.5× / 1× replay speeds
+
+### v0.4 — Perception layer
+
+- calibration
+- camera-motion compensation
+- hand landmark gating
+- optical looming fallback
+- perception state machine
+- separate perception and neural readouts
+
+## Citation
+
+A permanent Zenodo DOI will be added here as soon as the enabled GitHub integration completes archival.
+
+Until then, cite the tagged GitHub release and the Hugging Face dataset above.
+
+---
+
+**FlyEye: a developer kit for turning real Drosophila connectome data into runnable neural circuits.**
