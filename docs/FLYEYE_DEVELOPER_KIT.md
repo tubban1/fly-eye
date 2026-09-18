@@ -1,5 +1,19 @@
 # FlyEye Developer Kit
 
+## Current package status
+
+| Package | Version | Purpose | Data/model boundary |
+|---|---:|---|---|
+| `@flyeye/escape-neuron-v1` | 0.1.0 | 3,376-neuron / 78,797-edge compact escape corridor | real signed neuron-level graph, task-specific selection |
+| `@flyeye/graph-core` | 0.1.0 | parser / validator / loaders | data only, no neural dynamics |
+| `@flyeye/runtime` | 0.1.0 | group-level escape dynamics | modeled dynamics |
+| `flyeye-graphs` Python | 0.1.0 | notebooks / NetworkX / research access | loader/analysis only |
+| `@flyeye/connectome-tools` | 0.1.0 | inspect / cut task-specific graph profiles | deterministic tooling |
+| `@flyeye/benchmarks` | 0.1.0 | compatibility and integrity vectors | software benchmarks, not biological truth |
+
+The neuron package is self-contained: its npm package directory includes the generated `manifest.json`, `graph.bin`, `report.json`, and README.
+
+
 The developer surface is split into six deliberately separate packages so that **real connectome data**, **modeled dynamics**, **tooling**, and **benchmarks** do not get mixed together.
 
 ## 1. @flyeye/escape-neuron-v1
