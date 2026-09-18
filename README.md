@@ -1,3 +1,11 @@
+## v0.5.0-alpha.4 — Shareable results
+
+- client-side 1080×1350 result card
+- includes mode, score, closest approach, max threat, round time, and rank
+- includes scientific boundary disclosure
+- raw camera frames are deliberately excluded from the result card
+- native file sharing is used when supported, with text/link fallback
+
 ## v0.5.0-alpha.2 — Replay 2.0
 
 - replay records fingertip / optical-target position, source, distance, approach, and perception confidence
