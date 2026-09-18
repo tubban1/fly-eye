@@ -34,7 +34,9 @@ export default async function handler(req,res){
     const displayName=normalizeDisplayName(body.display_name);
 
     // Plausibility checks: alpha anti-cheat. Stronger signed-session validation comes later.
-    if(mode==='scare_fast' && metrics.escaped && metrics.escape_latency_ms<250){
+    // Only reject timings below a single browser frame-scale reaction window.
+    // The old 250 ms threshold rejected legitimate fast rounds (~0.22 s).
+    if(mode==='scare_fast' && metrics.escaped && metrics.escape_latency_ms<80){
       return send(res,400,{error:'implausible_latency'});
     }
     if(mode==='sneak_up' && metrics.survived_ms>20500 && metrics.escaped){
