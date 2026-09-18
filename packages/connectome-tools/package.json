@@ -1,5 +1,5 @@
 {
-  "name": "@flyeye/connectome-tools",
+  "name": "@fly-eye/connectome-tools",
   "version": "0.1.0",
   "type": "module",
   "description": "CLI tools for inspecting and extracting FlyEye FLYGRAPH connectome profiles",
@@ -8,7 +8,7 @@
     "flyeye-connectome": "./bin/flyeye-connectome.js"
   },
   "dependencies": {
-    "@flyeye/graph-core": "0.1.0"
+    "@fly-eye/graph-core": "0.1.0"
   },
   "files": [
     "bin",
