@@ -2,7 +2,7 @@ import {
   loadNeuronGraph,
   parseFlyGraph,
   validateNeuronManifest
-} from '@flyeye/graph-core';
+} from '@fly-eye/graph-core';
 
 export const PROFILE_ID='flyeye.escape-neuron.v1';
 
