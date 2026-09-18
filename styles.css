@@ -245,3 +245,13 @@
   .advanced-graph-head strong{font-size:14px}
   .advanced-stats{grid-template-columns:repeat(2,1fr)}
 }
+
+
+/* Launch: persistent repository entry point */
+.github-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.github-link:hover,.github-link:focus-visible{border-color:rgba(223,255,85,.48);background:rgba(223,255,85,.08);outline:none}
+@media(max-width:480px){
+  .top-actions{gap:5px}
+  .top-actions .ghost{padding:9px 9px;font-size:8px}
+  .github-link{letter-spacing:.07em}
+}

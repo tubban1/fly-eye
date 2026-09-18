@@ -23,5 +23,6 @@
     "packages/escape-neuron-v1",
     "packages/connectome-tools",
     "packages/benchmarks"
-  ]
+  ],
+  "homepage": "https://fly.fde.fan"
 }
