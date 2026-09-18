@@ -324,3 +324,8 @@
 @media(max-width:480px){
   .challenge-nav-actions .tiny-btn{padding:5px 6px;font-size:6.5px}
 }
+
+@media(max-width:760px){
+  .landing{max-height:calc(100dvh - 76px);overflow-y:auto;padding-bottom:8px;scrollbar-width:none}
+  .landing::-webkit-scrollbar{display:none}
+}
