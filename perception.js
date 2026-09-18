@@ -58,6 +58,14 @@ export class PerceptionEngine {
       handDetected:false,handConfidence:0,handArea:0,handDistance:1,handGrowth:0,handApproach:0,
       tipDetected:false,tipSource:'none',tipDistance:1,tipApproach:0,tipConfidence:0,
       stableFor:0,motionBlocked:true,localDominance:0,
+      confidence:{
+        cameraStable:0,
+        handConfidence:0,
+        fingertipConfidence:0,
+        opticalLoomConfidence:0,
+        approachConfidence:0,
+        finalLoomConfidence:0
+      },
       approach:0,looming:0,shiftX:0,shiftY:0,light:.5
     };
   }
@@ -208,6 +216,26 @@ export class PerceptionEngine {
 
     const looming=(phase==='approaching'||phase==='alert')?clamp(this.approachEvidence):0;
 
+    const cameraConfidence=this.calibrated
+      ? clamp((stableFor/320)*(1-clamp(globalMotion/.42)))
+      : clamp(elapsed/1500)*.45;
+    const fingertipConfidence=clamp(Math.max(
+      hm.detected?hm.confidence:0,
+      om.detected?om.confidence:0
+    ));
+    const opticalLoomConfidence=clamp(
+      opticalLoom*.72 +
+      clamp((localDominance-1)/1.8)*.28
+    );
+    const approachConfidence=clamp(this.approachEvidence);
+    const finalLoomConfidence=cameraStable
+      ? clamp(
+          approachConfidence*.56 +
+          opticalLoomConfidence*.22 +
+          fingertipConfidence*.22
+        )
+      : 0;
+
     this.last={
       phase,cameraStable,globalMotion,localMotion:clamp(residual*7),opticalLoom,
       handDetected:hm.detected,handConfidence:hm.confidence,handArea:hm.area,
@@ -219,6 +247,14 @@ export class PerceptionEngine {
       tipApproach:hm.detected?hm.tipApproach:om.approach,
       tipConfidence:hm.detected?hm.confidence:om.confidence,
       stableFor,motionBlocked:now<this.motionBlockUntil,localDominance,
+      confidence:{
+        cameraStable:cameraConfidence,
+        handConfidence:clamp(hm.confidence||0),
+        fingertipConfidence,
+        opticalLoomConfidence,
+        approachConfidence,
+        finalLoomConfidence
+      },
       approach:this.approachEvidence,looming,shiftX:shift.dx,shiftY:shift.dy,light
     };
     return this.last;
