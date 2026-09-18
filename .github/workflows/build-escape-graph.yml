@@ -41,12 +41,15 @@ jobs:
           MAX_HOPS: "3"
           TOP_ESCAPE_DNS: "32"
         run: |
-          rm -rf public/data/escape-neuron-v1
+          rm -rf public/data/escape-neuron-v1 packages/escape-neuron-v1/data
           node scripts/build-escape-graph.mjs \
             /tmp/fly-eye-source/manifest.json \
             /tmp/fly-eye-source/graph.bin \
             public/data/escape-neuron-v1
+          mkdir -p packages/escape-neuron-v1
+          cp -R public/data/escape-neuron-v1 packages/escape-neuron-v1/data
           ls -lh public/data/escape-neuron-v1/
+          ls -lh packages/escape-neuron-v1/data/
 
       - name: Validate generated manifest
         run: |
@@ -56,7 +59,7 @@ jobs:
         run: |
           git config user.name "fly-eye-graph-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add public/data/escape-neuron-v1
+          git add public/data/escape-neuron-v1 packages/escape-neuron-v1/data
           if git diff --cached --quiet; then
             echo "escape-neuron-v1 is already up to date"
           else
