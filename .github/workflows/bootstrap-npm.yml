@@ -31,24 +31,24 @@ jobs:
       - name: Publish graph-core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @flyeye/graph-core --access public
+        run: npm publish --workspace @fly-eye/graph-core --access public
 
       - name: Publish runtime
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @flyeye/runtime --access public
+        run: npm publish --workspace @fly-eye/runtime --access public
 
       - name: Publish escape-neuron-v1
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @flyeye/escape-neuron-v1 --access public
+        run: npm publish --workspace @fly-eye/escape-neuron-v1 --access public
 
       - name: Publish connectome-tools
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @flyeye/connectome-tools --access public
+        run: npm publish --workspace @fly-eye/connectome-tools --access public
 
       - name: Publish benchmarks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @flyeye/benchmarks --access public
+        run: npm publish --workspace @fly-eye/benchmarks --access public
