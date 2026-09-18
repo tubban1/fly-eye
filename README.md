@@ -8,7 +8,7 @@ FlyEye is a browser experiment and developer kit built around a real, signed **D
 
 ## Try it
 
-- **Live demo:** https://fly-eye-vc2t.vercel.app
+- **Live demo:** https://fly.fde.fan
 - **GitHub:** https://github.com/tubban1/fly-eye
 - **Latest release:** https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9
 
