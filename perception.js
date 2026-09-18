@@ -74,6 +74,33 @@ export class PerceptionEngine {
     this.reset(); this.calibrationStart=now;
   }
 
+  rearmAfterPractice(now=performance.now()){
+    this.approachEvidence=0;
+    this.approachSince=0;
+    this.alertSince=0;
+    this.prevOpticalTip=null;
+    this.opticalTip=null;
+    this.opticalTipStreak=0;
+    this.prevHand=null;
+    this.motionBlockUntil=now+260;
+    this.stableSince=0;
+    this.last={
+      ...this.last,
+      phase:'stabilizing',
+      cameraStable:false,
+      motionBlocked:true,
+      stableFor:0,
+      approach:0,
+      looming:0,
+      tipApproach:0,
+      confidence:{
+        ...(this.last.confidence||{}),
+        approachConfidence:0,
+        finalLoomConfidence:0
+      }
+    };
+  }
+
   analyze(now=performance.now()){
     if(this.video.readyState<2) return this.last;
     if(!this.calibrationStart) this.calibrationStart=now;
