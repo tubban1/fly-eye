@@ -27,6 +27,7 @@
       <div class="brand">FLY <span>EYE</span></div>
       <div class="top-actions">
         <a class="ghost github-link" href="https://github.com/tubban1/fly-eye" target="_blank" rel="noopener noreferrer" aria-label="Open FlyEye on GitHub">GITHUB ↗</a>
+        <button class="ghost" id="feedbackBtn" data-i18n="feedback">FEEDBACK</button>
         <button class="ghost" id="langBtn">中文</button>
         <button class="ghost" id="scienceBtn" data-i18n="brainBtn">BRAIN</button>
       </div>
@@ -50,6 +51,34 @@
       </div>
       <button class="cta" id="openCamera" data-i18n="openCamera">OPEN CAMERA</button>
       <div class="privacy" data-i18n="privacy">Camera frames stay on your device.</div>
+    </section>
+
+    <section class="feedback-modal hidden" id="feedbackModal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+      <div class="feedback-card glass">
+        <div class="feedback-head">
+          <div>
+            <div class="eyebrow" data-i18n="feedbackEyebrow">HELP IMPROVE FLYEYE</div>
+            <h2 id="feedbackTitle" data-i18n="feedbackTitle">Send feedback</h2>
+          </div>
+          <button class="tiny-btn" id="closeFeedback" type="button" aria-label="Close">×</button>
+        </div>
+        <label class="feedback-label" for="feedbackType" data-i18n="feedbackType">TYPE</label>
+        <select id="feedbackType">
+          <option value="bug" data-i18n="feedbackBug">Bug / problem</option>
+          <option value="idea" data-i18n="feedbackIdea">Idea / suggestion</option>
+          <option value="science" data-i18n="feedbackScience">Scientific feedback</option>
+          <option value="other" data-i18n="feedbackOther">Other</option>
+        </select>
+        <label class="feedback-label" for="feedbackMessage" data-i18n="feedbackMessageLabel">MESSAGE</label>
+        <textarea id="feedbackMessage" maxlength="2000" rows="6" data-i18n-placeholder="feedbackPlaceholder" placeholder="What happened, or what should FlyEye improve?"></textarea>
+        <label class="feedback-label" for="feedbackContact" data-i18n="feedbackContact">CONTACT (OPTIONAL)</label>
+        <input id="feedbackContact" maxlength="160" autocomplete="email" data-i18n-placeholder="feedbackContactPlaceholder" placeholder="Email or other contact" />
+        <input id="feedbackWebsite" class="feedback-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <div class="feedback-actions">
+          <small id="feedbackStatus"></small>
+          <button class="cta" id="submitFeedback" type="button" data-i18n="feedbackSubmit">SEND FEEDBACK</button>
+        </div>
+      </div>
     </section>
 
     <section class="permission hidden" id="permission">
