@@ -1,0 +1,38 @@
+name: Publish Hugging Face dataset
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".publish/huggingface-v1"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Prepare dataset
+        run: node scripts/prepare-huggingface-dataset.mjs
+
+      - name: Install Hub client
+        run: python -m pip install --upgrade huggingface_hub
+
+      - name: Upload dataset
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_REPO_ID: ${{ vars.HF_REPO_ID }}
+        run: python scripts/publish_huggingface.py
