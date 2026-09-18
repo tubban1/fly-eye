@@ -76,9 +76,11 @@ export class EscapeRuntime{
     const rawEscape=(s.loom||0)*.45+escapeDn*.25+flight*.30;
     const escape=clamp((rawEscape-.08)/.50);
 
+    const lc4=clamp(s.loom||0);
     return {
       profile:this.profile.profile,
-      loom:clamp(s.loom||0),
+      loom:lc4,
+      lc4,
       dnLeft,dnRight,flightLeft,flightRight,flight,escapeDn,network,escape,
       state:{...s}
     };
