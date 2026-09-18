@@ -56,6 +56,10 @@ self.onmessage = async (event) => {
     if (!ready && !loading) await init();
     return;
   }
+  if (msg.type === 'init-detailed') {
+    if (!ready && !loading) await initDetailed();
+    return;
+  }
   if (msg.type === 'reset') {
     if (ready) resetState();
     return;
@@ -94,6 +98,60 @@ async function init() {
     attribution:AGGREGATE_PROFILE.attribution
   });
 }
+async function initDetailed() {
+  loading=true;
+  try{
+    activeProfile=FULL_PROFILE;
+    const loaded=await loadProfile(FULL_PROFILE);
+    manifest=loaded.manifest;
+
+    self.postMessage({
+      type:'status',
+      status:'graph-parse',
+      profile:FULL_PROFILE.name,
+      loaded:loaded.buffer.byteLength,
+      total:loaded.buffer.byteLength
+    });
+    parseGraph(loaded.buffer);
+
+    self.postMessage({
+      type:'status',
+      status:'metadata',
+      profile:FULL_PROFILE.name,
+      loaded:loaded.buffer.byteLength,
+      total:loaded.buffer.byteLength
+    });
+    buildMetadata();
+
+    runtimeMode='neuron';
+    ready=true;
+    loading=false;
+    resetState();
+
+    self.postMessage({
+      type:'ready',
+      profile:FULL_PROFILE.name,
+      aggregate:false,
+      neurons:n,
+      edges:edgeCount,
+      loomCount:groups.loom?.length||0,
+      visionCount:(groups.visionL?.length||0)+(groups.visionR?.length||0),
+      escapeTargetCount:escapeTargets.length,
+      graphBytes:loaded.buffer.byteLength,
+      upstreamCommit:UPSTREAM_COMMIT,
+      attribution:manifest.attribution||''
+    });
+  }catch(err){
+    loading=false;
+    ready=false;
+    self.postMessage({
+      type:'error',
+      profile:FULL_PROFILE.name,
+      message:String(err?.message||err)
+    });
+  }
+}
+
 async function loadProfile(profile) {
   self.postMessage({ type: 'status', status: 'manifest', profile: profile.name });
   const manifestRes = await fetch(profile.manifest, { cache: 'force-cache' });
