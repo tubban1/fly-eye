@@ -1,3 +1,13 @@
+## v0.5.0-alpha.7 — Optional neuron-level advanced mode
+
+- camera gameplay remains on zero-download `escape-fast-v1`
+- a separate Worker loads the pinned 70K-neuron / 798,715-edge graph only on explicit request
+- real manifest/download/parse/metadata progress is shown
+- detailed mode reports neuron count, edge count, LC4 count, and derived escape-target count
+- advanced graph failures cannot block or replace the fast gameplay runtime
+- synthetic FLYGRAPH regression test covers the detailed loader path
+- GitHub CI now runs the full regression suite plus the Vite production build
+
 ## v0.5.0-alpha.6 — FlyEye Graphs SDK
 
 - reusable `flyeye.escape-fast.v1` developer profile
