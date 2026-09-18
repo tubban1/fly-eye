@@ -1,5 +1,5 @@
 import { db, ensureSchema } from '../server/db.js';
-import { calculateScore, validUuid, normalizeMetrics } from '../server/scoring.js';
+import { calculateScore, validUuid, normalizeMetrics, normalizeDisplayName } from '../server/scoring.js';
 
 function send(res,status,payload){
   res.statusCode=status;
@@ -31,6 +31,7 @@ export default async function handler(req,res){
     if(!['sneak_up','scare_fast'].includes(mode)) return send(res,400,{error:'invalid_mode'});
 
     const metrics=normalizeMetrics(body);
+    const displayName=normalizeDisplayName(body.display_name);
 
     // Plausibility checks: alpha anti-cheat. Stronger signed-session validation comes later.
     if(mode==='scare_fast' && metrics.escaped && metrics.escape_latency_ms<250){
@@ -45,6 +46,15 @@ export default async function handler(req,res){
     const graphProfile=String(body.graph_profile||'escape-fast-v1').slice(0,64);
 
     const sql=db();
+    if(displayName){
+      await sql`
+        insert into fly_eye_players (user_id,display_name,updated_at)
+        values (${userId},${displayName},now())
+        on conflict (user_id)
+        do update set display_name=excluded.display_name, updated_at=now()
+      `;
+    }
+
     const [row]=await sql`
       insert into fly_eye_scores
         (user_id,mode,score,closest_approach,max_threat,escape_latency_ms,survived_ms,escaped,model_version,graph_profile)
@@ -79,6 +89,7 @@ export default async function handler(req,res){
       personal_best:bestRow.personal_best,
       rank:rankRow.rank,
       mode,
+      display_name:displayName,
       metrics
     });
   }catch(err){
