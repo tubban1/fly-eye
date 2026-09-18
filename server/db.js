@@ -40,6 +40,13 @@ export function ensureSchema(){
     `;
     await sql`create index if not exists fly_eye_scores_mode_score_idx on fly_eye_scores(mode, score desc, created_at asc)`;
     await sql`create index if not exists fly_eye_scores_user_idx on fly_eye_scores(user_id, created_at desc)`;
+    await sql`
+      create table if not exists fly_eye_players (
+        user_id uuid primary key,
+        display_name text not null,
+        updated_at timestamptz not null default now()
+      )
+    `;
     return true;
   })().catch(err=>{schemaPromise=null;throw err});
   return schemaPromise;

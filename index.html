@@ -149,6 +149,14 @@
         </div>
         <p id="resultExplain" data-i18n="resultExplainInitial">Camera looming drove LC4 and propagated through the connectome.</p>
         <div class="leaderboard">
+          <div class="player-profile">
+            <label for="playerName" data-i18n="playerName">PLAYER NAME</label>
+            <div class="player-profile-row">
+              <input id="playerName" maxlength="24" autocomplete="nickname" data-i18n-placeholder="playerNamePlaceholder" placeholder="Choose a public name" />
+              <button class="tiny-btn" id="savePlayerName" type="button" data-i18n="saveName">SAVE</button>
+            </div>
+            <small id="playerNameStatus" data-i18n="namePublic">Shown publicly on the leaderboard. Your browser keeps your player ID.</small>
+          </div>
           <div class="leaderboard-head">
             <span data-i18n="globalLeaderboard">GLOBAL LEADERBOARD</span>
             <b id="playerRank">—</b>

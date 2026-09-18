@@ -33,7 +33,7 @@ Object.assign(dict.en,{
   resultExplainInitial:'Camera looming drove LC4 and propagated through the escape pathway.',
   pipePerception:'GLOBAL MOTION COMPENSATION + HAND LANDMARKS',pipeLoom:'VALIDATED APPROACH / LOOMING',
   pipeGraph:'LC4 + MALECNS AGGREGATE GRAPH',pipeMotor:'DN / FLIGHT READOUT',
-  graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',
+  graphReady:'READY',graphLoading:'GRAPH LOADING',fastGraph:'FAST GRAPH',graphErrorBadge:'GRAPH ERROR',playerName:'PLAYER NAME',playerNamePlaceholder:'Choose a public name',saveName:'SAVE',namePublic:'Shown publicly on the leaderboard. Your browser keeps your player ID.',nameSaved:'Name saved',nameInvalid:'Enter a name up to 24 characters',
   cameraStable:'STABLE',cameraMoving:'MOVING',handNo:'NO',handWarming:'WARMING',tip:'TIP',
   calmState:'CALM',alertState:'ALERT',escapeReadyState:'ESCAPE READY',stabilizing:'STABILIZING — THREAT PAUSED…',cameraStabilizing:'STABILIZING',systemCheck:'SYSTEM CHECK',wizardStabilize:'Preparing your camera…',wizardGesture:'Move one finger toward the fly',wizardReady:'Calibration complete',wizardHoldStill:'Hold the phone naturally for a moment.',wizardMoveFinger:'Now move one fingertip toward the fly once.',wizardDone:'Good — the approach signal responded.',fingertip:'FINGERTIP',opticalTracking:'OPTICAL',flyBrain:'FLY BRAIN',confidence:'CONFIDENCE',skip:'SKIP',checkReady:'READY',checkWait:'WAIT',checkOptical:'OPTICAL READY',checkTracked:'TRACKED',perceptionLayer:'PERCEPTION',brainLayer:'BRAIN',modelTimeline:'MODEL TIMELINE',modelTimelineNote:'Relative to modeled escape trigger',eventTip:'Fingertip enters fly zone',eventApproach:'Approach confidence rises',eventLoom:'Validated looming',eventLc4:'LC4 response',eventDn:'Descending-neuron response',eventFlight:'Flight output',eventEscape:'Modeled escape trigger',modeSneakEyebrow:'MODE A',modeSneakTitle:'Sneak Up',modeSneakBody:'Get as close as possible without making the fly escape.',modeScareEyebrow:'MODE B',modeScareTitle:'Scare Fast',modeScareBody:'Trigger the escape circuit as fast as you can.',scoreLabel:'SCORE',closestApproach:'CLOSEST',roundTime:'TIME',globalLeaderboard:'GLOBAL LEADERBOARD',leaderboardLoading:'Loading leaderboard…',leaderboardUnavailable:'Leaderboard unavailable',yourRank:'YOUR RANK',sneakWinTitle:'You stayed close.<br><em>And kept it calm.</em>',sneakEscapeTitle:'Too close.<br><em>The fly escaped.</em>',scareWinTitle:'Escape triggered.<br><em>Fast.</em>',scareTimeoutTitle:'No escape.<br><em>Try a clearer approach.</em>',sneakResultSafe:'You survived the full round without triggering escape.',sneakResultEscaped:'The fly escaped before the round ended.',scareResultSuccess:'The escape circuit triggered in {time}.',scareResultTimeout:'No validated escape was triggered inside 15 seconds.',roundComplete:'ROUND COMPLETE',shareResultText:'I tried Fly Eye — a camera-driven fly escape-circuit experiment.',shareCardScience:'Real MaleCNS aggregate connectivity + modeled camera encoding/dynamics.',shareCardPrivacy:'No raw camera frame is included in this result card.',shareCopied:'Result link copied',flyVisionPipeline:'FLY VISION PIPELINE',visionHuman:'HUMAN',visionStabilized:'STABILIZED',visionMotion:'MOTION',visionLoom:'LOOM EVIDENCE',visionLc4:'LC4 INPUT',visionHumanExplain:'Camera luminance used as the human reference view.',visionStabilizedExplain:'The camera image after translation compensation. This suppresses phone movement before threat analysis.',visionMotionExplain:'Compensated local motion evidence. Bright areas changed after camera motion was subtracted.',visionLoomExplain:'Modeled fly-centered looming evidence. This is an explanatory model layer, not biological imaging.',visionLc4Explain:'Modeled LC4 input evidence derived from validated looming confidence, not a neural recording.',advancedGraphEyebrow:'OPTIONAL ADVANCED MODE',advancedGraphTitle:'Neuron-level graph inspector',advancedGraphBody:'Load the pinned 70K-neuron / 798,715-edge graph only when you want neuron-level inspection. It never blocks camera gameplay.',advancedGraphIdle:'Not loaded · about 9.86 MB',loadDetailedGraph:'LOAD NEURON-LEVEL GRAPH',advancedLoading:'LOADING',advancedReady:'READY',advancedError:'ERROR',advancedParsing:'Downloaded · parsing graph…',advancedMetadata:'Building LC4 / DN metadata…',advancedLoaded:'NEURON GRAPH LOADED',neurons:'NEURONS',edges:'EDGES',escapeTargets:'ESCAPE TARGETS'
 });
@@ -48,7 +48,7 @@ Object.assign(dict.zh,{
   resultExplainInitial:'摄像头中的逼近刺激了 LC4，并沿逃逸通路传播。',
   pipePerception:'全局运动补偿 + 手部关键点',pipeLoom:'确认后的接近 / 逼近信号',
   pipeGraph:'LC4 + MaleCNS 聚合连接图',pipeMotor:'DN / 飞行输出',
-  graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',
+  graphReady:'已就绪',graphLoading:'图加载中',fastGraph:'快速图',graphErrorBadge:'连接图错误',playerName:'玩家昵称',playerNamePlaceholder:'输入公开昵称',saveName:'保存',namePublic:'昵称会公开显示在排行榜；浏览器会继续保存你的玩家 ID。',nameSaved:'昵称已保存',nameInvalid:'请输入不超过 24 个字符的昵称',
   cameraStable:'稳定',cameraMoving:'移动',handNo:'未检测',handWarming:'后台加载',tip:'指尖',
   calmState:'平静',alertState:'警觉',escapeReadyState:'即将逃逸',stabilizing:'正在重新稳定——威胁检测暂停…',cameraStabilizing:'稳定中',systemCheck:'系统自检',wizardStabilize:'正在准备摄像头…',wizardGesture:'把一根手指向果蝇靠近',wizardReady:'校准完成',wizardHoldStill:'自然拿稳手机片刻即可。',wizardMoveFinger:'现在把一根指尖向果蝇靠近一次。',wizardDone:'很好——接近信号已经正常响应。',fingertip:'指尖',opticalTracking:'光学追踪',flyBrain:'果蝇大脑',confidence:'置信度',skip:'跳过',checkReady:'就绪',checkWait:'等待',checkOptical:'光学就绪',checkTracked:'已追踪',perceptionLayer:'感知层',brainLayer:'大脑层',modelTimeline:'模型时间线',modelTimelineNote:'相对模型逃逸触发时间',eventTip:'指尖进入果蝇区域',eventApproach:'接近置信度上升',eventLoom:'确认有效逼近',eventLc4:'LC4 开始响应',eventDn:'下降神经元响应',eventFlight:'飞行输出上升',eventEscape:'模型触发逃逸',modeSneakEyebrow:'模式 A',modeSneakTitle:'潜行靠近',modeSneakBody:'尽可能靠近果蝇，但不要让它逃跑。',modeScareEyebrow:'模式 B',modeScareTitle:'快速惊吓',modeScareBody:'尽快触发果蝇的逃逸回路。',scoreLabel:'得分',closestApproach:'最近距离',roundTime:'时间',globalLeaderboard:'全球排行榜',leaderboardLoading:'正在加载排行榜…',leaderboardUnavailable:'排行榜暂不可用',yourRank:'你的排名',sneakWinTitle:'你靠得很近，<br><em>但它没有逃跑。</em>',sneakEscapeTitle:'太近了，<br><em>果蝇逃跑了。</em>',scareWinTitle:'成功触发逃逸，<br><em>而且很快。</em>',scareTimeoutTitle:'没有触发逃逸，<br><em>再试一次更明确的逼近。</em>',sneakResultSafe:'你完成了整轮挑战，没有触发逃逸。',sneakResultEscaped:'果蝇在本轮结束前逃跑了。',scareResultSuccess:'逃逸回路在 {time} 内被触发。',scareResultTimeout:'15 秒内没有触发有效逃逸。',roundComplete:'本轮完成',shareResultText:'我刚刚体验了 Fly Eye——一个由摄像头驱动的果蝇逃逸回路实验。',shareCardScience:'真实 MaleCNS 聚合连接 + 建模的摄像头编码/动力学。',shareCardPrivacy:'这张结果卡不包含原始摄像头画面。',shareCopied:'结果链接已复制',flyVisionPipeline:'果蝇视觉流程',visionHuman:'人类视图',visionStabilized:'稳定视图',visionMotion:'运动证据',visionLoom:'逼近证据',visionLc4:'LC4 输入',visionHumanExplain:'作为参考的人类摄像头亮度视图。',visionStabilizedExplain:'经过平移补偿后的摄像头图像，用于在威胁判断前尽量去除手机移动。',visionMotionExplain:'去除相机整体运动后的局部运动证据。较亮区域表示发生了更明显的变化。',visionLoomExplain:'以果蝇为中心的建模逼近证据。这是解释层，不是生物成像。',visionLc4Explain:'根据确认后的逼近置信度生成的 LC4 建模输入证据，不是神经记录。',advancedGraphEyebrow:'可选高级模式',advancedGraphTitle:'神经元级连接图检查器',advancedGraphBody:'只有在需要神经元级检查时才加载固定版本的 70K 神经元 / 798,715 条连接图。它永远不会阻塞摄像头玩法。',advancedGraphIdle:'尚未加载 · 约 9.86 MB',loadDetailedGraph:'加载神经元级连接图',advancedLoading:'加载中',advancedReady:'已就绪',advancedError:'错误',advancedParsing:'下载完成 · 正在解析连接图…',advancedMetadata:'正在建立 LC4 / DN 元数据…',advancedLoaded:'神经元级连接图已加载',neurons:'神经元',edges:'连接',escapeTargets:'逃逸目标'
 });
@@ -59,6 +59,7 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAria)));
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>el.setAttribute('placeholder',t(el.dataset.i18nPlaceholder)));
   $('#langBtn').textContent=lang==='en'?'中文':'EN';
   const bt=$('#brainToggle'); if(bt) bt.textContent=document.body.classList.contains('brain-expanded')?t('hideDetails'):t('details');
   localStorage.setItem('flyEye_lang',lang)
@@ -98,6 +99,7 @@ function getAnonymousUserId(){
   return id;
 }
 const userId=getAnonymousUserId();
+let playerName=cleanPlayerName(localStorage.getItem('flyEye_player_name')||'')||'';
 let gameMode=localStorage.getItem('flyEye_mode')==='scare_fast'?'scare_fast':'sneak_up';
 const round={
   active:false,finished:false,startedAt:0,endedAt:0,
@@ -465,6 +467,7 @@ async function submitRoundResult(){
       headers:{'content-type':'application/json'},
       body:JSON.stringify({
         user_id:userId,
+        display_name:playerName||undefined,
         mode:gameMode,
         closest_approach:round.closestApproach,
         max_threat:maxThreat,
@@ -490,18 +493,67 @@ async function submitRoundResult(){
   }
 }
 
+function cleanPlayerName(value){
+  return Array.from(String(value||'').normalize('NFKC').replace(/[\u0000-\u001F\u007F]/g,'').replace(/\s+/g,' ').trim()).slice(0,24).join('');
+}
+
+function syncPlayerNameUI(){
+  const input=$('#playerName');
+  if(input && input.value!==playerName) input.value=playerName;
+}
+
+async function savePlayerName(){
+  const input=$('#playerName');
+  const status=$('#playerNameStatus');
+  const next=cleanPlayerName(input?.value);
+  if(!next){
+    if(status) status.textContent=t('nameInvalid');
+    input?.focus();
+    return;
+  }
+  const button=$('#savePlayerName');
+  if(button) button.disabled=true;
+  try{
+    const resp=await fetch('/api/player',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({user_id:userId,display_name:next})
+    });
+    if(!resp.ok) throw new Error('player '+resp.status);
+    playerName=next;
+    localStorage.setItem('flyEye_player_name',playerName);
+    syncPlayerNameUI();
+    if(status) status.textContent=t('nameSaved')+' ✓';
+    await loadLeaderboard();
+  }catch(err){
+    console.warn('player name save failed',err);
+    if(status) status.textContent=t('leaderboardUnavailable');
+  }finally{
+    if(button) button.disabled=false;
+  }
+}
+
 async function loadLeaderboard(){
   try{
-    const resp=await fetch('/api/leaderboard?mode='+encodeURIComponent(gameMode)+'&limit=8');
+    const params=new URLSearchParams({mode:gameMode,limit:'10',viewer_id:userId});
+    const resp=await fetch('/api/leaderboard?'+params.toString());
     if(!resp.ok) throw new Error('leaderboard '+resp.status);
     const data=await resp.json();
     const host=$('#leaderboardList'); host.innerHTML='';
     for(const entry of data.entries||[]){
       const row=document.createElement('div');
-      row.className='leaderboard-row'+(entry.user_id===userId?' me':'');
-      const rank=document.createElement('b'); rank.textContent='#'+entry.rank;
-      const who=document.createElement('span'); who.textContent=entry.user_id===userId?'YOU / 你':'Fly '+entry.user_id.slice(0,4).toUpperCase();
-      const score=document.createElement('strong'); score.textContent=String(entry.score);
+      row.className='leaderboard-row'+(entry.is_viewer?' me':'');
+      row.dataset.rank=String(entry.rank);
+      const rank=document.createElement('b');
+      const medal=entry.rank===1?'🥇 ':entry.rank===2?'🥈 ':entry.rank===3?'🥉 ':'';
+      rank.textContent=medal+'#'+entry.rank;
+      const who=document.createElement('span');
+      const fallback=entry.is_viewer?(lang==='zh'?'你':'YOU'):(lang==='zh'?'匿名果蝇':'Anonymous Fly');
+      const publicName=entry.display_name||fallback;
+      who.textContent=entry.is_viewer && entry.display_name
+        ? publicName+' · '+(lang==='zh'?'你':'YOU')
+        : publicName;
+      const score=document.createElement('strong'); score.textContent=Number(entry.score).toLocaleString();
       row.append(rank,who,score);host.appendChild(row);
     }
     $('#leaderboardStatus').textContent='';
@@ -1217,6 +1269,7 @@ document.querySelectorAll('.mode-card').forEach(btn=>{
 });
 applyModeUI();
 resetRound();
+syncPlayerNameUI();
 
 $('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#wizardSkip').onclick=()=>completeCalibrationWizard(true);$('#resetBtn').onclick=prepareNextRound;$('#againBtn').onclick=()=>{prepareNextRound();$('#result').classList.add('hidden')};
 $('#viewReplayBtn').onclick=showReplay;
@@ -1259,6 +1312,8 @@ document.querySelectorAll('[data-vision]').forEach(btn=>{
 $('#flyVisionBtn').onclick=()=>{$('#flyVisionPanel').classList.remove('hidden');updateFlyVisionCopy();drawMosaic()};
 $('#closeVision').onclick=()=>$('#flyVisionPanel').classList.add('hidden');
 $('#shareBtn').onclick=shareRoundResult;
+$('#savePlayerName').onclick=savePlayerName;
+$('#playerName').onkeydown=(event)=>{if(event.key==='Enter'){event.preventDefault();savePlayerName()}};
 
 addEventListener('visibilitychange',()=>{if(document.hidden&&!DEBUG_MODE){sensory.motion=sensory.loom=0}});
 

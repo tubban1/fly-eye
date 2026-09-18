@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
-import { calculateScore, normalizeMetrics, validUuid } from '../server/scoring.js';
+import { calculateScore, normalizeMetrics, validUuid, normalizeDisplayName } from '../server/scoring.js';
 
 assert.equal(validUuid('550e8400-e29b-41d4-a716-446655440000'),true);
 assert.equal(validUuid('not-a-uuid'),false);
+assert.equal(normalizeDisplayName('  Liang   Rao  '),'Liang Rao');
+assert.equal(normalizeDisplayName('果蝇玩家'),'果蝇玩家');
+assert.equal(normalizeDisplayName(''),null);
+assert.equal(Array.from(normalizeDisplayName('123456789012345678901234567890')).length,24);
 
 assert.deepEqual(normalizeMetrics({
   closest_approach:-1,
