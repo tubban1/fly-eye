@@ -1,5 +1,5 @@
 {
-  "name": "@flyeye/benchmarks",
+  "name": "@fly-eye/benchmarks",
   "version": "0.1.0",
   "type": "module",
   "description": "Reference test vectors for FlyEye graph integrity and modeled escape runtimes",
