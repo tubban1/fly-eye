@@ -1,3 +1,12 @@
+## v0.5.0-alpha.6 — FlyEye Graphs SDK
+
+- reusable `flyeye.escape-fast.v1` developer profile
+- zero-dependency browser SDK with `loadFlyEyeProfile()` and `EscapeRuntime`
+- published JSON Schema and TypeScript definitions
+- provenance and scientific-boundary documentation
+- immutable profile-versioning rule
+- automated SDK regression test for looming → turn/DN → flight → escape readout
+
 ## v0.5.0-alpha.5 — Fly Vision 2.0
 
 - five inspectable perception layers: Human / Stabilized / Motion Evidence / Loom Evidence / LC4 Input
