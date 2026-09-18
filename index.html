@@ -49,6 +49,11 @@
           <small data-i18n="modeScareBody">Trigger the escape circuit as fast as you can.</small>
         </button>
       </div>
+      <div class="game-rules glass" id="landingRules">
+        <strong id="landingRulesTitle">HOW RANKING WORKS</strong>
+        <p id="landingRulesBody"></p>
+        <div class="metric-chips" id="landingMetricChips"></div>
+      </div>
       <button class="cta" id="openCamera" data-i18n="openCamera">OPEN CAMERA</button>
       <div class="privacy" data-i18n="privacy">Camera frames stay on your device.</div>
     </section>
@@ -92,7 +97,10 @@
 
     <section class="hud hidden" id="hud">
       <div class="challenge-card glass">
-        <span data-i18n="challenge">CHALLENGE</span>
+        <div class="challenge-nav">
+          <span data-i18n="challenge">CHALLENGE</span>
+          <button class="tiny-btn" id="gameHomeBtn" type="button" data-i18n="allGames">← GAMES</button>
+        </div>
         <strong id="challengeTitle" data-i18n="sneak">Sneak up on the fly</strong>
         <p id="challengeBody" data-i18n="challengeBody">Move your hand slowly toward the fly. Get close without triggering escape.</p>
         <div class="perception-status" id="perceptionStatus">CALIBRATING VISION…</div>
@@ -177,6 +185,11 @@
           <div class="score-line"><span data-i18n="roundTime">TIME</span><b id="resultTime">—</b></div>
         </div>
         <p id="resultExplain" data-i18n="resultExplainInitial">Camera looming drove LC4 and propagated through the connectome.</p>
+        <div class="ranking-explainer" id="resultRules">
+          <strong id="resultRulesTitle"></strong>
+          <p id="resultRulesBody"></p>
+          <div class="metric-chips" id="resultMetricChips"></div>
+        </div>
         <div class="leaderboard">
           <div class="player-profile">
             <label for="playerName" data-i18n="playerName">PLAYER NAME</label>
@@ -187,7 +200,7 @@
             <small id="playerNameStatus" data-i18n="namePublic">Shown publicly on the leaderboard. Your browser keeps your player ID.</small>
           </div>
           <div class="leaderboard-head">
-            <span data-i18n="globalLeaderboard">GLOBAL LEADERBOARD</span>
+            <span id="leaderboardTitle">GLOBAL LEADERBOARD</span>
             <b id="playerRank">—</b>
           </div>
           <div id="viewerRankCard" class="viewer-rank-card hidden" aria-live="polite"></div>
@@ -196,6 +209,8 @@
         </div>
         <div class="result-actions">
           <button class="cta" id="againBtn" data-i18n="again">TRY AGAIN</button>
+          <button class="ghost big switch-game-btn" id="switchModeBtn">PLAY OTHER GAME</button>
+          <button class="ghost big" id="allGamesBtn" data-i18n="allGames">ALL GAMES</button>
           <button class="ghost big" id="viewReplayBtn" data-i18n="viewReplay">VIEW REPLAY</button>
           <button class="ghost big" id="shareBtn" data-i18n="share">SHARE</button>
         </div>
