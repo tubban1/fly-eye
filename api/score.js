@@ -1,4 +1,5 @@
-import { db, ensureSchema, calculateScore, validUuid, clamp01 } from '../server/db.js';
+import { db, ensureSchema } from '../server/db.js';
+import { calculateScore, validUuid, normalizeMetrics } from '../server/scoring.js';
 
 function send(res,status,payload){
   res.statusCode=status;
@@ -29,13 +30,7 @@ export default async function handler(req,res){
     if(!validUuid(userId)) return send(res,400,{error:'invalid_user_id'});
     if(!['sneak_up','scare_fast'].includes(mode)) return send(res,400,{error:'invalid_mode'});
 
-    const metrics={
-      closest_approach:clamp01(body.closest_approach ?? 1),
-      max_threat:clamp01(body.max_threat ?? 0),
-      escape_latency_ms:Math.max(0,Math.min(30000,Math.round(Number(body.escape_latency_ms)||0))),
-      survived_ms:Math.max(0,Math.min(30000,Math.round(Number(body.survived_ms)||0))),
-      escaped:!!body.escaped
-    };
+    const metrics=normalizeMetrics(body);
 
     // Plausibility checks: alpha anti-cheat. Stronger signed-session validation comes later.
     if(mode==='scare_fast' && metrics.escaped && metrics.escape_latency_ms<250){
@@ -59,16 +54,29 @@ export default async function handler(req,res){
       returning id,score,created_at
     `;
 
-    const [rankRow]=await sql`
-      select 1 + count(*)::int as rank
+    const [bestRow]=await sql`
+      select max(score)::int as personal_best
       from fly_eye_scores
-      where mode=${mode} and score>${score}
+      where mode=${mode} and user_id=${userId}
+    `;
+
+    const [rankRow]=await sql`
+      with best as (
+        select distinct on (user_id) user_id, score
+        from fly_eye_scores
+        where mode=${mode}
+        order by user_id, score desc, created_at asc
+      )
+      select 1 + count(*)::int as rank
+      from best
+      where score>${bestRow.personal_best}
     `;
 
     return send(res,200,{
       ok:true,
       id:String(row.id),
       score:row.score,
+      personal_best:bestRow.personal_best,
       rank:rankRow.rank,
       mode,
       metrics
