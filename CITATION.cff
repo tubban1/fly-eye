@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use FlyEye Developer Kit or its derived graph profiles, please cite this software and preserve the MaleCNS attribution recorded in the profile manifest."
+title: "FlyEye Developer Kit: reusable Drosophila connectome graphs and runtime tooling"
+type: software
+version: "0.5.0-alpha.8"
+date-released: 2026-09-18
+authors:
+  - name: "FlyEye Contributors"
+repository-code: "https://github.com/tubban1/fly-eye"
+url: "https://fly.fde.fan"
+license: MIT
+keywords:
+  - Drosophila
+  - fruit fly
+  - connectome
+  - MaleCNS
+  - neuroscience
+  - LC4
+  - looming
+  - escape circuit
+  - graph
+  - neuroinformatics
+abstract: >-
+  FlyEye Developer Kit provides reusable MaleCNS-derived Drosophila graph
+  profiles, a binary graph parser, modeled runtime dynamics, Python tooling,
+  connectome extraction tools, and compatibility benchmarks. MaleCNS-derived
+  graph data retain their upstream CC BY 4.0 attribution and are explicitly
+  separated from modeled dynamics.
