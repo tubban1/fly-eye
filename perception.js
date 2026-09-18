@@ -56,7 +56,7 @@ export class PerceptionEngine {
     this.last={
       phase:'calibrating',cameraStable:false,globalMotion:0,localMotion:0,opticalLoom:0,
       handDetected:false,handConfidence:0,handArea:0,handDistance:1,handGrowth:0,handApproach:0,
-      tipDetected:false,tipSource:'none',tipDistance:1,tipApproach:0,tipConfidence:0,
+      tipDetected:false,tipSource:'none',tipX:.5,tipY:.5,tipDistance:1,tipApproach:0,tipConfidence:0,
       stableFor:0,motionBlocked:true,localDominance:0,
       confidence:{
         cameraStable:0,
@@ -270,6 +270,8 @@ export class PerceptionEngine {
       handApproach:hm.approach,handTipApproach:hm.tipApproach,
       tipDetected:hm.detected||om.detected,
       tipSource:hm.detected?'hand':(om.detected?'optical':'none'),
+      tipX:hm.detected?hm.tipX:om.x,
+      tipY:hm.detected?hm.tipY:om.y,
       tipDistance:hm.detected?hm.tipDistance:om.distance,
       tipApproach:hm.detected?hm.tipApproach:om.approach,
       tipConfidence:hm.detected?hm.confidence:om.confidence,
@@ -292,7 +294,7 @@ export class PerceptionEngine {
       if(this.prevOpticalTip && now-this.prevOpticalTip.t>220) this.prevOpticalTip=null;
       this.opticalTip=null;
       this.opticalTipStreak=0;
-      return {detected:false,distance:1,approach:0,confidence:0};
+      return {detected:false,x:.5,y:.5,distance:1,approach:0,confidence:0};
     }
 
     const distance=Math.hypot(candidate.x-fx,candidate.y-fy);
@@ -317,6 +319,8 @@ export class PerceptionEngine {
 
     return {
       detected:candidate.confidence>.12 && this.opticalTipStreak>=2,
+      x:candidate.x,
+      y:candidate.y,
       distance:clamp(distance/.72),
       approach,
       confidence
@@ -350,7 +354,7 @@ export class PerceptionEngine {
     const h=this.hand;
     if(!h || now-h.t>360){
       this.prevHand=null;
-      return {detected:false,confidence:0,area:0,distance:1,growth:0,approach:0,tipDistance:1,tipApproach:0};
+      return {detected:false,confidence:0,area:0,distance:1,growth:0,approach:0,tipX:.5,tipY:.5,tipDistance:1,tipApproach:0};
     }
 
     const centerDistance=Math.hypot(h.cx-fx,h.cy-fy);
@@ -378,6 +382,8 @@ export class PerceptionEngine {
       confidence:h.confidence,
       area:clamp(h.area/.24),
       distance:clamp(centerDistance/1.15),
+      tipX:nearest.x,
+      tipY:nearest.y,
       tipDistance:clamp(tipDistance/.75),
       growth,
       approach,
