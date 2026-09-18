@@ -319,3 +319,8 @@
   .metric-chips span{font-size:7px;padding:4px 6px}
   .result-actions .switch-game-btn{order:-1;flex-basis:100%}
 }
+
+.challenge-nav-actions{display:flex;gap:5px;align-items:center}
+@media(max-width:480px){
+  .challenge-nav-actions .tiny-btn{padding:5px 6px;font-size:6.5px}
+}
