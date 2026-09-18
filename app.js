@@ -42,7 +42,16 @@ let perceptionState=perceptionEngine.last;
 const connectome={status:'loading',phase:'manifest',profile:'auto',aggregate:false,groups:0,aggregateLinks:0,representedNeurons:0,loaded:0,total:0,reason:'',startedAt:performance.now(),worker:null,pending:false,lastSent:0,escape:0,escapeDn:0,network:0,spikes:0,neurons:0,edges:0,escapeTargets:0,error:''};
 function initConnectome(){
   try{
-    connectome.worker=new Worker('/connectome-worker.js');
+    connectome.worker=new Worker(new URL('./connectome-worker.js', import.meta.url), {type:'module'});
+    connectome.worker.onerror=(event)=>{
+      console.error('Connectome worker failed',event);
+      connectome.status='error';
+      connectome.error='Worker failed to load: '+(event?.message||'unknown error');
+      connectome.phase='worker-error';
+      connectome.pending=false;
+      updateConnectomeStatus();
+      updatePerceptionUI(perceptionState);
+    };
     connectome.worker.onmessage=(event)=>{
       const msg=event.data||{};
       if(msg.type==='ready'){
