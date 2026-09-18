@@ -1,4 +1,4 @@
-# @flyeye/escape-neuron-v1
+# @fly-eye/escape-neuron-v1
 
 Compact neuron-level escape-pathway asset derived from the pinned MaleCNS graph.
 
