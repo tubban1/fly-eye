@@ -45,3 +45,7 @@ assert.ok(calculateScore('sneak_up',{
 }));
 
 console.log('PASS scoring rules');
+
+assert.ok(calculateScore('scare_fast',{
+  escaped:true,escape_latency_ms:220
+}) > 0);
