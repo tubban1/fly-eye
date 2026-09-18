@@ -67,23 +67,7 @@ const vectors=JSON.parse(
 const report=await runEscapeBenchmarks({profile:aggregate,Runtime:EscapeRuntime,vectors});
 assert.equal(report.pass,true,JSON.stringify(report,null,2));
 
-const realManifestPath=new URL('../public/data/escape-neuron-v1/manifest.json',import.meta.url);
-const realGraphPath=new URL('../public/data/escape-neuron-v1/graph.bin',import.meta.url);
-const fileFetch=async(url)=>{
-  const target=String(url).includes('manifest')?realManifestPath:realGraphPath;
-  const bytes=fs.readFileSync(target);
-  return {
-    ok:true,
-    status:200,
-    json:async()=>JSON.parse(bytes.toString('utf8')),
-    arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)
-  };
-};
-const realNeuron=await loadEscapeNeuronV1({
-  manifestUrl:'manifest.json',
-  graphUrl:'graph.bin',
-  fetch:fileFetch
-});
+const realNeuron=await loadEscapeNeuronV1();
 assert.equal(realNeuron.manifest.profile,'flyeye.escape-neuron.v1');
 assert.equal(realNeuron.manifest.neuronCount,3376);
 assert.equal(realNeuron.manifest.edgeCount,78797);
