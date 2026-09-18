@@ -7,13 +7,21 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node tests/connectome-worker.test.mjs && node tests/perception.test.mjs && node tests/scoring.test.mjs && node tests/graphs-sdk.test.mjs",
-    "build:escape-neuron": "node scripts/prepare-escape-graph.mjs"
+    "test": "node tests/connectome-worker.test.mjs && node tests/perception.test.mjs && node tests/scoring.test.mjs && node tests/graphs-sdk.test.mjs && npm run test:packages",
+    "build:escape-neuron": "node scripts/prepare-escape-graph.mjs",
+    "test:packages": "node tests/packages.test.mjs && python3 -m unittest discover -s packages/python-sdk/tests -p 'test_*.py'"
   },
   "devDependencies": {
     "vite": "^7.1.5"
   },
   "dependencies": {
     "postgres": "^3.4.7"
-  }
+  },
+  "workspaces": [
+    "packages/graph-core",
+    "packages/runtime",
+    "packages/escape-neuron-v1",
+    "packages/connectome-tools",
+    "packages/benchmarks"
+  ]
 }
