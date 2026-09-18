@@ -1,5 +1,5 @@
 {
-  "name": "@flyeye/escape-neuron-v1",
+  "name": "@fly-eye/escape-neuron-v1",
   "version": "0.1.0",
   "type": "module",
   "description": "Compact neuron-level MaleCNS-derived LC4 escape corridor for FlyEye applications",
@@ -9,7 +9,7 @@
   },
   "types": "./index.d.ts",
   "dependencies": {
-    "@flyeye/graph-core": "0.1.0"
+    "@fly-eye/graph-core": "0.1.0"
   },
   "files": [
     "index.js",
