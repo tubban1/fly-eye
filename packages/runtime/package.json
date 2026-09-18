@@ -1,5 +1,5 @@
 {
-  "name": "@flyeye/runtime",
+  "name": "@fly-eye/runtime",
   "version": "0.1.0",
   "type": "module",
   "description": "Declared modeled group dynamics for FlyEye connectome profiles",
@@ -9,7 +9,7 @@
   },
   "types": "./index.d.ts",
   "dependencies": {
-    "@flyeye/graph-core": "0.1.0"
+    "@fly-eye/graph-core": "0.1.0"
   },
   "files": [
     "index.js",
