@@ -46,6 +46,24 @@
 .vision-tabs .tiny-btn{font-size:7px;opacity:.55;padding:6px 8px}
 .vision-tabs .tiny-btn.active{opacity:1;border-color:rgba(223,255,85,.42);background:rgba(223,255,85,.08)}
 .fly-vision canvas{display:block;width:100%;aspect-ratio:16/9;border-radius:12px;background:#111}.fly-vision-card p{font-size:10px;color:var(--muted);line-height:1.4;margin:9px 0 0}.science-drawer{position:absolute;z-index:40;right:0;top:0;height:100%;width:min(480px,100vw);padding:78px 28px 28px;background:rgba(8,8,8,.96);border-left:1px solid var(--line);transform:translateX(102%);transition:.28s ease;overflow:auto}.science-drawer.open{transform:none}.drawer-close{position:absolute;right:18px;top:18px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:transparent;color:#fff;font-size:24px}.science-drawer h2{font-size:38px;line-height:1;letter-spacing:-.05em}.science-drawer p{color:var(--muted);line-height:1.6}.pipeline{display:grid;gap:10px;margin-top:24px}.pipeline div{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-size:12px;font-weight:800;letter-spacing:.08em}.pipeline span{text-align:center;color:var(--acid)}
+.advanced-graph{margin-top:28px;padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
+.advanced-graph-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.advanced-graph-head span{display:block;font-size:8px;font-weight:900;letter-spacing:.12em;color:var(--muted)}
+.advanced-graph-head strong{display:block;margin-top:4px;font-size:16px}
+.advanced-graph-head>b{font-size:9px;padding:5px 7px;border:1px solid var(--line);border-radius:999px}
+.advanced-graph-head>b[data-state="ready"]{color:var(--acid);border-color:rgba(223,255,85,.34)}
+.advanced-graph-head>b[data-state="error"]{color:var(--danger)}
+.advanced-graph>p{font-size:10px!important;line-height:1.45!important}
+.advanced-progress{margin:12px 0}
+.advanced-progress>div{height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.advanced-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#62ddff,var(--acid));transition:width .18s ease}
+.advanced-progress span{display:block;margin-top:6px;font-size:8px;color:var(--muted)}
+.advanced-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.advanced-stats>div{padding:8px;border:1px solid rgba(255,255,255,.07);border-radius:10px}
+.advanced-stats span{display:block;font-size:7px;font-weight:850;letter-spacing:.08em;color:var(--muted)}
+.advanced-stats b{display:block;margin-top:3px;font-size:13px}
+.advanced-graph .ghost.big{width:100%;min-height:44px}
+
 .calibration-wizard{
   position:absolute;z-index:24;left:18px;bottom:18px;width:min(360px,calc(100vw - 36px));
   padding:14px;border-radius:18px;background:rgba(8,8,8,.74);
@@ -220,4 +238,10 @@
   .vision-tabs .tiny-btn{flex:0 0 auto;font-size:6.5px}
   .fly-vision-head strong{font-size:12px}
   .fly-vision-card p{font-size:8px}
+}
+
+@media(max-width:760px){
+  .advanced-graph{margin-top:20px;padding:12px}
+  .advanced-graph-head strong{font-size:14px}
+  .advanced-stats{grid-template-columns:repeat(2,1fr)}
 }
