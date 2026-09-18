@@ -506,6 +506,12 @@ function syncPlayerNameUI(){
   if(input && input.value!==playerName) input.value=playerName;
 }
 
+function repaintViewerName(){
+  document.querySelectorAll('.leaderboard-row.me span').forEach(el=>{
+    if(playerName) el.textContent=playerName+' · '+(lang==='zh'?'你':'YOU');
+  });
+}
+
 async function savePlayerName(){
   const input=$('#playerName');
   const status=$('#playerNameStatus');
@@ -527,6 +533,7 @@ async function savePlayerName(){
     playerName=next;
     localStorage.setItem('flyEye_player_name',playerName);
     syncPlayerNameUI();
+    repaintViewerName();
     if(status) status.textContent=t('nameSaved')+' ✓';
     await loadLeaderboard();
   }catch(err){
@@ -553,7 +560,7 @@ async function loadLeaderboard(){
       rank.textContent=medal+'#'+entry.rank;
       const who=document.createElement('span');
       const fallback=entry.is_viewer?(lang==='zh'?'你':'YOU'):(lang==='zh'?'匿名果蝇':'Anonymous Fly');
-      const publicName=entry.display_name||fallback;
+      const publicName=(entry.is_viewer&&playerName)?playerName:(entry.display_name||fallback);
       who.textContent=entry.is_viewer && entry.display_name
         ? publicName+' · '+(lang==='zh'?'你':'YOU')
         : publicName;
