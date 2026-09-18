@@ -1,10 +1,11 @@
-name: Build reusable escape graph
+name: Build reusable escape-neuron graph
 
 on:
   push:
     branches: [main]
     paths:
-      - "scripts/build_escape_graph.py"
+      - "scripts/build-escape-graph.mjs"
+      - "scripts/prepare-escape-graph.mjs"
       - ".github/workflows/build-escape-graph.yml"
   workflow_dispatch:
 
@@ -14,34 +15,51 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: 22
 
-      - name: Download pinned source graph
+      - name: Download pinned MaleCNS-derived source graph
         run: |
           mkdir -p /tmp/fly-eye-source
-          curl -L --fail --retry 3             https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/graph.bin             -o /tmp/fly-eye-source/graph.bin
-          curl -L --fail --retry 3             https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/manifest.json             -o /tmp/fly-eye-source/manifest.json
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/graph.bin \
+            -o /tmp/fly-eye-source/graph.bin
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/dzhng/fly-escape/bff49a376f0844c918eb7f2be83e95f2699b0d14/data/processed/brain/manifest.json \
+            -o /tmp/fly-eye-source/manifest.json
 
-      - name: Build escape-v1
+      - name: Build escape-neuron-v1
+        env:
+          MAX_HOPS: "3"
+          TOP_ESCAPE_DNS: "32"
         run: |
-          python scripts/build_escape_graph.py             --graph /tmp/fly-eye-source/graph.bin             --manifest /tmp/fly-eye-source/manifest.json             --out-dir data/escape-v1
-          ls -lh data/escape-v1/graph.bin data/escape-v1/manifest.json
+          rm -rf public/data/escape-neuron-v1
+          node scripts/build-escape-graph.mjs \
+            /tmp/fly-eye-source/manifest.json \
+            /tmp/fly-eye-source/graph.bin \
+            public/data/escape-neuron-v1
+          ls -lh public/data/escape-neuron-v1/
+
+      - name: Validate generated manifest
+        run: |
+          node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('public/data/escape-neuron-v1/manifest.json')); if(m.profile!=='flyeye.escape-neuron.v1'||!m.neuronCount||!m.edgeCount) process.exit(1); console.log(m.profile,m.neuronCount,m.edgeCount,m.graphBytes,m.graphHash)"
 
       - name: Commit generated graph if changed
         run: |
           git config user.name "fly-eye-graph-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/escape-v1/graph.bin data/escape-v1/manifest.json
+          git add public/data/escape-neuron-v1
           if git diff --cached --quiet; then
-            echo "escape-v1 is already up to date"
+            echo "escape-neuron-v1 is already up to date"
           else
-            git commit -m "Build reusable escape-v1 graph"
+            git commit -m "Build reusable escape-neuron-v1 graph"
             git push
           fi
