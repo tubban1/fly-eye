@@ -141,6 +141,7 @@ function updateConnectomeLoadProgress(){
     p=96;label=lang==='zh'?'建立神经读出':'BUILDING READOUTS';d='LC4 → DN / flight';
   }
   stage.textContent=label;pct.textContent=Math.round(p)+'%';bar.style.width=Math.round(p)+'%';detail.textContent=d;
+  wrap.classList.toggle('is-ready',connectome.status==='ready');
 }
 function updateConnectomeStatus(){
   const el=$('#connectomeStatus'),badge=$('#graphBadge');
@@ -210,6 +211,7 @@ function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v))}
 function smooth(prev,next,k=.16){return prev+(next-prev)*k}
 
 async function openCamera(){
+  document.body.classList.remove('brain-expanded');
   $('#permission').classList.add('hidden');
   try{
     if(stream) stream.getTracks().forEach(t=>t.stop());
@@ -227,7 +229,7 @@ async function openCamera(){
   }catch(err){ console.error(err); $('#permission').classList.remove('hidden'); }
 }
 
-function resetFly(){fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
+function resetFly(){document.body.classList.remove('brain-expanded');const bt=$('#brainToggle');if(bt)bt.textContent=t('details');fly.x=.56;fly.y=.55;fly.vx=fly.vy=0;fly.state='idle';fly.escapeUntil=0;escaped=false;maxThreat=0;connectome.escape=0;connectome.escapeDn=0;connectome.network=0;Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});connectome.worker?.postMessage({type:'reset'});resetReplay();$('#result').classList.add('hidden');$('#replayPanel').classList.add('hidden')}
 
 function experienceArmed(){
   return DEBUG_MODE || (
