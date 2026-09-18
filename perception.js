@@ -50,10 +50,12 @@ export class PerceptionEngine {
     this.calibrationStart=0; this.calibrated=false;
     this.motionFloor=.018; this.shiftFloor=.35;
     this.prevHand=null; this.hand=null;
+    this.prevOpticalTip=null; this.opticalTip=null;
     this.approachEvidence=0; this.approachSince=0; this.alertSince=0;
     this.last={
       phase:'calibrating',cameraStable:false,globalMotion:0,localMotion:0,opticalLoom:0,
       handDetected:false,handConfidence:0,handArea:0,handDistance:1,handGrowth:0,handApproach:0,
+      tipDetected:false,tipSource:'none',tipDistance:1,tipApproach:0,tipConfidence:0,
       approach:0,looming:0,shiftX:0,shiftY:0,light:.5
     };
   }
@@ -89,13 +91,15 @@ export class PerceptionEngine {
     const slow=this.reference?localMotionCompensated(gray,this.reference,w,h,fx,fy,{dx:0,dy:0}):{near:0,global:0};
 
     if(!this.reference || now-this.referenceTs>420){ this.reference=gray.slice(); this.referenceTs=now; }
-    this.prev=gray; this.frame=gray;
 
     const shiftMag=Math.hypot(shift.dx,shift.dy);
     const globalMotion=clamp(shiftMag/4 + local.global*2.2);
     const residual=Math.max(0,local.near-local.global*1.12);
     const slowResidual=Math.max(0,slow.near-slow.global*1.08);
     const opticalLoom=clamp(residual*6.5 + slowResidual*2.1);
+    const opticalTip=this.prev
+      ? detectMovingTip(gray,this.prev,w,h,fx,fy,shift,this.motionFloor)
+      : null;
 
     const elapsed=now-this.calibrationStart;
     if(elapsed<1500){
@@ -108,29 +112,46 @@ export class PerceptionEngine {
       local.global < Math.max(.16,this.motionFloor*6.0+.045);
 
     const hm=this.handMetrics(now,fx/w,fy/h);
+    const om=this.opticalTipMetrics(now,opticalTip,fx/w,fy/h);
     let semantic=0;
 
-    if(hm.detected && cameraStable){
-      // The game is fingertip-first: a finger moving toward the fly is sufficient
-      // evidence. Hand growth and compensated optical looming strengthen it.
-      const proximity=clamp(1-hm.tipDistance);
-      const motionToward=clamp(Math.max(hm.tipApproach,hm.approach));
-      const proximityDrive=proximity>.38 ? (proximity-.38)/.62 : 0;
+    if(cameraStable){
+      let handEvidence=0;
+      if(hm.detected){
+        const proximity=clamp(1-hm.tipDistance);
+        const motionToward=clamp(Math.max(hm.tipApproach,hm.approach));
+        const proximityDrive=proximity>.38 ? (proximity-.38)/.62 : 0;
+        handEvidence=clamp(
+          motionToward*.50 +
+          proximityDrive*.28 +
+          hm.growth*.06 +
+          opticalLoom*.16
+        );
+        if(hm.tipDistance<.24) handEvidence=Math.max(handEvidence,.34+(1-hm.tipDistance)*.22);
+      }
 
-      semantic=clamp(
-        motionToward*.52 +
-        proximityDrive*.26 +
-        hm.growth*.08 +
-        opticalLoom*.14
-      );
+      // Independent local tip tracker: does not need a whole-hand detection.
+      let opticalTipEvidence=0;
+      if(om.detected){
+        const proximityDrive=om.distance<.72 ? clamp((.72-om.distance)/.72) : 0;
+        opticalTipEvidence=clamp(
+          om.approach*.56 +
+          proximityDrive*.22 +
+          om.confidence*.12 +
+          opticalLoom*.10
+        );
+        if(om.distance<.22) opticalTipEvidence=Math.max(opticalTipEvidence,.30+(1-om.distance)*.20);
+      }
 
-      // Very close fingertip gets a small persistent approach signal even when
-      // the user slows down at the final centimeters.
-      if(hm.tipDistance<.24) semantic=Math.max(semantic,.34+(1-hm.tipDistance)*.22);
-    }else if(cameraStable && opticalLoom>.36 && residual>.045 && globalMotion<.38){
-      // Partial fingertip / object fallback when MediaPipe cannot see the whole hand.
-      semantic=clamp(.10+opticalLoom*.46+residual*1.6);
+      semantic=Math.max(handEvidence,opticalTipEvidence);
+
+      // Last-resort looming path for a partial object too small to track as a tip.
+      if(!hm.detected && !om.detected && opticalLoom>.42 && residual>.055 && globalMotion<.34){
+        semantic=Math.max(semantic,clamp(.08+opticalLoom*.42+residual*1.3));
+      }
     }
+
+    this.prev=gray; this.frame=gray;
 
     this.approachEvidence = semantic>this.approachEvidence
       ? smooth(this.approachEvidence,semantic,.46)
@@ -147,7 +168,7 @@ export class PerceptionEngine {
     let phase='ready';
     if(!this.calibrated) phase='calibrating';
     else if(!cameraStable) phase='camera-moving';
-    else if(hm.detected && !this.approachSince) phase='hand-detected';
+    else if((hm.detected||om.detected) && !this.approachSince) phase='hand-detected';
     else if(this.approachSince && now-this.approachSince>80) phase='approaching';
     if(this.alertSince && now-this.alertSince>70) phase='alert';
 
@@ -158,6 +179,11 @@ export class PerceptionEngine {
       handDetected:hm.detected,handConfidence:hm.confidence,handArea:hm.area,
       handDistance:hm.distance,handTipDistance:hm.tipDistance,handGrowth:hm.growth,
       handApproach:hm.approach,handTipApproach:hm.tipApproach,
+      tipDetected:hm.detected||om.detected,
+      tipSource:hm.detected?'hand':(om.detected?'optical':'none'),
+      tipDistance:hm.detected?hm.tipDistance:om.distance,
+      tipApproach:hm.detected?hm.tipApproach:om.approach,
+      tipConfidence:hm.detected?hm.confidence:om.confidence,
       approach:this.approachEvidence,looming,shiftX:shift.dx,shiftY:shift.dy,light
     };
     return this.last;
@@ -224,6 +250,59 @@ export class PerceptionEngine {
       tipApproach
     };
   }
+}
+
+function detectMovingTip(cur,prev,w,h,fx,fy,shift,motionFloor){
+  const mask=new Uint8Array(w*h);
+  const threshold=Math.max(.085,motionFloor*3.6+.035);
+  const maxRx=w*.34,maxRy=h*.46;
+
+  for(let y=2;y<h-2;y++){
+    const py=Math.round(y+shift.dy); if(py<0||py>=h) continue;
+    for(let x=2;x<w-2;x++){
+      const px=Math.round(x+shift.dx); if(px<0||px>=w) continue;
+      const dx=(x-fx)/maxRx,dy=(y-fy)/maxRy;
+      if(dx*dx+dy*dy>1.25) continue;
+      const d=Math.abs(cur[y*w+x]-prev[py*w+px])/255;
+      if(d>threshold) mask[y*w+x]=1;
+    }
+  }
+
+  const seen=new Uint8Array(w*h);
+  let best=null;
+  const qx=new Int16Array(w*h),qy=new Int16Array(w*h);
+
+  for(let sy=2;sy<h-2;sy++) for(let sx=2;sx<w-2;sx++){
+    const start=sy*w+sx;
+    if(!mask[start]||seen[start]) continue;
+
+    let head=0,tail=0;
+    qx[tail]=sx;qy[tail]=sy;tail++;seen[start]=1;
+    let count=0,sumX=0,sumY=0,minDist=Infinity,tipX=sx,tipY=sy;
+
+    while(head<tail){
+      const x=qx[head],y=qy[head];head++;count++;sumX+=x;sumY+=y;
+      const nd=Math.hypot((x-fx)/w,(y-fy)/h);
+      if(nd<minDist){minDist=nd;tipX=x;tipY=y}
+      for(const [ox,oy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const nx=x+ox,ny=y+oy;
+        if(nx<1||nx>=w-1||ny<1||ny>=h-1) continue;
+        const ni=ny*w+nx;
+        if(mask[ni]&&!seen[ni]){seen[ni]=1;qx[tail]=nx;qy[tail]=ny;tail++}
+      }
+    }
+
+    if(count<2||count>520) continue;
+    const cx=sumX/count,cy=sumY/count;
+    const compactness=clamp(Math.sqrt(count)/9);
+    const proximity=clamp(1-minDist/.38);
+    const confidence=clamp(compactness*.42+proximity*.58);
+    const score=confidence*(.55+proximity*.45);
+    if(!best||score>best.score){
+      best={x:tipX/w,y:tipY/h,cx:cx/w,cy:cy/h,size:count,confidence,score};
+    }
+  }
+  return best;
 }
 
 function estimateGlobalShift(cur,prev,w,h,fx,fy,handBox){
