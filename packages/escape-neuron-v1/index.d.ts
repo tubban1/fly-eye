@@ -1,11 +1,15 @@
 import type { LoadedNeuronGraph } from '@flyeye/graph-core';
 
 export declare const PROFILE_ID: 'flyeye.escape-neuron.v1';
-export declare const DEFAULT_MANIFEST_URL: string;
-export declare const DEFAULT_GRAPH_URL: string;
+
+export declare function getEscapeNeuronV1AssetUrls(): {
+  manifest: URL;
+  graph: URL;
+  report: URL;
+};
 
 export declare function loadEscapeNeuronV1(options?: {
-  manifestUrl?: string;
-  graphUrl?: string;
+  manifestUrl?: string | URL;
+  graphUrl?: string | URL;
   fetch?: typeof fetch;
 }): Promise<LoadedNeuronGraph>;
