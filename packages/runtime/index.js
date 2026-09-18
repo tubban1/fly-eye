@@ -1,4 +1,4 @@
-import { validateAggregateProfile } from '@flyeye/graph-core';
+import { validateAggregateProfile } from '@fly-eye/graph-core';
 
 const clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,value));
 
