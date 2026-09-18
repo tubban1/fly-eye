@@ -15,6 +15,10 @@ tags:
 
 # FlyEye Escape Neuron v1
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22829797.svg)](https://doi.org/10.5281/zenodo.22829797)
+[![GitHub](https://img.shields.io/badge/GitHub-tubban1%2Ffly--eye-181717?logo=github)](https://github.com/tubban1/fly-eye)
+[![Live Demo](https://img.shields.io/badge/live%20demo-fly.fde.fan-brightgreen)](https://fly.fde.fan)
+
 A compact, reproducible neuron-level Drosophila escape-circuit graph derived
 from the pinned MaleCNS source used by FlyEye.
 
@@ -88,3 +92,28 @@ a Python SDK.
 Source:
 
 https://github.com/tubban1/fly-eye
+
+
+## Citation
+
+If you use this dataset or the FlyEye Developer Kit in research, cite the archived software release:
+
+**FlyEye Contributors (2026). _FlyEye Developer Kit: reusable Drosophila connectome graphs and runtime tooling_ (v0.5.0-alpha.9). Zenodo. https://doi.org/10.5281/zenodo.22829797**
+
+```bibtex
+@software{flyeye_developer_kit_2026,
+  author  = {{FlyEye Contributors}},
+  title   = {FlyEye Developer Kit: reusable Drosophila connectome graphs and runtime tooling},
+  year    = {2026},
+  version = {0.5.0-alpha.9},
+  doi     = {10.5281/zenodo.22829797},
+  url     = {https://doi.org/10.5281/zenodo.22829797}
+}
+```
+
+Related resources:
+
+- Live demo: https://fly.fde.fan
+- Source: https://github.com/tubban1/fly-eye
+- GitHub release: https://github.com/tubban1/fly-eye/releases/tag/v0.5.0-alpha.9
+- Zenodo archive: https://doi.org/10.5281/zenodo.22829797
