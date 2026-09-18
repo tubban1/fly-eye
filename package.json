@@ -1,7 +1,7 @@
 {
   "name": "fly-eye",
   "private": true,
-  "version": "0.5.0-alpha.2",
+  "version": "0.5.0-alpha.3",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
@@ -12,5 +12,8 @@
   },
   "devDependencies": {
     "vite": "^7.1.5"
+  },
+  "dependencies": {
+    "postgres": "^3.4.7"
   }
 }
