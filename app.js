@@ -198,7 +198,7 @@ function updateConnectomeStatus(){
   }
 }
 initConnectome();
-const prewarmHands=()=>perceptionEngine.initHands().then(()=>updatePerceptionUI(perceptionState));
+const prewarmHands=()=>perceptionEngine.initHands().then(()=>{updatePerceptionUI(perceptionState);updateCalibrationWizard();});
 if('requestIdleCallback' in window) requestIdleCallback(prewarmHands,{timeout:1200});
 else setTimeout(prewarmHands,350);
 
@@ -229,6 +229,7 @@ function resetCalibrationWizard(now=performance.now()){
   calibrationWizard.startedAt=now;
   calibrationWizard.completedAt=0;
   calibrationWizard.skipped=false;
+  document.body.classList.add('calibration-flow');
   $('#calibrationWizard')?.classList.remove('hidden');
   updateCalibrationWizard();
 }
@@ -244,6 +245,7 @@ function completeCalibrationWizard(skipped=false){
   calibrationWizard.skipped=skipped;
   calibrationWizard.active=false;
   calibrationWizard.completedAt=performance.now();
+  document.body.classList.remove('calibration-flow');
 
   // Start the actual challenge from a clean neural state after the practice gesture.
   sensory.motion=0;sensory.loom=0;
@@ -365,6 +367,7 @@ function analyzeFrame(now){
     sensory.light=perceptionState.light;
     sensory.loom=gate?perceptionState.looming:0;
     updatePerceptionUI(perceptionState);
+    updateCalibrationWizard();
   }catch(err){
     perceptionRuntimeError=String(err?.message||err);
     console.error('Perception frame failed',err);
@@ -676,7 +679,7 @@ $('#closeReplay').onclick=()=>closeReplay(true);
 $('#replayContinue').onclick=()=>closeReplay(true);
 $('#replayPlay').onclick=()=>replay.playing?pauseReplay():playReplay(true);
 $('#replayScrubber').oninput=(e)=>{pauseReplay();renderReplay(Number(e.target.value)/1000)};
-$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();updateConnectomeStatus();updatePerceptionUI(perceptionState)};
+$('#langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';applyLang();updateConnectomeStatus();updatePerceptionUI(perceptionState);updateCalibrationWizard()};
 $('#scienceBtn').onclick=()=>$('#scienceDrawer').classList.add('open');$('#closeScience').onclick=()=>$('#scienceDrawer').classList.remove('open');
 $('#brainToggle').onclick=()=>{
   document.body.classList.toggle('brain-expanded');
