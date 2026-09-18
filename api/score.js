@@ -16,6 +16,66 @@ async function readJson(req){
   return raw?JSON.parse(raw):{};
 }
 
+async function rankSneak(sql,userId){
+  const [row]=await sql`
+    with best as (
+      select distinct on (user_id)
+        user_id, score, closest_approach, max_threat, survived_ms, escaped, created_at
+      from fly_eye_sneak_scores
+      order by
+        user_id,
+        escaped asc,
+        closest_approach asc,
+        survived_ms desc,
+        max_threat asc,
+        created_at asc
+    ),
+    ranked as (
+      select
+        *,
+        rank() over (
+          order by escaped asc, closest_approach asc, survived_ms desc, max_threat asc
+        )::int as rank
+      from best
+    )
+    select score,rank
+    from ranked
+    where user_id=${userId}
+    limit 1
+  `;
+  return row||null;
+}
+
+async function rankScare(sql,userId){
+  const [row]=await sql`
+    with best as (
+      select distinct on (user_id)
+        user_id, score, escape_latency_ms, survived_ms, escaped, created_at
+      from fly_eye_scare_scores
+      order by
+        user_id,
+        case when escaped and escape_latency_ms is not null then 0 else 1 end asc,
+        escape_latency_ms asc nulls last,
+        created_at asc
+    ),
+    ranked as (
+      select
+        *,
+        rank() over (
+          order by
+            case when escaped and escape_latency_ms is not null then 0 else 1 end asc,
+            escape_latency_ms asc nulls last
+        )::int as rank
+      from best
+    )
+    select score,rank
+    from ranked
+    where user_id=${userId}
+    limit 1
+  `;
+  return row||null;
+}
+
 export default async function handler(req,res){
   if(req.method!=='POST'){
     res.setHeader('allow','POST');
@@ -33,9 +93,6 @@ export default async function handler(req,res){
     const metrics=normalizeMetrics(body);
     const displayName=normalizeDisplayName(body.display_name);
 
-    // Plausibility checks: alpha anti-cheat. Stronger signed-session validation comes later.
-    // Only reject timings below a single browser frame-scale reaction window.
-    // The old 250 ms threshold rejected legitimate fast rounds (~0.22 s).
     if(mode==='scare_fast' && metrics.escaped && metrics.escape_latency_ms<80){
       return send(res,400,{error:'implausible_latency'});
     }
@@ -46,8 +103,8 @@ export default async function handler(req,res){
     const score=calculateScore(mode,metrics);
     const modelVersion=String(body.model_version||'0.5.0-alpha.3').slice(0,64);
     const graphProfile=String(body.graph_profile||'escape-fast-v1').slice(0,64);
-
     const sql=db();
+
     if(displayName){
       await sql`
         insert into fly_eye_players (user_id,display_name,updated_at)
@@ -57,42 +114,43 @@ export default async function handler(req,res){
       `;
     }
 
-    const [row]=await sql`
-      insert into fly_eye_scores
-        (user_id,mode,score,closest_approach,max_threat,escape_latency_ms,survived_ms,escaped,model_version,graph_profile)
-      values
-        (${userId},${mode},${score},${metrics.closest_approach},${metrics.max_threat},
-         ${metrics.escape_latency_ms||null},${metrics.survived_ms},${metrics.escaped},${modelVersion},${graphProfile})
-      returning id,score,created_at
-    `;
+    let inserted;
+    let ranked;
 
-    const [bestRow]=await sql`
-      select max(score)::int as personal_best
-      from fly_eye_scores
-      where mode=${mode} and user_id=${userId}
-    `;
-
-    const [rankRow]=await sql`
-      with best as (
-        select distinct on (user_id) user_id, score
-        from fly_eye_scores
-        where mode=${mode}
-        order by user_id, score desc, created_at asc
-      )
-      select 1 + count(*)::int as rank
-      from best
-      where score>${bestRow.personal_best}
-    `;
+    if(mode==='sneak_up'){
+      [inserted]=await sql`
+        insert into fly_eye_sneak_scores
+          (user_id,score,closest_approach,max_threat,survived_ms,escaped,model_version,graph_profile)
+        values
+          (${userId},${score},${metrics.closest_approach},${metrics.max_threat},
+           ${metrics.survived_ms},${metrics.escaped},${modelVersion},${graphProfile})
+        returning id,score,created_at
+      `;
+      ranked=await rankSneak(sql,userId);
+    }else{
+      [inserted]=await sql`
+        insert into fly_eye_scare_scores
+          (user_id,score,escape_latency_ms,max_threat,survived_ms,escaped,model_version,graph_profile)
+        values
+          (${userId},${score},${metrics.escape_latency_ms||null},${metrics.max_threat},
+           ${metrics.survived_ms},${metrics.escaped},${modelVersion},${graphProfile})
+        returning id,score,created_at
+      `;
+      ranked=await rankScare(sql,userId);
+    }
 
     return send(res,200,{
       ok:true,
-      id:String(row.id),
-      score:row.score,
-      personal_best:bestRow.personal_best,
-      rank:rankRow.rank,
+      id:String(inserted.id),
+      score:inserted.score,
+      personal_best:ranked?.score??inserted.score,
+      rank:ranked?.rank??null,
       mode,
       display_name:displayName,
-      metrics
+      metrics,
+      rank_basis:mode==='sneak_up'
+        ? ['escaped','closest_approach','survived_ms','max_threat']
+        : ['escaped','escape_latency_ms']
     });
   }catch(err){
     console.error('score api failed',err);
