@@ -1,0 +1,19 @@
+{
+  "name": "@flyeye/escape-neuron-v1",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Compact neuron-level MaleCNS-derived LC4 escape corridor for FlyEye applications",
+  "license": "CC-BY-4.0",
+  "exports": {
+    ".": "./index.js"
+  },
+  "types": "./index.d.ts",
+  "dependencies": {
+    "@flyeye/graph-core": "0.1.0"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ]
+}
