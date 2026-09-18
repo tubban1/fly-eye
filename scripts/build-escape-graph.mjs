@@ -210,10 +210,12 @@ const graphSha = crypto.createHash('sha256').update(out).digest('hex');
 
 const outManifest = {
   schemaVersion: 1,
-  profile: 'flyeye.escape.v1',
+  profile: 'flyeye.escape-neuron.v1',
+  kind: 'neuron-connectome',
   dataset: manifest.dataset,
   attribution: manifest.attribution,
   license: 'CC BY 4.0 per upstream MaleCNS source terms',
+  scientificBoundary: 'Real neuron-level signed edges selected from the pinned MaleCNS-derived graph. Path selection is task-specific; any neural dynamics applied by consumers are modeled unless separately validated.',
   neuronCount: newN,
   edgeCount: newE,
   graphBytes: outBytes,
@@ -265,11 +267,11 @@ const report = {
 fs.writeFileSync(path.join(outDir, 'report.json'), JSON.stringify(report, null, 2) + '\n');
 
 const readmeLines = [
-  '# FlyEye Escape Graph',
+  '# FlyEye Escape Neuron Graph',
   '',
-  'A compact, reproducible MaleCNS-derived graph profile for camera-driven looming / escape experiments.',
+  'A compact, reproducible neuron-level MaleCNS-derived graph profile for looming / escape experiments.',
   '',
-  '- Profile: flyeye.escape.v1',
+  '- Profile: flyeye.escape-neuron.v1',
   '- Source graph: ' + n.toLocaleString() + ' neurons / ' + edgeCount.toLocaleString() + ' edges / ' + (buf.length / 1e6).toFixed(2) + ' MB',
   '- Compact graph: ' + newN.toLocaleString() + ' neurons / ' + newE.toLocaleString() + ' edges / ' + (outBytes / 1e6).toFixed(3) + ' MB',
   '- Reduction: ' + (100 * (1 - outBytes / buf.length)).toFixed(1) + '%',
