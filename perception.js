@@ -189,6 +189,38 @@ export class PerceptionEngine {
     return this.last;
   }
 
+  opticalTipMetrics(now,candidate,fx,fy){
+    if(!candidate){
+      if(this.prevOpticalTip && now-this.prevOpticalTip.t>260) this.prevOpticalTip=null;
+      this.opticalTip=null;
+      return {detected:false,distance:1,approach:0,confidence:0};
+    }
+
+    const distance=Math.hypot(candidate.x-fx,candidate.y-fy);
+    let approach=0;
+
+    if(this.prevOpticalTip){
+      const dt=Math.max(.05,(now-this.prevOpticalTip.t)/1000);
+      const spatialJump=Math.hypot(candidate.x-this.prevOpticalTip.x,candidate.y-this.prevOpticalTip.y);
+
+      // Only compare consecutive candidates that plausibly belong to the same
+      // moving fingertip/object edge.
+      if(spatialJump<.22){
+        approach=clamp(((this.prevOpticalTip.distance-distance)/dt)*2.6);
+      }
+    }
+
+    this.prevOpticalTip={t:now,x:candidate.x,y:candidate.y,distance};
+    this.opticalTip={...candidate,t:now,distance,approach};
+
+    return {
+      detected:candidate.confidence>.12,
+      distance:clamp(distance/.72),
+      approach,
+      confidence:clamp(candidate.confidence)
+    };
+  }
+
   updateHand(now){
     try{
       const result=this.handLandmarker.detectForVideo(this.video,now);
