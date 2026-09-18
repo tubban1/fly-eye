@@ -1,0 +1,19 @@
+{
+  "name": "@flyeye/runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Declared modeled group dynamics for FlyEye connectome profiles",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js"
+  },
+  "types": "./index.d.ts",
+  "dependencies": {
+    "@flyeye/graph-core": "0.1.0"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ]
+}
