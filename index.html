@@ -18,7 +18,7 @@
       <div class="brand">FLY <span>EYE</span></div>
       <div class="top-actions">
         <button class="ghost" id="langBtn">中文</button>
-        <button class="ghost" id="scienceBtn">BRAIN</button>
+        <button class="ghost" id="scienceBtn" data-i18n="brainBtn">BRAIN</button>
       </div>
     </header>
 
@@ -46,15 +46,15 @@
         <p id="challengeBody" data-i18n="challengeBody">Move your hand slowly toward the fly. Get close without triggering escape.</p>
         <div class="perception-status" id="perceptionStatus">CALIBRATING VISION…</div>
         <div class="load-progress" id="connectomeLoad">
-          <div class="load-progress-head"><span id="connectomeLoadStage">CONNECTOME</span><b id="connectomeLoadPct">0%</b></div>
+          <div class="load-progress-head"><span id="connectomeLoadStage" data-i18n="connectome">CONNECTOME</span><b id="connectomeLoadPct">0%</b></div>
           <div class="load-progress-track"><i id="connectomeLoadBar"></i></div>
-          <small id="connectomeLoadDetail">Preparing runtime…</small>
+          <small id="connectomeLoadDetail" data-i18n="preparingRuntime">Preparing runtime…</small>
         </div>
         <div class="perception-grid">
-          <div><span>HAND</span><b id="handStatus">—</b></div>
-          <div><span>CAMERA</span><b id="cameraStatus">—</b></div>
-          <div><span>APPROACH</span><b id="approachValue">0%</b></div>
-          <div><span>VALID LOOM</span><b id="validLoomValue">0%</b></div>
+          <div><span data-i18n="hand">HAND</span><b id="handStatus">—</b></div>
+          <div><span data-i18n="camera">CAMERA</span><b id="cameraStatus">—</b></div>
+          <div><span data-i18n="approachLabel">APPROACH</span><b id="approachValue">0%</b></div>
+          <div><span data-i18n="validLoom">VALID LOOM</span><b id="validLoomValue">0%</b></div>
         </div>
         <div class="threat-row"><span data-i18n="threat">THREAT</span><b id="threatValue">0%</b></div>
         <div class="threat-track"><i id="threatBar"></i></div>
@@ -67,17 +67,20 @@
             <strong id="brainState">CALM</strong>
             <small class="graph-badge" id="graphBadge" data-state="loading">GRAPH LOADING</small>
           </div>
-          <button class="tiny-btn" id="flyVisionBtn" data-i18n="flyVision">FLY VISION</button>
+          <div class="brain-actions">
+            <button class="tiny-btn mobile-brain-toggle" id="brainToggle" data-i18n="details">DETAILS</button>
+            <button class="tiny-btn" id="flyVisionBtn" data-i18n="flyVision">FLY VISION</button>
+          </div>
         </div>
-        <div class="channel"><label>MOTION</label><div><i id="motionBar"></i></div><b id="motionVal">0</b></div>
-        <div class="channel"><label>LIGHT</label><div><i id="lightBar"></i></div><b id="lightVal">0</b></div>
-        <div class="channel"><label>LOOMING</label><div><i id="loomBar"></i></div><b id="loomVal">0</b></div>
+        <div class="channel"><label data-i18n="motion">MOTION</label><div><i id="motionBar"></i></div><b id="motionVal">0</b></div>
+        <div class="channel"><label data-i18n="light">LIGHT</label><div><i id="lightBar"></i></div><b id="lightVal">0</b></div>
+        <div class="channel"><label data-i18n="looming">LOOMING</label><div><i id="loomBar"></i></div><b id="loomVal">0</b></div>
         <div class="divider"></div>
-        <div class="channel neural"><label>NETWORK</label><div><i id="rBar"></i></div><b id="rVal">0</b></div>
+        <div class="channel neural"><label data-i18n="network">NETWORK</label><div><i id="rBar"></i></div><b id="rVal">0</b></div>
         <div class="channel neural"><label>LC4</label><div><i id="lc4Bar"></i></div><b id="lc4Val">0</b></div>
-        <div class="channel neural"><label>DN LEFT</label><div><i id="lplc2Bar"></i></div><b id="lplc2Val">0</b></div>
-        <div class="channel neural"><label>DN RIGHT</label><div><i id="dnpBar"></i></div><b id="dnpVal">0</b></div>
-        <div class="channel neural"><label>FLIGHT DN</label><div><i id="motorBar"></i></div><b id="motorVal">0</b></div>
+        <div class="channel neural"><label data-i18n="dnLeft">DN LEFT</label><div><i id="lplc2Bar"></i></div><b id="lplc2Val">0</b></div>
+        <div class="channel neural"><label data-i18n="dnRight">DN RIGHT</label><div><i id="dnpBar"></i></div><b id="dnpVal">0</b></div>
+        <div class="channel neural"><label data-i18n="flightDn">FLIGHT DN</label><div><i id="motorBar"></i></div><b id="motorVal">0</b></div>
         <p class="science-note" id="connectomeStatus" data-i18n="scienceNote">Loading the real MaleCNS-derived graph locally…</p>
       </aside>
 
@@ -90,7 +93,7 @@
         <div class="eyebrow" data-i18n="escaped">ESCAPE TRIGGERED</div>
         <h2 data-i18n-html="resultTitle">You woke up<br><em>the escape circuit.</em></h2>
         <div class="score-line"><span data-i18n="maxThreat">MAX THREAT</span><b id="maxThreat">0%</b></div>
-        <p id="resultExplain">Camera looming drove LC4 and propagated through the connectome.</p>
+        <p id="resultExplain" data-i18n="resultExplainInitial">Camera looming drove LC4 and propagated through the connectome.</p>
         <div class="result-actions">
           <button class="cta" id="againBtn" data-i18n="again">TRY AGAIN</button>
           <button class="ghost big" id="viewReplayBtn" data-i18n="viewReplay">VIEW REPLAY</button>
@@ -112,22 +115,22 @@
         <div class="replay-grid">
           <div class="replay-vision">
             <canvas id="replayCanvas" width="384" height="216"></canvas>
-            <div class="replay-caption" id="replayCaption">Visual motion begins.</div>
+            <div class="replay-caption" id="replayCaption" data-i18n="replayInitial">Visual motion begins.</div>
           </div>
 
           <div class="replay-neural">
             <div class="replay-time"><b id="replayTime">0 ms</b><span data-i18n="replayBefore">before escape</span></div>
-            <div class="replay-row"><label>LOOMING</label><div><i id="replayLoom"></i></div><b id="replayLoomVal">0</b></div>
+            <div class="replay-row"><label data-i18n="looming">LOOMING</label><div><i id="replayLoom"></i></div><b id="replayLoomVal">0</b></div>
             <div class="replay-row"><label>LC4</label><div><i id="replayLc4"></i></div><b id="replayLc4Val">0</b></div>
-            <div class="replay-row"><label>DN LEFT</label><div><i id="replayDnL"></i></div><b id="replayDnLVal">0</b></div>
-            <div class="replay-row"><label>DN RIGHT</label><div><i id="replayDnR"></i></div><b id="replayDnRVal">0</b></div>
-            <div class="replay-row"><label>FLIGHT DN</label><div><i id="replayFlight"></i></div><b id="replayFlightVal">0</b></div>
-            <div class="replay-row escape-row"><label>ESCAPE</label><div><i id="replayEscape"></i></div><b id="replayEscapeVal">0</b></div>
+            <div class="replay-row"><label data-i18n="dnLeft">DN LEFT</label><div><i id="replayDnL"></i></div><b id="replayDnLVal">0</b></div>
+            <div class="replay-row"><label data-i18n="dnRight">DN RIGHT</label><div><i id="replayDnR"></i></div><b id="replayDnRVal">0</b></div>
+            <div class="replay-row"><label data-i18n="flightDn">FLIGHT DN</label><div><i id="replayFlight"></i></div><b id="replayFlightVal">0</b></div>
+            <div class="replay-row escape-row"><label data-i18n="escape">ESCAPE</label><div><i id="replayEscape"></i></div><b id="replayEscapeVal">0</b></div>
           </div>
         </div>
 
         <div class="replay-scrub">
-          <input id="replayScrubber" type="range" min="0" max="1000" value="0" step="1" aria-label="Replay timeline" />
+          <input id="replayScrubber" type="range" min="0" max="1000" value="0" step="1" data-i18n-aria="replayTimeline" aria-label="Replay timeline" />
           <div class="replay-axis"><span>-2.0 s</span><span>LC4</span><span>DN</span><span data-i18n="replayEscapeMark">ESCAPE</span></div>
         </div>
 
@@ -153,7 +156,7 @@
       <h2 data-i18n="scienceTitle">Camera → sensory signals → fly behavior</h2>
       <p data-i18n="scienceBody">Fly Eye v0.4.4 starts with an embedded MaleCNS-derived aggregate escape graph in a Web Worker and propagates spikes locally. Camera-to-neuron sensory encoding and the neuron dynamics remain models; this is not a complete biological replica.</p>
       <div class="pipeline">
-        <div>CAMERA</div><span>↓</span><div>GLOBAL MOTION COMPENSATION + HAND LANDMARKS</div><span>↓</span><div>VALIDATED APPROACH / LOOMING</div><span>↓</span><div>LC4 + MALECNS AGGREGATE GRAPH</div><span>↓</span><div>DN / FLIGHT READOUT</div>
+        <div data-i18n="camera">CAMERA</div><span>↓</span><div data-i18n="pipePerception">GLOBAL MOTION COMPENSATION + HAND LANDMARKS</div><span>↓</span><div data-i18n="pipeLoom">VALIDATED APPROACH / LOOMING</div><span>↓</span><div data-i18n="pipeGraph">LC4 + MALECNS AGGREGATE GRAPH</div><span>↓</span><div data-i18n="pipeMotor">DN / FLIGHT READOUT</div>
       </div>
     </section>
 
