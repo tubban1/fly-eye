@@ -1,5 +1,5 @@
 {
-  "name": "@flyeye/graph-core",
+  "name": "@fly-eye/graph-core",
   "version": "0.1.0",
   "type": "module",
   "description": "Core loaders, validators and FLYGRAPH parser for FlyEye connectome profiles",
