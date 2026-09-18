@@ -247,7 +247,11 @@ function completeCalibrationWizard(skipped=false){
   calibrationWizard.completedAt=performance.now();
   document.body.classList.remove('calibration-flow');
 
-  // Start the actual challenge from a clean neural state after the practice gesture.
+  // Start the actual challenge from a clean state after the practice gesture.
+  perceptionEngine.rearmAfterPractice(performance.now());
+  perceptionState=perceptionEngine.last;
+  resetReplay();
+  maxThreat=0;
   sensory.motion=0;sensory.loom=0;
   connectome.escape=0;connectome.escapeDn=0;connectome.network=0;connectome.spikes=0;
   Object.assign(neural,{r:0,lc4:0,lplc2:0,dnp:0,motor:0});
