@@ -342,8 +342,8 @@ function modeRules(){
         ? '成功触发逃逸的人排在前面；触发越快，排名越高。0–10000 分只是把反应时间变得更直观，不决定名次。'
         : 'Successful escapes rank first; faster escape time ranks higher. The 0–10,000 score only makes the timing easier to read — it does not decide rank.',
       chips:lang==='zh'
-        ? ['逃逸时间：越短越好','未触发逃逸：排在成功者之后','积分：10000 − 1.6 × 毫秒']
-        : ['Escape time: lower is better','No escape: ranked after successful runs','Score: 10000 − 1.6 × milliseconds'],
+        ? ['逃逸时间：越短越好','未触发逃逸：排在成功者之后','表现分：越快越接近 10000；6.25 秒后为 0']
+        : ['Escape time: lower is better','No escape: ranked after successful runs','Performance score: faster approaches 10,000; after 6.25 s it is 0'],
       leaderboard:lang==='zh'?'快速惊吓排行榜':'SCARE FAST LEADERBOARD',
       switchLabel:lang==='zh'?'玩「潜行靠近」':'PLAY SNEAK UP'
     };
