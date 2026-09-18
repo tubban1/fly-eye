@@ -873,11 +873,11 @@ function connectomeAdapter(now){
 function triggerEscape(threat=connectome.escape){
   const now=performance.now();
   escaped=true; fly.state='escape'; fly.escapeUntil=now+1050;
-  finishRound('escape',now);
   const a=Math.random()*Math.PI*2;
   fly.vx=Math.cos(a)*(rear?.008:.007);
   fly.vy=Math.sin(a)*.006-.003;
   markReplayTrigger(now,threat);
+  finishRound('escape',now);
 }
 
 function updateFly(dt,now,threat){
@@ -970,6 +970,12 @@ function loop(now){
   requestAnimationFrame(loop)
 }
 
+function prepareNextRound(){
+  perceptionEngine.rearmAfterPractice(performance.now());
+  perceptionState=perceptionEngine.last;
+  resetFly();
+}
+
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
 
 document.querySelectorAll('.mode-card').forEach(btn=>{
@@ -983,7 +989,7 @@ document.querySelectorAll('.mode-card').forEach(btn=>{
 applyModeUI();
 resetRound();
 
-$('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#wizardSkip').onclick=()=>completeCalibrationWizard(true);$('#resetBtn').onclick=resetFly;$('#againBtn').onclick=()=>{resetFly();$('#result').classList.add('hidden')};
+$('#openCamera').onclick=openCamera;$('#retryCamera').onclick=openCamera;$('#wizardSkip').onclick=()=>completeCalibrationWizard(true);$('#resetBtn').onclick=prepareNextRound;$('#againBtn').onclick=()=>{prepareNextRound();$('#result').classList.add('hidden')};
 $('#viewReplayBtn').onclick=showReplay;
 $('#closeReplay').onclick=()=>closeReplay(true);
 $('#replayContinue').onclick=()=>closeReplay(true);
