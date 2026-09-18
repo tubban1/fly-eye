@@ -1,0 +1,16 @@
+{
+  "name": "@flyeye/graph-core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Core loaders, validators and FLYGRAPH parser for FlyEye connectome profiles",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js"
+  },
+  "types": "./index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ]
+}
