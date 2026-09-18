@@ -104,30 +104,43 @@ export class PerceptionEngine {
     }else{
       this.calibrated=true;
     }
-    const cameraStable=this.calibrated && shiftMag < Math.max(2.3,this.shiftFloor*3.2+.6) &&
-      local.global < Math.max(.10,this.motionFloor*4.5+.025);
+    const cameraStable=this.calibrated && shiftMag < Math.max(3.4,this.shiftFloor*4.2+1.0) &&
+      local.global < Math.max(.16,this.motionFloor*6.0+.045);
 
     const hm=this.handMetrics(now,fx/w,fy/h);
-    const evidenceCount=(hm.growth>.12?1:0)+(hm.approach>.12?1:0)+(opticalLoom>.16?1:0);
     let semantic=0;
-    if(hm.detected && cameraStable && hm.distance<.52 && evidenceCount>=2){
-      semantic=clamp(hm.growth*.42+hm.approach*.38+opticalLoom*.20);
-    }else if(!hm.detected && cameraStable && opticalLoom>.58 && residual>.075 && globalMotion<.24){
-      // Conservative fallback for a fingertip or another approaching object that
-      // is too partial for a semantic hand detection. Strong local evidence is
-      // required and global camera motion must stay low.
-      semantic=clamp(.12+opticalLoom*.52);
+
+    if(hm.detected && cameraStable){
+      // The game is fingertip-first: a finger moving toward the fly is sufficient
+      // evidence. Hand growth and compensated optical looming strengthen it.
+      const proximity=clamp(1-hm.tipDistance);
+      const motionToward=clamp(Math.max(hm.tipApproach,hm.approach));
+      const proximityDrive=proximity>.38 ? (proximity-.38)/.62 : 0;
+
+      semantic=clamp(
+        motionToward*.52 +
+        proximityDrive*.26 +
+        hm.growth*.08 +
+        opticalLoom*.14
+      );
+
+      // Very close fingertip gets a small persistent approach signal even when
+      // the user slows down at the final centimeters.
+      if(hm.tipDistance<.24) semantic=Math.max(semantic,.34+(1-hm.tipDistance)*.22);
+    }else if(cameraStable && opticalLoom>.36 && residual>.045 && globalMotion<.38){
+      // Partial fingertip / object fallback when MediaPipe cannot see the whole hand.
+      semantic=clamp(.10+opticalLoom*.46+residual*1.6);
     }
 
     this.approachEvidence = semantic>this.approachEvidence
       ? smooth(this.approachEvidence,semantic,.46)
       : this.approachEvidence*.88;
 
-    if(this.approachEvidence>.22){
+    if(this.approachEvidence>.16){
       if(!this.approachSince)this.approachSince=now;
     }else this.approachSince=0;
 
-    if(this.approachEvidence>.48){
+    if(this.approachEvidence>.36){
       if(!this.alertSince)this.alertSince=now;
     }else this.alertSince=0;
 
@@ -135,15 +148,16 @@ export class PerceptionEngine {
     if(!this.calibrated) phase='calibrating';
     else if(!cameraStable) phase='camera-moving';
     else if(hm.detected && !this.approachSince) phase='hand-detected';
-    else if(this.approachSince && now-this.approachSince>120) phase='approaching';
-    if(this.alertSince && now-this.alertSince>100) phase='alert';
+    else if(this.approachSince && now-this.approachSince>80) phase='approaching';
+    if(this.alertSince && now-this.alertSince>70) phase='alert';
 
     const looming=(phase==='approaching'||phase==='alert')?clamp(this.approachEvidence):0;
 
     this.last={
       phase,cameraStable,globalMotion,localMotion:clamp(residual*7),opticalLoom,
       handDetected:hm.detected,handConfidence:hm.confidence,handArea:hm.area,
-      handDistance:hm.distance,handGrowth:hm.growth,handApproach:hm.approach,
+      handDistance:hm.distance,handTipDistance:hm.tipDistance,handGrowth:hm.growth,
+      handApproach:hm.approach,handTipApproach:hm.tipApproach,
       approach:this.approachEvidence,looming,shiftX:shift.dx,shiftY:shift.dy,light
     };
     return this.last;
@@ -158,7 +172,15 @@ export class PerceptionEngine {
       for(const p of lm){minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);maxX=Math.max(maxX,p.x);maxY=Math.max(maxY,p.y);}
       const handed=result?.handednesses?.[0]?.[0];
       const box={minX,minY,maxX,maxY};
-      this.hand={t:now,landmarks:lm,box,cx:(minX+maxX)/2,cy:(minY+maxY)/2,area:Math.max(0,(maxX-minX)*(maxY-minY)),confidence:handed?.score??1};
+      const tipIndices=[8,4,12,16,20];
+      const tips=tipIndices.map(i=>lm[i]).filter(Boolean).map((p,i)=>({x:p.x,y:p.y,kind:tipIndices[i]}));
+      this.hand={
+        t:now,landmarks:lm,box,tips,
+        indexTip:lm[8]||null,
+        cx:(minX+maxX)/2,cy:(minY+maxY)/2,
+        area:Math.max(0,(maxX-minX)*(maxY-minY)),
+        confidence:handed?.score??1
+      };
     }catch(err){
       console.warn('Hand tracking frame failed',err);
     }
@@ -166,19 +188,41 @@ export class PerceptionEngine {
 
   handMetrics(now,fx,fy){
     const h=this.hand;
-    if(!h || now-h.t>260){
+    if(!h || now-h.t>360){
       this.prevHand=null;
-      return {detected:false,confidence:0,area:0,distance:1,growth:0,approach:0};
+      return {detected:false,confidence:0,area:0,distance:1,growth:0,approach:0,tipDistance:1,tipApproach:0};
     }
-    const distance=Math.hypot(h.cx-fx,h.cy-fy);
-    let growth=0,approach=0;
-    if(this.prevHand){
-      const dt=Math.max(.05,(h.t-this.prevHand.t)/1000);
-      growth=clamp(((h.area-this.prevHand.area)/Math.max(.018,this.prevHand.area))/dt*.18);
-      approach=clamp(((this.prevHand.distance-distance)/dt)*1.7);
+
+    const centerDistance=Math.hypot(h.cx-fx,h.cy-fy);
+    let nearest={distance:centerDistance,x:h.cx,y:h.cy,kind:'center'};
+    for(const tip of h.tips||[]){
+      const d=Math.hypot(tip.x-fx,tip.y-fy);
+      if(d<nearest.distance) nearest={distance:d,x:tip.x,y:tip.y,kind:tip.kind};
     }
-    if(!this.prevHand || h.t!==this.prevHand.t) this.prevHand={t:h.t,area:h.area,distance};
-    return {detected:true,confidence:h.confidence,area:clamp(h.area/.24),distance:clamp(distance/1.15),growth,approach};
+
+    const tipDistance=nearest.distance;
+    let growth=0,approach=0,tipApproach=0;
+    if(this.prevHand && h.t!==this.prevHand.t){
+      const dt=Math.max(.07,(h.t-this.prevHand.t)/1000);
+      growth=clamp(((h.area-this.prevHand.area)/Math.max(.018,this.prevHand.area))/dt*.14);
+      approach=clamp(((this.prevHand.centerDistance-centerDistance)/dt)*1.25);
+      tipApproach=clamp(((this.prevHand.tipDistance-tipDistance)/dt)*2.4);
+    }
+
+    if(!this.prevHand || h.t!==this.prevHand.t){
+      this.prevHand={t:h.t,area:h.area,centerDistance,tipDistance};
+    }
+
+    return {
+      detected:true,
+      confidence:h.confidence,
+      area:clamp(h.area/.24),
+      distance:clamp(centerDistance/1.15),
+      tipDistance:clamp(tipDistance/.75),
+      growth,
+      approach,
+      tipApproach
+    };
   }
 }
 
