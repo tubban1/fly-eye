@@ -355,7 +355,11 @@ function estimateGlobalShift(cur,prev,w,h,fx,fy,handBox){
       }
     }
     const cost=n?sum/(n*255):1;
-    if(cost<best.cost)best={dx,dy,cost};
+    const bestMag=Math.hypot(best.dx,best.dy);
+    const mag=Math.hypot(dx,dy);
+    if(cost<best.cost-1e-6 || (Math.abs(cost-best.cost)<=1e-6 && mag<bestMag)){
+      best={dx,dy,cost};
+    }
   }
   return best;
 }
