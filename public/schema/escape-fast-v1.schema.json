@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fly.fde.fan/schema/escape-fast-v1.schema.json",
+  "title": "FlyEye Escape Fast v1",
+  "type": "object",
+  "required": ["schemaVersion","profile","kind","dataset","source","attribution","scientificBoundary","nodes","edges"],
+  "properties": {
+    "schemaVersion": {"type":"integer","minimum":1},
+    "profile": {"const":"flyeye.escape-fast.v1"},
+    "kind": {"const":"aggregate-connectome"},
+    "dataset": {"type":"string"},
+    "source": {
+      "type":"object",
+      "required":["repository","commit","graphHash"],
+      "properties":{
+        "repository":{"type":"string"},
+        "commit":{"type":"string"},
+        "graphHash":{"type":"string"}
+      }
+    },
+    "attribution":{"type":"string"},
+    "scientificBoundary":{"type":"string"},
+    "nodes":{
+      "type":"array",
+      "minItems":1,
+      "items":{
+        "type":"object",
+        "required":["id","label","neuronCount"],
+        "properties":{
+          "id":{"type":"string"},
+          "label":{"type":"string"},
+          "neuronCount":{"type":"integer","minimum":1}
+        }
+      }
+    },
+    "edges":{
+      "type":"array",
+      "items":{
+        "type":"object",
+        "required":["source","target","edgeCount","positiveWeight","negativeWeight"],
+        "properties":{
+          "source":{"type":"string"},
+          "target":{"type":"string"},
+          "edgeCount":{"type":"integer","minimum":1},
+          "positiveWeight":{"type":"number","minimum":0},
+          "negativeWeight":{"type":"number","minimum":0}
+        }
+      }
+    }
+  }
+}
