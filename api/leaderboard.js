@@ -3,7 +3,7 @@ import { db, ensureSchema } from '../server/db.js';
 function send(res,status,payload){
   res.statusCode=status;
   res.setHeader('content-type','application/json; charset=utf-8');
-  res.setHeader('cache-control','public, max-age=10, s-maxage=20, stale-while-revalidate=60');
+  res.setHeader('cache-control','private, no-store');
   res.end(JSON.stringify(payload));
 }
 
