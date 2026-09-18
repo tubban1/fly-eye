@@ -1,3 +1,11 @@
+## v0.5.0-alpha.5 — Fly Vision 2.0
+
+- five inspectable perception layers: Human / Stabilized / Motion Evidence / Loom Evidence / LC4 Input
+- layers come from the same perception engine used by gameplay
+- camera-translation compensation is visible instead of hidden
+- looming and LC4 layers are explicitly labeled modeled evidence, not biological imaging
+- mobile layer controls stay compact and camera-first
+
 ## v0.5.0-alpha.4 — Shareable results
 
 - client-side 1080×1350 result card
