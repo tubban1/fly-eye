@@ -236,6 +236,27 @@
       <div class="pipeline">
         <div data-i18n="camera">CAMERA</div><span>↓</span><div data-i18n="pipePerception">GLOBAL MOTION COMPENSATION + HAND LANDMARKS</div><span>↓</span><div data-i18n="pipeLoom">VALIDATED APPROACH / LOOMING</div><span>↓</span><div data-i18n="pipeGraph">LC4 + MALECNS AGGREGATE GRAPH</div><span>↓</span><div data-i18n="pipeMotor">DN / FLIGHT READOUT</div>
       </div>
+      <div class="advanced-graph">
+        <div class="advanced-graph-head">
+          <div>
+            <span data-i18n="advancedGraphEyebrow">OPTIONAL ADVANCED MODE</span>
+            <strong data-i18n="advancedGraphTitle">Neuron-level graph inspector</strong>
+          </div>
+          <b id="detailedGraphBadge">OFF</b>
+        </div>
+        <p data-i18n="advancedGraphBody">Load the pinned 70K-neuron / 798,715-edge graph only when you want neuron-level inspection. It never blocks camera gameplay.</p>
+        <div class="advanced-progress">
+          <div><i id="detailedGraphBar"></i></div>
+          <span id="detailedGraphStatus" data-i18n="advancedGraphIdle">Not loaded · about 9.86 MB</span>
+        </div>
+        <div class="advanced-stats hidden" id="detailedGraphStats">
+          <div><span data-i18n="neurons">NEURONS</span><b id="detailedNeurons">—</b></div>
+          <div><span data-i18n="edges">EDGES</span><b id="detailedEdges">—</b></div>
+          <div><span>LC4</span><b id="detailedLc4">—</b></div>
+          <div><span data-i18n="escapeTargets">ESCAPE TARGETS</span><b id="detailedTargets">—</b></div>
+        </div>
+        <button class="ghost big" id="loadDetailedGraph" data-i18n="loadDetailedGraph">LOAD NEURON-LEVEL GRAPH</button>
+      </div>
     </section>
 
     <div class="toast" id="toast"></div>
