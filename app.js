@@ -348,7 +348,7 @@ function connectomeAdapter(now){
   }
   const threat=connectome.escape;
   maxThreat=Math.max(maxThreat,threat);
-  if(!escaped && perceptionState.phase==='alert' && sensory.loom>.28 && threat>.48) triggerEscape(threat);
+  if(!escaped && perceptionState.phase==='alert' && sensory.loom>.20 && threat>.40) triggerEscape(threat);
   return threat;
 }
 
@@ -406,7 +406,9 @@ function updatePerceptionUI(p){
   else if(perceptionEngine.handStatus!=='ready'){key='loadingHands';state='ready'}
 
   status.textContent=t(key); status.dataset.state=state;
-  $('#handStatus').textContent=p.handDetected?(lang==='zh'?'检测到':'YES'):(perceptionEngine.handStatus==='ready'?(lang==='zh'?'未检测':'NO'):(lang==='zh'?'后台加载':'WARMING'));
+  $('#handStatus').textContent=p.handDetected
+    ? ((lang==='zh'?'指尖 ':'TIP ')+Math.round((p.handTipDistance??1)*100)+'%')
+    : (perceptionEngine.handStatus==='ready'?(lang==='zh'?'未检测':'NO'):(lang==='zh'?'后台加载':'WARMING'));
   $('#cameraStatus').textContent=p.cameraStable?(lang==='zh'?'稳定':'STABLE'):(p.phase==='calibrating'?'—':(lang==='zh'?'移动':'MOVING'));
   $('#approachValue').textContent=Math.round((p.approach||0)*100)+'%';
   $('#validLoomValue').textContent=Math.round((p.looming||0)*100)+'%';
@@ -462,6 +464,6 @@ if(DEBUG_MODE){
   diag.id='debugStatus';
   diag.style.cssText='position:absolute;z-index:99;left:10px;top:56px;padding:8px 10px;background:#000;color:#dfff55;font:11px monospace;border:1px solid #dfff55;border-radius:8px';
   document.body.appendChild(diag);
-  setInterval(()=>{diag.textContent=`perception=${perceptionState.phase} hand=${perceptionState.handDetected} camera=${perceptionState.cameraStable} graph=${connectome.status} n=${connectome.neurons} e=${connectome.edges} loom=${sensory.loom.toFixed(2)} lc4=${neural.lc4.toFixed(2)} dnL=${neural.lplc2.toFixed(2)} dnR=${neural.dnp.toFixed(2)} escapeDN=${connectome.escapeDn.toFixed(2)} flight=${neural.motor.toFixed(2)} threat=${connectome.escape.toFixed(2)} spikes=${connectome.spikes}`},120);
+  setInterval(()=>{diag.textContent=`perception=${perceptionState.phase} hand=${perceptionState.handDetected} tip=${(perceptionState.handTipDistance??1).toFixed(2)} tipApproach=${(perceptionState.handTipApproach??0).toFixed(2)} camera=${perceptionState.cameraStable} graph=${connectome.status} n=${connectome.neurons} e=${connectome.edges} loom=${sensory.loom.toFixed(2)} lc4=${neural.lc4.toFixed(2)} dnL=${neural.lplc2.toFixed(2)} dnR=${neural.dnp.toFixed(2)} escapeDN=${connectome.escapeDn.toFixed(2)} flight=${neural.motor.toFixed(2)} threat=${connectome.escape.toFixed(2)} spikes=${connectome.spikes}`},120);
   startDebugMode();
 }
