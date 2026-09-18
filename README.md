@@ -1,3 +1,12 @@
+## v0.5.0-alpha.2 — Replay 2.0
+
+- replay records fingertip / optical-target position, source, distance, approach, and perception confidence
+- perception overlay draws fingertip marker, fly-centered looming zone, and fingertip-to-fly relation
+- independent PERCEPTION and BRAIN layer toggles
+- replay speed controls: 0.25× / 0.5× / 1×
+- generated model timeline for fingertip entry, approach, validated looming, LC4, descending-neuron response, flight output, and modeled escape trigger
+- timeline is explicitly labeled as model-relative timing, not biological millisecond precision
+
 ## v0.5.0-alpha.1 — Reliability foundation
 
 The first v0.5 milestone is now implemented:
