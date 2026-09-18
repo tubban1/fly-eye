@@ -1,3 +1,13 @@
+## v0.4.7 — Mobile + replay UX
+
+- replay now redraws the fly at its recorded position/state
+- replay camera frames mirror correctly for front-camera sessions
+- visible UI copy is bilingual EN / 中文, including perception, brain, replay, and science labels
+- mobile challenge HUD is compact and hides graph-loading details after READY
+- mobile Brain panel is collapsed by default to LC4 + Flight and expands on demand
+- full Brain view remains available as a bottom sheet
+- v0.5 productization roadmap: `docs/V0.5_PLAN.md`
+
 # FLY EYE
 
 **Let a fly brain see your world.**
