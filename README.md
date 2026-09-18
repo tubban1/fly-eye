@@ -169,7 +169,7 @@ This separation keeps the public experience fast while preserving a reproducible
 - npm developer packages
 - PyPI Python SDK
 - Hugging Face dataset
-- Zenodo integration enabled
+- Zenodo archive published: `10.5281/zenodo.22829797`
 
 ### v0.5.0-alpha.8 — Developer Kit
 
