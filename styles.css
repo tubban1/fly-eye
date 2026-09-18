@@ -300,3 +300,22 @@
   .viewer-rank-row{grid-template-columns:34px 1fr auto}
   .leaderboard-list{max-height:38dvh}
 }
+
+
+/* Game rules + navigation */
+.game-rules{margin:12px 0 14px;padding:12px 14px;border-radius:15px;background:rgba(8,8,8,.36)}
+.game-rules strong,.ranking-explainer strong{display:block;font-size:9px;letter-spacing:.11em;color:var(--acid)}
+.game-rules p,.ranking-explainer p{margin:6px 0 8px;font-size:10px;line-height:1.45;color:var(--muted)}
+.metric-chips{display:flex;gap:5px;flex-wrap:wrap}
+.metric-chips span{padding:5px 7px;border:1px solid rgba(255,255,255,.09);border-radius:999px;font-size:7.5px;color:var(--muted);background:rgba(255,255,255,.025)}
+.ranking-explainer{margin:12px 0;padding:12px;border:1px solid rgba(223,255,85,.12);border-radius:14px;background:rgba(223,255,85,.025)}
+.challenge-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.challenge-nav>span{font-size:8px}
+.switch-game-btn{border-color:rgba(223,255,85,.32);color:var(--acid)}
+@media(max-width:760px){
+  .game-rules{padding:10px 11px;margin:9px 0 10px}
+  .game-rules p,.ranking-explainer p{font-size:9px}
+  .metric-chips{gap:4px}
+  .metric-chips span{font-size:7px;padding:4px 6px}
+  .result-actions .switch-game-btn{order:-1;flex-basis:100%}
+}
