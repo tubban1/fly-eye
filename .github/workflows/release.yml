@@ -1,0 +1,49 @@
+name: Publish GitHub Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".release/v0.5.0-alpha.8"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Developer Kit
+        run: |
+          npm install
+          npm test
+          test -f public/data/escape-neuron-v1/graph.bin
+          test -f public/data/escape-neuron-v1/manifest.json
+          test -f packages/escape-neuron-v1/data/graph.bin
+
+      - name: Assemble release assets
+        run: |
+          mkdir -p dist/release
+          cp public/data/escape-neuron-v1/graph.bin dist/release/escape-neuron-v1.graph.bin
+          cp public/data/escape-neuron-v1/manifest.json dist/release/escape-neuron-v1.manifest.json
+          cp public/data/escape-neuron-v1/report.json dist/release/escape-neuron-v1.report.json
+
+          zip -r dist/release/flyeye-developer-kit-v0.5.0-alpha.8.zip             packages             docs/FLYEYE_DEVELOPER_KIT.md             docs/FLYEYE_GRAPHS.md             public/data/escape-fast-v1.json             public/data/escape-neuron-v1             public/schema             public/sdk             CITATION.cff             DATA_LICENSE.md             LICENSE
+
+          cd dist/release
+          sha256sum             escape-neuron-v1.graph.bin             escape-neuron-v1.manifest.json             escape-neuron-v1.report.json             flyeye-developer-kit-v0.5.0-alpha.8.zip             > SHA256SUMS.txt
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v0.5.0-alpha.8
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "$TAG already exists; uploading/replacing assets"
+            gh release upload "$TAG" dist/release/* --clobber
+          else
+            gh release create "$TAG"               --target "$GITHUB_SHA"               --title "FlyEye v0.5.0-alpha.8 — Developer Kit"               --notes-file docs/releases/v0.5.0-alpha.8.md               --prerelease               dist/release/*
+          fi
