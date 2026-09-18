@@ -7,7 +7,7 @@ const BASE=`https://raw.githubusercontent.com/dzhng/fly-escape/${COMMIT}/data/pr
 const cacheDir='.cache/flyeye-source';
 const manifestPath=path.join(cacheDir,'manifest.json');
 const graphPath=path.join(cacheDir,'graph.bin');
-const outDir='public/data/escape-v1';
+const outDir='public/data/escape-neuron-v1';
 
 fs.mkdirSync(cacheDir,{recursive:true});
 fs.mkdirSync(outDir,{recursive:true});
@@ -33,4 +33,4 @@ const result=spawnSync(process.execPath,[
 if(result.status!==0) process.exit(result.status??1);
 
 const m=JSON.parse(fs.readFileSync(path.join(outDir,'manifest.json'),'utf8'));
-console.log(`Prepared escape-v1: ${m.neuronCount} neurons, ${m.edgeCount} edges, ${(m.graphBytes/1e6).toFixed(3)} MB`);
+console.log(`Prepared escape-neuron-v1: ${m.neuronCount} neurons, ${m.edgeCount} edges, ${(m.graphBytes/1e6).toFixed(3)} MB`);
