@@ -139,6 +139,10 @@
           <div class="replay-vision">
             <canvas id="replayCanvas" width="384" height="216"></canvas>
             <div class="replay-caption" id="replayCaption" data-i18n="replayInitial">Visual motion begins.</div>
+            <div class="replay-layer-controls">
+              <button class="tiny-btn active" id="replayPerceptionToggle" data-i18n="perceptionLayer">PERCEPTION</button>
+              <button class="tiny-btn active" id="replayBrainToggle" data-i18n="brainLayer">BRAIN</button>
+            </div>
           </div>
 
           <div class="replay-neural">
@@ -149,6 +153,10 @@
             <div class="replay-row"><label data-i18n="dnRight">DN RIGHT</label><div><i id="replayDnR"></i></div><b id="replayDnRVal">0</b></div>
             <div class="replay-row"><label data-i18n="flightDn">FLIGHT DN</label><div><i id="replayFlight"></i></div><b id="replayFlightVal">0</b></div>
             <div class="replay-row escape-row"><label data-i18n="escape">ESCAPE</label><div><i id="replayEscape"></i></div><b id="replayEscapeVal">0</b></div>
+            <div class="model-timeline">
+              <div class="model-timeline-head"><span data-i18n="modelTimeline">MODEL TIMELINE</span><small data-i18n="modelTimelineNote">Relative to modeled escape trigger</small></div>
+              <div id="modelTimelineEvents"></div>
+            </div>
           </div>
         </div>
 
@@ -158,6 +166,11 @@
         </div>
 
         <div class="replay-actions">
+          <div class="replay-speed" aria-label="Replay speed">
+            <button class="tiny-btn" data-speed="0.25">0.25×</button>
+            <button class="tiny-btn active" data-speed="0.5">0.5×</button>
+            <button class="tiny-btn" data-speed="1">1×</button>
+          </div>
           <button class="ghost big" id="replayPlay" data-i18n="pauseReplay">PAUSE</button>
           <button class="cta" id="replayContinue" data-i18n="continueBtn">CONTINUE</button>
         </div>
