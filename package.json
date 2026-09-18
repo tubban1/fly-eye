@@ -1,13 +1,13 @@
 {
   "name": "fly-eye",
   "private": true,
-  "version": "0.5.0-alpha.5",
+  "version": "0.5.0-alpha.6",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node tests/connectome-worker.test.mjs && node tests/perception.test.mjs && node tests/scoring.test.mjs",
+    "test": "node tests/connectome-worker.test.mjs && node tests/perception.test.mjs && node tests/scoring.test.mjs && node tests/graphs-sdk.test.mjs",
     "build:escape-neuron": "node scripts/prepare-escape-graph.mjs"
   },
   "devDependencies": {
