@@ -4,6 +4,19 @@
 
 Fly Eye is a camera-first browser experiment. Your real environment becomes sensory input for a virtual fruit fly: local motion, brightness and looming signals are converted into neural input, then the fly reacts inside the camera view.
 
+## v0.4.4 — Zero-download fast graph
+
+Camera mode no longer waits for the 70K neuron graph.
+
+- embedded `escape-fast-v1` starts immediately in the Web Worker
+- 5 pathway groups: LC4/loom, turnL, turnR, flightL, flightR
+- 21 MaleCNS-derived aggregate links using the upstream group-level edge counts and signed weights
+- group-level neural dynamics are modeled; this is **not** neuron-level propagation
+- MediaPipe Hand Landmarker is now optional for startup: camera calibration + conservative optical looming can run while hand tracking warms in the background
+- the detailed 70K graph is no longer a blocking dependency for the camera challenge
+- reusable developer asset: `/data/escape-fast-v1.json`
+- optional neuron-level compact graph tooling remains under `scripts/build-escape-graph.mjs`
+
 ## v0.4.2 — Reusable fast escape graph
 
 - visible graph progress in the mobile challenge card
@@ -54,7 +67,7 @@ MediaPipe is used only to isolate likely player-hand pixels/landmarks. It does *
 
 ## Connectome runtime
 
-Fly Eye currently consumes the prepared browser graph from `dzhng/fly-escape`, pinned to upstream commit:
+Fly Eye camera mode now uses an embedded aggregate escape graph derived from the pinned MaleCNS manifest. The detailed browser graph remains an optional development asset, pinned to upstream commit:
 
 `bff49a376f0844c918eb7f2be83e95f2699b0d14`
 
