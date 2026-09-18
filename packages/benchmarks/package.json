@@ -11,5 +11,26 @@
     "index.js",
     "vectors",
     "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tubban1/fly-eye.git",
+    "directory": "packages/benchmarks"
+  },
+  "homepage": "https://github.com/tubban1/fly-eye#readme",
+  "bugs": {
+    "url": "https://github.com/tubban1/fly-eye/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "keywords": [
+    "drosophila",
+    "fruit-fly",
+    "connectome",
+    "neuroscience",
+    "male-cns",
+    "flyeye"
   ]
 }
