@@ -49,7 +49,7 @@
   .brain .channel.mobile-key label{font-size:7px}
   .brain .channel.mobile-key b{font-size:8px}
   .brain .channel.mobile-key>div{height:5px}
-  .brain:not(.unused) #flyVisionBtn{display:none}
+  .brain #flyVisionBtn{display:none}
 
   body.brain-expanded .brain{
     max-height:55dvh;overflow:auto;background:rgba(8,8,8,.72)
